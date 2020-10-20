@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- common -->
+    <item name="toolbar" type="id" />
+    <item name="selected_location" type="id" />
+    <item name="fragment_container" type="id" />
+    <item name="layout_content" type="id" />
+    <item name="layout_loading" type="id" />
+    <item name="layout_error_no_internet" type="id" />
+    <item name="layout_error_loading_data" type="id" />
+    <item name="property_name" type="id" />
+    <item name="property_hint" type="id" />
+    <item name="property_value" type="id" />
+    <item name="property_value_secondary" type="id" />
+    <item name="property_switch" type="id" />
+    <item name="property_icon" type="id" />
+
+</resources>

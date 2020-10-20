@@ -1,0 +1,70 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+repositories {
+    flatDir { dirs 'libs' }
+}
+
+android {
+    compileSdkVersion toolVersions.android.compileSdk
+
+    defaultConfig {
+        applicationId "com.lex.simplequest"
+        minSdkVersion toolVersions.android.minSdk
+        targetSdkVersion toolVersions.android.targetSdk
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    viewBinding {
+        enabled = true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation(name: 'mvp-android-2.0.0-SNAPSHOT-release', ext: 'aar')
+    implementation deps.support.appCompat
+    implementation deps.support.coreKtx
+    implementation deps.support.constraintLayout
+    implementation deps.rxAndroid
+    implementation deps.rxJava
+    implementation deps.viewPump
+    implementation deps.support.design
+    implementation deps.okHttp.okHttp
+    implementation deps.okHttp.loggingInterceptor
+    implementation deps.retrofit.retrofit
+    implementation deps.retrofit.converterGson
+    implementation deps.picasso
+    implementation deps.playservices.location
+    implementation deps.playservices.gcm
+
+    //implementation 'com.aldoapps:autoformatedittext:0.9.3'
+//    implementation 'me.abhinay.input:currency-edittext:1.1'
+//    implementation 'com.cottacush:CurrencyEditText:0.0.3'
+
+    implementation project(':core')
+
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+}

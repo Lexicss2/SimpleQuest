@@ -1,0 +1,38 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdkVersion toolVersions.android.compileSdk
+
+    defaultConfig {
+        minSdkVersion toolVersions.android.minSdk
+        targetSdkVersion toolVersions.android.targetSdk
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation deps.support.appCompat
+    implementation 'com.android.support:recyclerview-v7:24.2.1'
+    implementation deps.rxAndroid
+    implementation deps.rxJava
+    implementation 'com.google.zxing:core:3.3.0'
+    implementation 'com.google.code.gson:gson:2.4'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation("com.google.guava:guava:28.2-android")
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
