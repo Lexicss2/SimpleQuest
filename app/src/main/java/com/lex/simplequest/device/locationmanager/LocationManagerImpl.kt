@@ -89,7 +89,6 @@ class LocationManagerImpl(
 
             if (null != location) {
                 // TODO: Write location in DB
-                Log.d("qaz", "write location to DB, ${location.latitude};${location.longitude}")
                 val l = Location(location.latitude, location.longitude, location.altitude)
                 locationManagerCallback?.onLocationChanged(l)
             }

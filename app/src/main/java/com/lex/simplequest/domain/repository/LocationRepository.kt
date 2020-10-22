@@ -6,11 +6,21 @@ import java.io.Closeable
 interface LocationRepository : Closeable {
     fun isLocationServicesEnabled(): Boolean
 
-    fun startTrack(name: String): Long
-    fun stopTrack(id: Long)
+    fun startTrack(name: String, startTime: Long): Long
+    fun stopTrack(id: Long, endTime: Long): Boolean
     fun getTrack(id: Long): Track?
     fun updateTrack(track: Track): Boolean
     fun deleteTrack(id: Long): Boolean
+    fun addPoint(trackId: Long, latitude: Double, longitude: Double, altitude: Double?)
+
+    fun getQuerySpecificationFactory(): LocationQuerySpecificationFactory
+
+    interface LocationQuerySpecification
+
+    interface LocationQuerySpecificationFactory {
+        fun trackById(trackId: Long): LocationQuerySpecification
+        fun trackByName(trackName: String): LocationQuerySpecification
+    }
 
     interface OnUpdateListener {
         fun onUpdated()

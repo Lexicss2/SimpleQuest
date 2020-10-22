@@ -18,7 +18,7 @@ public interface QuestContract {
 
         String COLUMN_NAME = "name";
         String COLUMN_START_TIME = "start_time";
-        String COLUMN_ENR_TIME = "end_time";
+        String COLUMN_END_TIME = "end_time";
     }
 
     interface Points extends BaseEntityColumns {

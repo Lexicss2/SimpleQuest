@@ -1,12 +1,18 @@
 package com.lex.simplequest.presentation.screen.home
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
+import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.lex.simplequest.R
+import com.lex.simplequest.device.service.TrackLocationService
+import com.lex.simplequest.domain.locationmanager.LocationTracker
 import com.lex.simplequest.presentation.base.BaseMvpActivity
 import com.lex.simplequest.presentation.base.ToolbarBackButtonOverride
 import com.lex.simplequest.presentation.screen.home.home.HomeFragment
@@ -43,6 +49,9 @@ class MainActivity(private val router: MainRouterImpl = MainRouterImpl()) :
 
     private lateinit var bottomNavigationView: BottomNavigationView
     private var isSettlingBottomNavigation = false
+    private lateinit var serviceIntent: Intent
+    private var locationTracker: LocationTracker? = null
+    private var isTrackRecording: Boolean = false
 
     private val bottomNavigationItemSelectedListener =
         BottomNavigationView.OnNavigationItemSelectedListener { menuItem ->
@@ -75,6 +84,21 @@ class MainActivity(private val router: MainRouterImpl = MainRouterImpl()) :
             } else true
         }
 
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            Log.i("qaz", "! Service Connected in Activity")
+            val binder = service as TrackLocationService.TrackLocationBinder
+            locationTracker = binder.getService() as LocationTracker
+            isTrackRecording = true == locationTracker?.isRecording()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            Log.e("qaz","Service Disconnected in Activity")
+            locationTracker = null
+            isTrackRecording = false
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         router.activity = this
         super.onCreate(savedInstanceState)
@@ -86,11 +110,47 @@ class MainActivity(private val router: MainRouterImpl = MainRouterImpl()) :
         if (null == savedInstanceState) {
             router.showHome()
         }
+
+        serviceIntent = Intent(this, TrackLocationService::class.java)
+        val compName = startService(serviceIntent)
+        Log.i(
+            "qaz",
+            "Activity onCreate: ${if (compName != null) "startted" else "not started"}"
+        )
     }
 
     override fun onStart() {
         super.onStart()
         updateBottomNavigationView()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+       val bond =  bindService(serviceIntent, serviceConnection, 0)
+        Log.d("qaz", "Activity onResume Try to bond service = $bond")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (locationTracker == null) {
+            Log.d("qaz", "location tracker null")
+        }
+        isTrackRecording = true == locationTracker?.isRecording()
+        Log.d("qaz", "onPause, isRecording = $isTrackRecording")
+        unbindService(serviceConnection)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.e("qaz", "Activity onDestroy")
+        if (!isTrackRecording) {
+            Log.d("qaz", "Service is not recording and can be stopped")
+            stopService(serviceIntent)
+        } else {
+            Log.w("qaz", "Service is recording, so keep service alive")
+        }
+        //stopService(Intent(this, TrackLocationService::class.java))
     }
 
     override fun onNewIntent(intent: Intent?) {

@@ -38,13 +38,15 @@ class HomeFragment :
 
     private val connection = object : ServiceConnection {
         override fun onServiceDisconnected(name: ComponentName?) {
+            Log.e("qaz", "on service disconnected")
             presenter.locationTrackerDisconnected()
         }
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            Log.i("qaz", "on service Connected")
             val binder = service as TrackLocationService.TrackLocationBinder
             val locationTracker = binder.getService() as LocationTracker
-            locationTracker.setup(App.instance.locationManager, App.instance.locationRepository)
+            //locationTracker.setup(App.instance.locationManager, App.instance.locationRepository)
             presenter.locationTrackerConnected(locationTracker)
         }
     }
@@ -69,15 +71,32 @@ class HomeFragment :
 
     override fun onStart() {
         super.onStart()
-        Intent(activity, TrackLocationService::class.java).also{ intent ->
+//        Log.d("qaz", "Fragment onStart, bind to Service")
+//        Intent(activity, TrackLocationService::class.java).also{ intent ->
+//            val bond = activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+//            Log.d("qaz", "bond = $bond")
+//        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("qaz", "Fragment onResume, bind to Service")
+        Intent(activity, TrackLocationService::class.java).also { intent ->
             val bond = activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
             Log.d("qaz", "bond = $bond")
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        Log.w("qaz", "Fragment onPause, unbind to Service")
+        activity?.unbindService(connection)
+    }
+
     override fun onStop() {
         super.onStop()
-        activity?.unbindService(connection)
+//        Log.w("qaz", "Fragment onStop, unbind to Service")
+//        activity?.unbindService(connection)
     }
 
     override fun setButtonCaptionAsStart() {
