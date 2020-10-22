@@ -44,6 +44,7 @@ class HomeFragment :
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as TrackLocationService.TrackLocationBinder
             val locationTracker = binder.getService() as LocationTracker
+            locationTracker.setup(App.instance.locationManager, App.instance.locationRepository)
             presenter.locationTrackerConnected(locationTracker)
         }
     }
@@ -58,8 +59,8 @@ class HomeFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewBinding.layoutContent.apply {
-            testButton.setOnClickListener {
-                presenter.testClicked()
+            startStopButton.setOnClickListener {
+                presenter.startStopClicked()
             }
         }
         super.onViewCreated(view, savedInstanceState)
@@ -77,6 +78,18 @@ class HomeFragment :
     override fun onStop() {
         super.onStop()
         activity?.unbindService(connection)
+    }
+
+    override fun setButtonCaptionAsStart() {
+        viewBinding.layoutContent.apply {
+            startStopButton.text = resources.getString(R.string.start_tracking)
+        }
+    }
+
+    override fun setButtonCaptionAsStop() {
+        viewBinding.layoutContent.apply {
+            startStopButton.text = resources.getString(R.string.stop_tracking)
+        }
     }
 
     override fun getUi(): HomeFragmentContract.Ui =

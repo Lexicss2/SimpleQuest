@@ -19,4 +19,8 @@
     <string name="navigation_track_list">Tracks</string>
     <string name="navigation_settings">Settings</string>
     <string name="title_activity_maps">Map</string>
+
+    <!-- Home -->
+    <string name="start_tracking">Start</string>
+    <string name="stop_tracking">Stop</string>
 </resources>

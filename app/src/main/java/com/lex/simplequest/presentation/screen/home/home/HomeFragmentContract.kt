@@ -7,11 +7,12 @@ import com.lex.simplequest.presentation.base.BaseMvpLceContract
 interface HomeFragmentContract {
 
     interface Ui : BaseMvpLceContract.Ui {
-
+        fun setButtonCaptionAsStart()
+        fun setButtonCaptionAsStop()
     }
 
     interface Presenter : BaseMvpLceContract.Presenter<Ui, Presenter.State> {
-        fun testClicked()
+        fun startStopClicked()
         fun locationTrackerConnected(locationTracker: LocationTracker)
         fun locationTrackerDisconnected()
 
