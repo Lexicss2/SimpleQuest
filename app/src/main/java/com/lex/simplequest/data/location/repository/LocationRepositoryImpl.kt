@@ -53,6 +53,9 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
 
             override fun trackByName(trackName: String): LocationRepository.LocationQuerySpecification =
                 TrackByNameQuerySpecification(trackName)
+
+            override fun allTracks(): LocationRepository.LocationQuerySpecification =
+                AllTracksSpecification()
         }
     }
 
@@ -106,6 +109,19 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
         checkNotClosed()
         val spec = querySpecFactory.trackById(id)
         return getTrack(spec)
+    }
+
+    override fun getTracks(spec: LocationRepository.LocationQuerySpecification): List<Track> {
+        checkNotClosed()
+        return context.contentResolver.query(
+            QuestContract.Tracks.CONTENT_URI,
+            null,
+            (spec as LocationQuerySpecificationImpl).getWhereClause(),
+            null,
+            null
+        ).use { cursor ->
+            cursor?.toTracks() ?: emptyList()
+        }
     }
 
     override fun updateTrack(track: Track): Boolean {

@@ -23,4 +23,5 @@
     <!-- Home -->
     <string name="start_tracking">Start</string>
     <string name="stop_tracking">Stop</string>
+    <string name="info">info</string>
 </resources>

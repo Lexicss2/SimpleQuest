@@ -67,3 +67,15 @@ fun Date.cardExpirationString(): String =
         DATE_FORMAT_CARD_EXPIRATION.format(this@cardExpirationString)
     }
 
+fun Long.toStringDuration(): String {
+    var time = this.toInt()
+    val hours = time / 3_600_000
+    time -= hours * 3_600_000
+    val minutes = time / 60_000
+    time -= minutes * 60_000
+    val seconds = time / 1_000
+    return "${hours.toString().padStart(2, '0')}:${
+        minutes.toString().padStart(2, '0')
+    }:${seconds.toString().padStart(2, '0')}"
+}
+
