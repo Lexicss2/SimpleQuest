@@ -14,21 +14,38 @@ fun Track.toContentValues(): ContentValues =
     }
 
 
+//fun Cursor.toTracks(): List<Track> =
+//    if (moveToFirst()) {
+//        val tracksList = mutableListOf<Track>()
+//        do {
+//            val id = getLong(getColumnIndex(QuestContract.Tracks.COLUMN_ID))
+//            val name = getString(getColumnIndex(QuestContract.Tracks.COLUMN_NAME))
+//            val startTime = getLong(getColumnIndex(QuestContract.Tracks.COLUMN_START_TIME))
+//            val indexStopTime = getColumnIndex(QuestContract.Tracks.COLUMN_END_TIME)
+//            val entTime = if (!isNull(indexStopTime)) getLong(indexStopTime) else null
+//
+////            val points = getTrackPoints(this, id)
+//
+//            val track = Track(id, name, startTime, entTime)
+//            tracksList.add(track)
+//        } while (moveToNext())
+//        tracksList.toList()
+//    } else {
+//        emptyList()
+//    }
+
 fun Cursor.toTracks(): List<Track> =
     if (moveToFirst()) {
         val tracksList = mutableListOf<Track>()
         do {
-            val idIndex = getColumnIndex(QuestContract.Tracks.COLUMN_ID)
-            val nameIndex = getColumnIndex(QuestContract.Tracks.COLUMN_NAME)
-            val id = if (idIndex > -1) {
-                getLong(idIndex)
-            } else 0L
-            //val id = getLong(idIndex)
-
-            val name = getString(nameIndex)
+            val id = getLong(getColumnIndex(QuestContract.Tracks.COLUMN_ID))
+            val name = getString(getColumnIndex(QuestContract.Tracks.COLUMN_NAME))
             val startTime = getLong(getColumnIndex(QuestContract.Tracks.COLUMN_START_TIME))
             val indexStopTime = getColumnIndex(QuestContract.Tracks.COLUMN_END_TIME)
             val entTime = if (!isNull(indexStopTime)) getLong(indexStopTime) else null
+
+//            val points = getTrackPoints(this, id)
+
             val track = Track(id, name, startTime, entTime)
             tracksList.add(track)
         } while (moveToNext())
@@ -37,12 +54,18 @@ fun Cursor.toTracks(): List<Track> =
         emptyList()
     }
 
-fun Cursor.toTrack(): Track? {
-    val tracks = toTracks()
-    return if (tracks.isNotEmpty()) {
-        tracks[0]
-    } else null
-}
+//private fun getTrackPoints(cursor: Cursor, trackId: Long): List<Point> {
+//}
+
+fun Cursor.getTrackId() = getLong(getColumnIndex(QuestContract.Tracks.COLUMN_ID))
+fun Cursor.getTrackPointId() = getLong(getColumnIndex(QuestContract.Points.COLUMN_ID))
+
+//fun Cursor.toTrack(): Track? {
+//    val tracks = toTracks()
+//    return if (tracks.isNotEmpty()) {
+//        tracks[0]
+//    } else null
+//}
 
 fun Point.toContentValues(): ContentValues =
     ContentValues().apply {
@@ -51,3 +74,12 @@ fun Point.toContentValues(): ContentValues =
         put(QuestContract.Points.COLUMN_ALTITUDE, altitude)
         put(QuestContract.Points.COLUMN_TRACK_ID, trackId)
     }
+
+fun <T> Cursor.toList(toT: Cursor.() -> T): List<T> =
+    if (moveToFirst()) {
+        (1..count).map {
+            toT().apply {
+                moveToNext()
+            }
+        }
+    } else arrayListOf()

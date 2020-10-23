@@ -1,6 +1,7 @@
 package com.lex.simplequest.presentation.screen.home.tracks
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -44,7 +45,10 @@ class AdapterTracks(private val context: Context, private val clickListener: Ite
                 trackNameView.text = track.name
                 val duration = track.duration()
                 trackTimeDistanceView.text =
-                    duration.toStringDuration() // TODO: Calculate distance using tracks
+                    duration.toStringDuration()  + "-" + track.points.size// TODO: Calculate distance using tracks
+                track.points.forEach {
+                    Log.d("qaz", "point = $it")
+                }
                 trackInfoButton.setOnClickListener {
                     clickListener.onInfoClicked(track)
                 }
