@@ -1,7 +1,6 @@
 package com.lex.simplequest.presentation.screen.home.map
 
 import android.os.Bundle
-import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -10,8 +9,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.lex.simplequest.App
 import com.lex.simplequest.R
 import com.lex.simplequest.presentation.base.BaseMvpFragment
@@ -58,9 +56,19 @@ class MapFragment :
 
 
         // Temporary
-        val sydney = LatLng(-34.0, 151.0)
-        map!!.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        map!!.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        val minsk = LatLng(53.905, 27.606)
+        val opt = MarkerOptions()
+
+        val markerMinsk = map!!.addMarker(MarkerOptions().position(minsk).title("Marker in Sydney").icon(
+            BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)
+        ))
+
+        val dacha = LatLng(54.022637, 27.610355)
+        val markerDacha = map!!.addMarker(MarkerOptions().position(dacha).title("dacha").icon(
+            BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+        ))
+
+        map!!.moveCamera(CameraUpdateFactory.newLatLng(minsk))
     }
 
     override fun setPin(data: Any) {

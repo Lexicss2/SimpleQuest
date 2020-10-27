@@ -35,11 +35,11 @@ class TracksFragment : BaseMvpFragment<TracksFragmentContract.Ui, TracksFragment
 
     private val tracksClickListener = object : AdapterTracks.ItemClickListener {
         override fun onTrackClicked(track: Track) {
-
+            presenter.trackClicked(track)
         }
 
         override fun onInfoClicked(track: Track) {
-
+            presenter.trackInfoClicked(track)
         }
     }
 
@@ -52,8 +52,6 @@ class TracksFragment : BaseMvpFragment<TracksFragmentContract.Ui, TracksFragment
         .root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-//        tracksListView.layoutManager = LinearLayoutManager(context!!, RecyclerView.VERTICAL, false)
-//        tracksListView.adapter =
         adapterTracks = AdapterTracks(context!!, tracksClickListener)
         tracksListView.apply {
             layoutManager = LinearLayoutManager(context!!, RecyclerView.VERTICAL, false)

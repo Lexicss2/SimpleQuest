@@ -24,4 +24,8 @@
     <string name="start_tracking">Start</string>
     <string name="stop_tracking">Stop</string>
     <string name="info">info</string>
+
+    <!-- Tracks -->
+    <string name="tracks_start">Start</string>
+    <string name="tracks_finish">Finish</string>
 </resources>

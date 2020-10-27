@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.lex.simplequest.databinding.ItemTrackBinding
 import com.lex.simplequest.domain.model.Track
+import com.lex.simplequest.domain.model.distance
 import com.lex.simplequest.domain.model.duration
 import com.lex.simplequest.presentation.utils.toStringDuration
 
@@ -45,7 +46,7 @@ class AdapterTracks(private val context: Context, private val clickListener: Ite
                 trackNameView.text = track.name
                 val duration = track.duration()
                 trackTimeDistanceView.text =
-                    duration.toStringDuration()  + "-" + track.points.size// TODO: Calculate distance using tracks
+                String.format("%s, %.2f", duration.toStringDuration(), track.distance())
                 track.points.forEach {
                     Log.d("qaz", "point = $it")
                 }

@@ -7,6 +7,7 @@ import com.lex.simplequest.R
 import com.lex.simplequest.presentation.screen.home.home.HomeFragment
 import com.lex.simplequest.presentation.screen.home.map.MapFragment
 import com.lex.simplequest.presentation.screen.home.settings.SettingsFragment
+import com.lex.simplequest.presentation.screen.home.tracks.TrackViewFragment
 import com.lex.simplequest.presentation.screen.home.tracks.TracksFragment
 import com.lex.simplequest.presentation.utils.clearBackStack
 import com.lex.simplequest.presentation.utils.inTransaction
@@ -30,6 +31,10 @@ class MainRouterImpl : MainRouter {
 
     override fun showSettings() {
         addFragment(SettingsFragment.newInstance(), true)
+    }
+
+    override fun showTrackView(trackId: Long) {
+        addFragment(TrackViewFragment.newInstance(trackId), false)
     }
 
     override fun goBack() {

@@ -13,12 +13,12 @@
     map:uiZoomControls="false"
     map:uiZoomGestures="true" />
 
-<!--<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--    xmlns:map="http://schemas.android.com/apk/res-auto"-->
-<!--    xmlns:tools="http://schemas.android.com/tools"-->
-<!--    android:layout_width="match_parent"-->
-<!--    android:layout_height="match_parent">-->
+    <!--<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--    xmlns:map="http://schemas.android.com/apk/res-auto"-->
+    <!--    xmlns:tools="http://schemas.android.com/tools"-->
+    <!--    android:layout_width="match_parent"-->
+    <!--    android:layout_height="match_parent">-->
 
-<!--    <include layout="@layout/activity_maps" />-->
+    <!--    <include layout="@layout/activity_maps" />-->
 
-<!--</FrameLayout>-->
+    <!--</FrameLayout>-->

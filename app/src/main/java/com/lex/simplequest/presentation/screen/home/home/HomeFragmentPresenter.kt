@@ -1,11 +1,8 @@
 package com.lex.simplequest.presentation.screen.home.home
 
 import android.util.Log
-import com.lex.simplequest.device.service.TrackLocationService
 import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracker
-import com.lex.simplequest.domain.locationmanager.LocationManager
 import com.lex.simplequest.domain.locationmanager.LocationTracker
-import com.lex.simplequest.domain.locationmanager.model.Location
 import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.presentation.base.BaseMvpLcePresenter
 import com.lex.simplequest.presentation.screen.home.MainRouter
@@ -78,12 +75,6 @@ class HomeFragmentPresenter(
 
     override fun updateUi() {
         super.updateUi()
-
-//        if (locationManager.isConnected()) {
-//            ui.setTestButtonStop()
-//        } else  {
-//            ui.setTestButtonStart()
-//        }
         connectedlocationTracker?.let { tracker ->
             if (tracker.isRecording()) {
                 ui.setButtonCaptionAsStop()

@@ -7,4 +7,5 @@ interface MainRouter : Router {
     fun showMap()
     fun showTracks()
     fun showSettings()
+    fun showTrackView(trackId: Long)
 }
