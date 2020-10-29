@@ -47,9 +47,9 @@ class AdapterTracks(private val context: Context, private val clickListener: Ite
                 val duration = track.duration()
                 trackTimeDistanceView.text =
                 String.format("%s, %.2f", duration.toStringDuration(), track.distance())
-                track.points.forEach {
-                    Log.d("qaz", "point = $it")
-                }
+//                track.points.forEach {
+//                    Log.d("qaz", "point = $it")
+//                }
                 trackInfoButton.setOnClickListener {
                     clickListener.onInfoClicked(track)
                 }

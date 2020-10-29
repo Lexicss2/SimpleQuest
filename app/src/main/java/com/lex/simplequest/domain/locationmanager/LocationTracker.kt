@@ -1,5 +1,6 @@
 package com.lex.simplequest.domain.locationmanager
 
+import com.lex.simplequest.domain.locationmanager.model.Location
 import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.domain.repository.LocationRepository
 
@@ -13,14 +14,16 @@ interface LocationTracker {
     fun stopRecording()  // stop recording and disconnect
     fun isRecording(): Boolean
     fun getLastTrack(): Track?
+    fun addListener(listener: Listener)
+    fun removeListener(listener: Listener)
 
-    var locationTrackerListener: Listener?
+//    var locationTrackerListener: Listener?
 
     interface Listener {
         fun onLocationManagerConnected()
         fun onLocationMangerConnectionSuspended(reason: Int)
         fun onLocationMangerConnectionFailed(error: Throwable)
-        fun onTrackUpdated(track: Track)
+        fun onLocationUpdated(location: Location)
     }
 
     enum class Status {

@@ -150,7 +150,6 @@ class MainActivity(private val router: MainRouterImpl = MainRouterImpl()) :
         } else {
             Log.w("qaz", "Service is recording, so keep service alive")
         }
-        //stopService(Intent(this, TrackLocationService::class.java))
     }
 
     override fun onNewIntent(intent: Intent?) {

@@ -44,7 +44,7 @@ class TrackViewFragment :
     }
 
     private var googleMap: GoogleMap? = null
-    private var savedTracks: List<Track>? = null
+    private var savedTracks: List<Track>? = null // TODO: Move to Presenter
 
 //    private var _viewBinding: FragmentTrackViewBinding? = null
 //    private val viewBinding: FragmentTrackViewBinding

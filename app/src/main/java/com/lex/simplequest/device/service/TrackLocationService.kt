@@ -21,6 +21,7 @@ import com.lex.simplequest.presentation.utils.tasks.SingleResultTask
 import io.reactivex.android.schedulers.AndroidSchedulers
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
 
 class TrackLocationService() : Service(), LocationTracker {
 
@@ -54,33 +55,47 @@ class TrackLocationService() : Service(), LocationTracker {
     private val addPointInteractor: AddPointInteractor =
         AddPointInteractorImpl(App.instance.locationRepository)
 
-    private var _locationTrackerListener: LocationTracker.Listener? = null
+//    private var _locationTrackerListener: LocationTracker.Listener? = null
 
-    override var locationTrackerListener: LocationTracker.Listener?
-        get() = _locationTrackerListener
-        set(value) {
-            _locationTrackerListener = value
-        }
+//    override var locationTrackerListener: LocationTracker.Listener?
+//        get() = _locationTrackerListener
+//        set(value) {
+//            _locationTrackerListener = value
+//        }
+    private val locationListeners = CopyOnWriteArrayList<LocationTracker.Listener>()
     private var locationManagerCallback = object : LocationManager.Callback {
 
         override fun onConnected() {
-            _locationTrackerListener?.onLocationManagerConnected()
+//            _locationTrackerListener?.onLocationManagerConnected()
+            locationListeners.forEach {
+                it.onLocationManagerConnected()
+            }
             if (LocationTracker.Status.RECORDING != status || LocationTracker.Status.CONNECTED != status) {
                 changeStatus(LocationTracker.Status.CONNECTED)
             }
         }
 
         override fun onConnectionSuspended(reason: Int) {
-            _locationTrackerListener?.onLocationMangerConnectionSuspended(reason)
+//            _locationTrackerListener?.onLocationMangerConnectionSuspended(reason)
+            locationListeners.forEach {
+                it.onLocationMangerConnectionSuspended(reason)
+            }
             changeStatus(LocationTracker.Status.IDLE)
         }
 
         override fun onConnectionFailed(error: Throwable) {
-            _locationTrackerListener?.onLocationMangerConnectionFailed(error)
+//            _locationTrackerListener?.onLocationMangerConnectionFailed(error)
+            locationListeners.forEach {
+                it.onLocationMangerConnectionFailed(error)
+            }
             changeStatus(LocationTracker.Status.IDLE)
         }
 
         override fun onLocationChanged(location: Location) {
+
+            locationListeners.forEach {
+                it.onLocationUpdated(location)
+            }
 
             if (null != activeTrackId && LocationTracker.Status.RECORDING != status) {
                 changeStatus(LocationTracker.Status.RECORDING)
@@ -143,6 +158,7 @@ class TrackLocationService() : Service(), LocationTracker {
         super.onDestroy()
         //isActive = false
         changeStatus(LocationTracker.Status.NONE)
+        locationListeners.clear()
         taskStartTrack.stop()
         taskStopTrack.stop()
         taskAddPoint.stop()
@@ -208,6 +224,18 @@ class TrackLocationService() : Service(), LocationTracker {
 
     override fun getLastTrack(): Track? {
         return null
+    }
+
+    override fun addListener(listener: LocationTracker.Listener) {
+        if (!locationListeners.contains(listener)) {
+            locationListeners.add(listener)
+        }
+    }
+
+    override fun removeListener(listener: LocationTracker.Listener) {
+        if (locationListeners.contains(listener)) {
+            locationListeners.remove(listener)
+        }
     }
 
     inner class TrackLocationBinder : Binder() {

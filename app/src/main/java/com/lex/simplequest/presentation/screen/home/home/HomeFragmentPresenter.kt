@@ -3,6 +3,7 @@ package com.lex.simplequest.presentation.screen.home.home
 import android.util.Log
 import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracker
 import com.lex.simplequest.domain.locationmanager.LocationTracker
+import com.lex.simplequest.domain.locationmanager.model.Location
 import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.presentation.base.BaseMvpLcePresenter
 import com.lex.simplequest.presentation.screen.home.MainRouter
@@ -18,22 +19,22 @@ class HomeFragmentPresenter(
 
     private val trackingListener = object : LocationTracker.Listener {
 
-    override fun onLocationManagerConnected() {
-        updateUi()
-    }
+        override fun onLocationManagerConnected() {
+            updateUi()
+        }
 
-    override fun onLocationMangerConnectionSuspended(reason: Int) {
-        updateUi()
-    }
+        override fun onLocationMangerConnectionSuspended(reason: Int) {
+            updateUi()
+        }
 
-    override fun onLocationMangerConnectionFailed(error: Throwable) {
-        updateUi()
-    }
+        override fun onLocationMangerConnectionFailed(error: Throwable) {
+            updateUi()
+        }
 
-    override fun onTrackUpdated(track: Track) {
-
+        override fun onLocationUpdated(location: Location) {
+            updateUi()
+        }
     }
-}
 
     override fun start() {
         super.start()
@@ -41,8 +42,6 @@ class HomeFragmentPresenter(
     }
 
     override fun startStopClicked() {
-        //?.testMethod()
-
         connectedlocationTracker?.let { tracker ->
             if (tracker.isRecording()) {
                 tracker.stopRecording()
@@ -55,14 +54,15 @@ class HomeFragmentPresenter(
 
     override fun locationTrackerConnected(locationTracker: LocationTracker) {
         connectedlocationTracker = locationTracker
-        connectedlocationTracker?.locationTrackerListener = trackingListener
+        connectedlocationTracker?.addListener(trackingListener)
         Log.i("qaz", "location tracker connected in presenter")
         updateUi()
     }
 
     override fun locationTrackerDisconnected() {
-        connectedlocationTracker?.locationTrackerListener = null
+        connectedlocationTracker?.removeListener(trackingListener)
         connectedlocationTracker = null
+        Log.i("qaz", "location tracker disconnected in presenter")
         updateUi()
     }
 
@@ -78,7 +78,7 @@ class HomeFragmentPresenter(
         connectedlocationTracker?.let { tracker ->
             if (tracker.isRecording()) {
                 ui.setButtonCaptionAsStop()
-            }  else {
+            } else {
                 ui.setButtonCaptionAsStart()
             }
         }

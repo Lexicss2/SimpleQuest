@@ -4,7 +4,6 @@ import com.lex.core.log.LogFactory
 import com.lex.simplequest.data.location.repository.AllTracksSpecification
 import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracker
 import com.lex.simplequest.domain.model.Track
-import com.lex.simplequest.domain.repository.LocationRepository
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractor
 import com.lex.simplequest.presentation.base.BaseMvpPresenter
 import com.lex.simplequest.presentation.screen.home.MainRouter

@@ -21,8 +21,6 @@ class MainRouterImpl : MainRouter {
 
     override fun showMap() {
         addFragment(MapFragment.newInstance(), true)
-//        val intent = Intent(activity, MapsActivity::class.java)
-//        activity.startActivity(intent)
     }
 
     override fun showTracks() {

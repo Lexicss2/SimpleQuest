@@ -7,17 +7,6 @@ class MainActivityPresenter(router: MainRouter) :
         router
     ), MainActivityContract.Presenter {
 
-//
-//    override fun start() {
-//        super.start()
-//
-//        router.showHome()
-//    }
-//
-//    override fun stop() {
-//        super.stop()
-//    }
-
     override fun onNavigationHomeClicked() {
         router.showHome()
     }

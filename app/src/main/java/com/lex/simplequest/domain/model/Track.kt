@@ -29,7 +29,7 @@ fun Track.distance(): Float =
                 results
             )
             distanceInmeters += results[2]
-            Log.d("qaz", "results = ${results[0]}, ${results[1]}, ${results[2]}")
+            //Log.d("qaz", "results = ${results[0]}, ${results[1]}, ${results[2]}")
         }
 
         distanceInmeters
