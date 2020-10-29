@@ -15,6 +15,9 @@ import com.lex.simplequest.R
 import com.lex.simplequest.databinding.FragmentHomeBinding
 import com.lex.simplequest.device.service.TrackLocationService
 import com.lex.simplequest.domain.locationmanager.LocationTracker
+import com.lex.simplequest.domain.model.Track
+import com.lex.simplequest.domain.model.distance
+import com.lex.simplequest.domain.track.interactor.ReadTracksInteractorImpl
 import com.lex.simplequest.presentation.base.BaseMvpLceFragment
 import com.lex.simplequest.presentation.screen.home.MainRouter
 import com.softeq.android.mvp.PresenterStateHolder
@@ -32,9 +35,13 @@ class HomeFragment :
             }
     }
 
+    // TODO: On recording state:
+    // Last track name = "Recording now .."
+    // Distance = "current distance"
+
     private var _viewBinding: FragmentHomeBinding? = null
     private val viewBinding: FragmentHomeBinding
-    get() = _viewBinding!!
+        get() = _viewBinding!!
 
     private val connection = object : ServiceConnection {
 
@@ -92,15 +99,49 @@ class HomeFragment :
         super.onStop()
     }
 
-    override fun setButtonCaptionAsStart() {
+
+    override fun setButtonStyleRecording(recording: Boolean) {
         viewBinding.layoutContent.apply {
-            startStopButton.text = resources.getString(R.string.start_tracking)
+            if (recording) {
+                startStopButton.text = getString(R.string.home_stop_tracking)
+                startStopButton.setBackgroundColor(
+                    resources.getColor(
+                        R.color.colorBgStopButton,
+                        null
+                    )
+                )
+            } else {
+                startStopButton.text = getString(R.string.home_start_tracking)
+                startStopButton.setBackgroundColor(
+                    resources.getColor(
+                        R.color.colorBgStartButton,
+                        null
+                    )
+                )
+            }
         }
     }
 
-    override fun setButtonCaptionAsStop() {
+    override fun showLastTrackInfo(track: Track?) {
         viewBinding.layoutContent.apply {
-            startStopButton.text = resources.getString(R.string.stop_tracking)
+            if (track != null) {
+                lastTrackNameView.text = track.name
+                lastTrackDistanceView.text = String.format("%.2f m", track.distance())
+            } else {
+                lastTrackNameView.text = resources.getString(R.string.home_no_tracks)
+                lastTrackDistanceView.text = "---"
+            }
+        }
+    }
+
+    /*
+            layoutContent.visibility = if (show) View.GONE else View.VISIBLE
+        layoutProgress.visibility = if (show) View.VISIBLE else View.GONE
+     */
+    override fun showProgress(show: Boolean) {
+        viewBinding.apply {
+            layoutContent.root.visibility = if (show) View.GONE else View.VISIBLE
+            layoutLoading.root.visibility = if (show) View.VISIBLE else View.GONE
         }
     }
 
@@ -109,9 +150,12 @@ class HomeFragment :
 
     override fun createPresenter(): HomeFragmentContract.Presenter =
         HomeFragmentPresenter(
+            ReadTracksInteractorImpl(App.instance.locationRepository),
             App.instance.internetConnectivityTracker,
+            App.instance.logFactory,
             getTarget(MainRouter::class.java)!!
         )
+
     override fun createPresenterStateHolder(): PresenterStateHolder<HomeFragmentContract.Presenter.State> =
         HomeFragmentPresenterStateHolder()
 }

@@ -21,9 +21,12 @@
     <string name="title_activity_maps">Map</string>
 
     <!-- Home -->
-    <string name="start_tracking">Start</string>
-    <string name="stop_tracking">Stop</string>
+    <string name="home_start_tracking">Start</string>
+    <string name="home_stop_tracking">Stop</string>
     <string name="info">info</string>
+    <string name="home_last_track_name">Last track</string>
+    <string name="home_last_track_distance">Distance</string>
+    <string name="home_no_tracks">(no tracks)</string>
 
     <!-- Tracks -->
     <string name="tracks_start">Start</string>
