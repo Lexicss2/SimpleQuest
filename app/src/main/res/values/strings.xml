@@ -27,6 +27,8 @@
     <string name="home_last_track_name">Last track</string>
     <string name="home_last_track_distance">Distance</string>
     <string name="home_no_tracks">(no tracks)</string>
+    <string name="home_is_recording">Is Recording</string>
+    <string name="home_last_track_duration">Duration</string>
 
     <!-- Tracks -->
     <string name="tracks_start">Start</string>

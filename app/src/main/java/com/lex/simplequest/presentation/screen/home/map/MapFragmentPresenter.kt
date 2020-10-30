@@ -36,6 +36,10 @@ class MapFragmentPresenter(
             this@MapFragmentPresenter.location = location
             updateUi(FLAG_LOCATION)
         }
+
+        override fun onStatusUpdated(status: LocationTracker.Status) {
+
+        }
     }
 
     override fun saveState(state: MapFragmentContract.Presenter.State) {

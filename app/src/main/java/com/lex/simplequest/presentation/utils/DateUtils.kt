@@ -79,3 +79,18 @@ fun Long.toStringDuration(): String {
     }:${seconds.toString().padStart(2, '0')}"
 }
 
+// return hh:mm and ss
+fun Long.toStringDurations(): Pair<String, String> {
+    var time = this.toInt()
+    val hours = time / 3_600_000
+    time -= hours * 3_600_000
+    val minutes = time / 60_000
+    time -= minutes * 60_000
+    val seconds = time / 1_000
+    val minutesStr = "${hours.toString().padStart(2, '0')}:${
+        minutes.toString().padStart(2, '0')
+    }"
+    val secondsStr = seconds.toString().padStart(2, '0')
+    return Pair(minutesStr, secondsStr)
+}
+

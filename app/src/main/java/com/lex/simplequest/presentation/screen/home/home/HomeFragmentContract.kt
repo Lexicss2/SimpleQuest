@@ -8,11 +8,10 @@ import com.lex.simplequest.presentation.base.BaseMvpLceContract
 interface HomeFragmentContract {
 
     interface Ui : BaseMvpLceContract.Ui {
-        //        fun setButtonCaptionAsStart()
-//        fun setButtonCaptionAsStop()
         fun setButtonStyleRecording(recording: Boolean)
-        fun showLastTrackInfo(track: Track?)
+        fun showLastTrackInfo(track: Track?, isRecording: Boolean)
         fun showProgress(show: Boolean)
+        fun setDurationMinutesSeconds(minutes: String, seconds: String)
     }
 
     interface Presenter : BaseMvpLceContract.Presenter<Ui, Presenter.State> {

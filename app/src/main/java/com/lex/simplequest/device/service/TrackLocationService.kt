@@ -26,7 +26,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 class TrackLocationService() : Service(), LocationTracker {
 
     companion object {
-        private const val TAG = "TrackLoscationService"
+        private const val TAG = "TrackLocationService"
         private const val TASK_START_TRACK = "startTrack"
         private const val TASK_STOP_TRACK = "stopTrack"
         private const val TASK_ADD_POINT = "addPoint"
@@ -57,7 +57,7 @@ class TrackLocationService() : Service(), LocationTracker {
 
 //    private var _locationTrackerListener: LocationTracker.Listener? = null
 
-//    override var locationTrackerListener: LocationTracker.Listener?
+    //    override var locationTrackerListener: LocationTracker.Listener?
 //        get() = _locationTrackerListener
 //        set(value) {
 //            _locationTrackerListener = value
@@ -67,6 +67,7 @@ class TrackLocationService() : Service(), LocationTracker {
 
         override fun onConnected() {
 //            _locationTrackerListener?.onLocationManagerConnected()
+            Log.i(TAG, "Manager onConnected")
             locationListeners.forEach {
                 it.onLocationManagerConnected()
             }
@@ -77,6 +78,7 @@ class TrackLocationService() : Service(), LocationTracker {
 
         override fun onConnectionSuspended(reason: Int) {
 //            _locationTrackerListener?.onLocationMangerConnectionSuspended(reason)
+            Log.w(TAG, "Manager onSuspended")
             locationListeners.forEach {
                 it.onLocationMangerConnectionSuspended(reason)
             }
@@ -85,6 +87,7 @@ class TrackLocationService() : Service(), LocationTracker {
 
         override fun onConnectionFailed(error: Throwable) {
 //            _locationTrackerListener?.onLocationMangerConnectionFailed(error)
+            Log.e(TAG, "Manager onFailed")
             locationListeners.forEach {
                 it.onLocationMangerConnectionFailed(error)
             }
@@ -92,6 +95,7 @@ class TrackLocationService() : Service(), LocationTracker {
         }
 
         override fun onLocationChanged(location: Location) {
+            Log.v(TAG, "Manager onChanged")
 
             locationListeners.forEach {
                 it.onLocationUpdated(location)
@@ -103,7 +107,7 @@ class TrackLocationService() : Service(), LocationTracker {
 
             activeTrackId?.let { trackId ->
                 // TODO: RM if Location is recording update current Track
-                Log.d("qaz", "location: ${location.latitude}: ${location.longitude}")
+                Log.v(TAG, "location: ${location.latitude}: ${location.longitude}")
                 val point =
                     Point(-1, trackId, location.latitude, location.longitude, location.altitude)
                 pointObservableValue.set(point)
@@ -117,7 +121,7 @@ class TrackLocationService() : Service(), LocationTracker {
         }
 
         override fun onLocationAvailable(available: Boolean) {
-            Log.w("qaz", "onLocationAvailable called, available: $available")
+            Log.w(TAG, "onLocationAvailable called, available: $available")
         }
     }
 
@@ -127,7 +131,7 @@ class TrackLocationService() : Service(), LocationTracker {
     }
 
     override fun onCreate() {
-        Log.i("qaz", "LT onCreate --------")
+        Log.i(TAG, "LT onCreate --------")
         super.onCreate()
         //isActive = true
         changeStatus(LocationTracker.Status.IDLE)
@@ -135,7 +139,7 @@ class TrackLocationService() : Service(), LocationTracker {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(
-            "qaz",
+            TAG,
             "<<Service LT started, startId = $startId>>, intent = $intent, activeTrackId = $activeTrackId"
         )
         locationManager = App.instance.locationManager
@@ -144,17 +148,17 @@ class TrackLocationService() : Service(), LocationTracker {
     }
 
     override fun onBind(intent: Intent): IBinder? {
-        Log.i("qaz", "onBind")
+        Log.i(TAG, "onBind")
         return binder
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        Log.d("qaz", "onUnbind")
+        Log.d(TAG, "onUnbind")
         return super.onUnbind(intent)
     }
 
     override fun onDestroy() {
-        Log.e("qaz", "LT onDestroy ---------")
+        Log.e(TAG, "LT onDestroy ---------")
         super.onDestroy()
         //isActive = false
         changeStatus(LocationTracker.Status.NONE)
@@ -166,25 +170,31 @@ class TrackLocationService() : Service(), LocationTracker {
     }
 
     override fun testMethod() {
-        //Log.i("qaz", "testMethod, isActive: $isActive")
+        //Log.i(TAG, "testMethod, isActive: $isActive")
     }
 
-    override fun connect() {
-        locationManager.connect(locationManagerCallback)
-        changeStatus(LocationTracker.Status.CONNECTING)
-    }
+    override fun connect(): Boolean =
+        if (LocationTracker.Status.IDLE == status) {
+            locationManager.connect(locationManagerCallback)
+            changeStatus(LocationTracker.Status.CONNECTING)
+            true
+        } else false
 
-    override fun disconnect() {
-        locationManager.disconnect()
 
-        activeTrackId?.let { trackId ->
-            taskStopTrack.start(
-                StopTrackInteractor.Param(trackId, System.currentTimeMillis()),
-                Unit
-            )
-        }
-        changeStatus(LocationTracker.Status.IDLE)
-    }
+    override fun disconnect() =
+        if (LocationTracker.Status.CONNECTED == status) {  // Disconnect only gor CONNECTED state, otherwise ignore, e.g. for RECORDING state
+            locationManager.disconnect()
+
+            activeTrackId?.let { trackId ->
+                taskStopTrack.start(
+                    StopTrackInteractor.Param(trackId, System.currentTimeMillis()),
+                    Unit
+                )
+            }
+            changeStatus(LocationTracker.Status.IDLE)
+            true
+        } else false
+
 
     override fun isConnected(): Boolean =
         LocationTracker.Status.CONNECTED == status || LocationTracker.Status.RECORDING == status
@@ -203,9 +213,9 @@ class TrackLocationService() : Service(), LocationTracker {
     }
 
     override fun stopRecording() {
-        Log.d("qaz", "StopRecording")
+        Log.d(TAG, "StopRecording")
         activeTrackId?.let { trackId ->
-            Log.d("qaz", "!!! activeTrackId is not null")
+            Log.d(TAG, "!!! activeTrackId is not null")
             locationManager.disconnect()
 
             taskStopTrack.start(
@@ -213,6 +223,7 @@ class TrackLocationService() : Service(), LocationTracker {
                 Unit
             )
         }
+        activeTrackId = null
 
         changeStatus(LocationTracker.Status.IDLE)
     }
@@ -248,16 +259,26 @@ class TrackLocationService() : Service(), LocationTracker {
     }
 
     private fun changeStatus(newStatus: LocationTracker.Status) {
-        Log.d("qaz", "Changing status from $status to $newStatus")
+        val message = "<<< Changing status from $status to $newStatus >>>"
+        when (newStatus) {
+            LocationTracker.Status.NONE -> Log.v(TAG, message)
+            LocationTracker.Status.IDLE -> Log.d(TAG, message)
+            LocationTracker.Status.CONNECTING -> Log.w(TAG, message)
+            LocationTracker.Status.CONNECTED -> Log.i(TAG, message)
+            LocationTracker.Status.RECORDING -> Log.e(TAG, message)
+        }
         status = newStatus
+        locationListeners.forEach {
+            it.onStatusUpdated(newStatus)
+        }
     }
 
     private fun handleStartTrack(trackId: Long?, error: Throwable?) {
         if (null != trackId) {
-            Log.i("qaz", "track inserted successfully, id = $trackId")
+            Log.i(TAG, "track inserted successfully, id = $trackId")
             activeTrackId = trackId
         } else if (null != error) {
-            Log.e("qaz", "error inserting track: ${error.localizedMessage}")
+            Log.e(TAG, "error inserting track: ${error.localizedMessage}")
             if (LocationTracker.Status.RECORDING == status) {
                 changeStatus(LocationTracker.Status.CONNECTED)
             }
@@ -282,10 +303,10 @@ class TrackLocationService() : Service(), LocationTracker {
 
     private fun handleStopTrack(succeeded: Boolean?, error: Throwable?) {
         if (null != error) {
-            Log.e("qaz", "Failed to stopTrack")
+            Log.e(TAG, "Failed to stopTrack")
             activeTrackId = null
         } else {
-            Log.i("qaz", "Stop track succeedded: $succeeded")
+            Log.i(TAG, "Stop track succeedded: $succeeded")
         }
     }
 
@@ -307,10 +328,10 @@ class TrackLocationService() : Service(), LocationTracker {
 
     private fun handleAddPointTask(error: Throwable?) {
         if (null != error) {
-            Log.e("qaz", "Failed to add point: ${error.localizedMessage}")
+            Log.e(TAG, "Failed to add point: ${error.localizedMessage}")
             // TODO: Handle somehow, needs to restart task
         } else {
-            Log.d("qaz", "Point add succeeded")
+            Log.d(TAG, "Point add succeeded")
         }
     }
 

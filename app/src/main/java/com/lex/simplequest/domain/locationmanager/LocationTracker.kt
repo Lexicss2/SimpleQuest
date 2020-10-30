@@ -7,11 +7,11 @@ import com.lex.simplequest.domain.repository.LocationRepository
 interface LocationTracker {
     fun testMethod() // TODO: Remove it
     fun setup(lm: LocationManager, lr: LocationRepository)
-    fun connect()
-    fun disconnect()
+    fun connect(): Boolean
+    fun disconnect(): Boolean
     fun isConnected(): Boolean
-    fun startRecording() // connect and start recording
-    fun stopRecording()  // stop recording and disconnect
+    fun startRecording()// connect and start recording
+    fun stopRecording() // stop recording and disconnect
     fun isRecording(): Boolean
     fun getLastTrack(): Track?
     fun addListener(listener: Listener)
@@ -24,6 +24,7 @@ interface LocationTracker {
         fun onLocationMangerConnectionSuspended(reason: Int)
         fun onLocationMangerConnectionFailed(error: Throwable)
         fun onLocationUpdated(location: Location)
+        fun onStatusUpdated(status: Status)
     }
 
     enum class Status {
