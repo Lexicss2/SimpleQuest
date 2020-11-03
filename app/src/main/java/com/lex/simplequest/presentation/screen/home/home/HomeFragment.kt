@@ -222,6 +222,10 @@ class HomeFragment :
         }
     }
 
+    override fun setTrackerStatus(status: LocationTracker.Status?) {
+        viewBinding.layoutContent.trackerStatusTextView.text = status.toString()
+    }
+
     override fun getUi(): HomeFragmentContract.Ui =
         this
 

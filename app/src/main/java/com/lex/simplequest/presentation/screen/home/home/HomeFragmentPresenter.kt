@@ -2,7 +2,8 @@ package com.lex.simplequest.presentation.screen.home.home
 
 import android.util.Log
 import com.lex.core.log.LogFactory
-import com.lex.simplequest.data.location.repository.AllTracksSpecification
+import com.lex.simplequest.data.location.repository.queries.AllTracksQuerySpecification
+import com.lex.simplequest.data.location.repository.queries.LatestTrackQuerySpecification
 import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracker
 import com.lex.simplequest.domain.locationmanager.LocationTracker
 import com.lex.simplequest.domain.locationmanager.model.Location
@@ -106,7 +107,8 @@ class HomeFragmentPresenter(
 
     override fun start() {
         super.start()
-        taskReadTracks.start(ReadTracksInteractor.Param(AllTracksSpecification()), Unit)
+        //taskReadTracks.start(ReadTracksInteractor.Param(AllTracksQuerySpecification()), Unit)
+        taskReadTracks.start(ReadTracksInteractor.Param(LatestTrackQuerySpecification()), Unit)
         updateUi(FLAG_SETUP_UI)
     }
 
@@ -128,7 +130,8 @@ class HomeFragmentPresenter(
                 if (taskReadTracks.isRunning()) {
                     taskReadTracks.stop()
                 }
-                taskReadTracks.start(ReadTracksInteractor.Param(AllTracksSpecification()), Unit)
+                //taskReadTracks.start(ReadTracksInteractor.Param(AllTracksQuerySpecification()), Unit)
+                taskReadTracks.start(ReadTracksInteractor.Param(LatestTrackQuerySpecification()), Unit)
             }
         }
         updateUi(FLAG_SET_BUTTON_STATUS)
@@ -199,11 +202,12 @@ class HomeFragmentPresenter(
 
                 ui.setButtonStyleRecording(status)
             }
-
+            ui.setTrackerStatus(tracker.getStatus())
         } else {
             if (0 != (flags and FLAG_SET_BUTTON_STATUS)) {
                 ui.setButtonStyleRecording(RecordButtonType.STOPPED)
             }
+            ui.setTrackerStatus(null)
         }
 
         if (0 != (flags and FLAG_SET_LOCATION_AVAILABILITY_STATUS)) {
@@ -225,6 +229,7 @@ class HomeFragmentPresenter(
             this.lastTrack = lastTrack
         } else if (null != error) {
             this.error = error
+            updateUi(FLAG_SET_ERROR_STATUS)
         }
 
         val tracker = connectedLocationTracker

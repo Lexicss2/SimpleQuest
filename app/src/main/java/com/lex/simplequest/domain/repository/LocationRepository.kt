@@ -21,6 +21,7 @@ interface LocationRepository : Closeable {
         fun trackById(trackId: Long): LocationQuerySpecification
         fun trackByName(trackName: String): LocationQuerySpecification
         fun allTracks(): LocationQuerySpecification
+        fun latestTrack(): LocationQuerySpecification
     }
 
     interface OnUpdateListener {

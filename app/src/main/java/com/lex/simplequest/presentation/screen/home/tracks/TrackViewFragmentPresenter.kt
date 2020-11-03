@@ -1,7 +1,7 @@
 package com.lex.simplequest.presentation.screen.home.tracks
 
 import com.lex.core.log.LogFactory
-import com.lex.simplequest.data.location.repository.TrackByIdQuerySpecification
+import com.lex.simplequest.data.location.repository.queries.TrackByIdQuerySpecification
 import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracker
 import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractor

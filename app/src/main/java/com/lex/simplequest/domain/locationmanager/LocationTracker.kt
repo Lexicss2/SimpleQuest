@@ -5,7 +5,6 @@ import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.domain.repository.LocationRepository
 
 interface LocationTracker {
-    fun testMethod() // TODO: Remove it
     fun setup(lm: LocationManager, lr: LocationRepository)
     fun connect(): Boolean
     fun disconnect(): Boolean
@@ -17,6 +16,7 @@ interface LocationTracker {
     fun getLastTrack(): Track?
     fun addListener(listener: Listener)
     fun removeListener(listener: Listener)
+    fun getStatus(): LocationTracker.Status
 
 //    var locationTrackerListener: Listener?
 

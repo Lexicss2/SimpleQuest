@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.Color
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
@@ -21,6 +22,9 @@ import com.lex.simplequest.R
 import com.lex.simplequest.device.service.TrackLocationService
 import com.lex.simplequest.domain.locationmanager.LocationTracker
 import com.lex.simplequest.domain.locationmanager.model.Location
+import com.lex.simplequest.domain.model.Track
+import com.lex.simplequest.domain.model.toLatLngs
+import com.lex.simplequest.domain.track.interactor.ReadTracksInteractorImpl
 import com.lex.simplequest.presentation.base.BaseMvpFragment
 import com.lex.simplequest.presentation.screen.home.MainRouter
 import com.softeq.android.mvp.PresenterStateHolder
@@ -30,6 +34,10 @@ class MapFragment :
     BaseMvpFragment<MapFragmentContract.Ui, MapFragmentContract.Presenter.State, MapFragmentContract.Presenter>(),
     MapFragmentContract.Ui, OnMapReadyCallback {
     companion object {
+        private const val BOUND_WIDTH = 300
+        private const val BOUND_HEIGHT = 300
+        private const val BOUND_PADDING = 5
+
         fun newInstance(): MapFragment =
             MapFragment().apply {
                 arguments = Bundle().apply {
@@ -100,18 +108,15 @@ class MapFragment :
     override fun showMarkerIfNeeded(location: Location) {
         googleMap?.let { map ->
             if (null == currentMarker) {
-                Log.d("qaz", "showMarker $location")
-                val markerOptions = MarkerOptions().position(LatLng(location.latitude, location.longitude))
-                    .title("Im here").icon(
-                        BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
-                    )
+                val markerOptions =
+                    MarkerOptions().position(LatLng(location.latitude, location.longitude))
+                        .title(resources.getString(R.string.map_iam_here)).icon(
+                            BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+                        )
                 currentMarker = map.addMarker(markerOptions)
-
-                val builder = LatLngBounds.Builder()
-                builder.include(markerOptions.position)
-                val bounds = builder.build()
-                val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 300, 300, 5)
-                map.animateCamera(cameraUpdate)
+                
+                val cameraUpdate = CameraUpdateFactory.newLatLng(currentMarker!!.position)
+                map.moveCamera(cameraUpdate) // or map.animateCamera(cameraUpdate)
             }
         }
     }
@@ -120,6 +125,15 @@ class MapFragment :
         currentMarker?.remove()
         currentMarker = null
         showMarkerIfNeeded(location)
+    }
+
+    override fun setTrack(track: Track) {
+        val map = googleMap
+        if (null != map) {
+            if (track.points.isNotEmpty()) {
+                showTrack(track)
+            }
+        }
     }
 
     private fun initGoogleMap() {
@@ -135,12 +149,40 @@ class MapFragment :
         }
     }
 
+    private fun showTrack(track: Track) {
+        googleMap?.let { map ->
+            val points = track.points.toLatLngs()
+
+            val polylineOptions = PolylineOptions().width(6.0f).color(Color.BLUE)
+            polylineOptions.geodesic(true)
+            polylineOptions.addAll(points)
+            val polyline = map.addPolyline(polylineOptions)
+
+            if (polyline.points.isNotEmpty()) {
+                val b = LatLngBounds.Builder()
+                polyline.points.forEach {
+                    b.include(it)
+                }
+                val bounds = b.build()
+                val cameraUpdate = CameraUpdateFactory.newLatLngBounds(
+                    bounds,
+                    BOUND_WIDTH,
+                    BOUND_HEIGHT,
+                    BOUND_PADDING
+                )
+                map.moveCamera(cameraUpdate)
+            }
+        }
+    }
+
     override fun getUi(): MapFragmentContract.Ui =
         this
 
     override fun createPresenter(): MapFragmentContract.Presenter =
         MapFragmentPresenter(
+            ReadTracksInteractorImpl(App.instance.locationRepository),
             App.instance.internetConnectivityTracker,
+            App.instance.logFactory,
             getTarget(MainRouter::class.java)!!
         )
 

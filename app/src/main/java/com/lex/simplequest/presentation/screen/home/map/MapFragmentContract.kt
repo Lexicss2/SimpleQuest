@@ -2,12 +2,14 @@ package com.lex.simplequest.presentation.screen.home.map
 
 import com.lex.simplequest.domain.locationmanager.LocationTracker
 import com.lex.simplequest.domain.locationmanager.model.Location
+import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.presentation.base.BaseMvpContract
 
 interface MapFragmentContract {
     interface Ui : BaseMvpContract.Ui {
         fun showMarkerIfNeeded(location: Location)
         fun updateMarker(location: Location)
+        fun setTrack(track: Track)
     }
 
     interface Presenter : BaseMvpContract.Presenter<Ui, Presenter.State> {
@@ -18,6 +20,7 @@ interface MapFragmentContract {
 
         interface State : BaseMvpContract.Presenter.State {
             var location: Location?
+            var locationsReceivedCount: Int
         }
     }
 }

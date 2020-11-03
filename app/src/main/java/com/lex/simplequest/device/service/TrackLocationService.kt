@@ -128,11 +128,6 @@ class TrackLocationService() : Service(), LocationTracker {
         }
     }
 
-    override fun setup(lm: LocationManager, lr: LocationRepository) {
-        locationManager = lm
-        locationRepository = lr
-    }
-
     override fun onCreate() {
         Log.i(TAG, "LT onCreate --------")
         super.onCreate()
@@ -172,8 +167,9 @@ class TrackLocationService() : Service(), LocationTracker {
         stopRecording()
     }
 
-    override fun testMethod() {
-        //Log.i(TAG, "testMethod, isActive: $isActive")
+    override fun setup(lm: LocationManager, lr: LocationRepository) {
+        locationManager = lm
+        locationRepository = lr
     }
 
     override fun connect(): Boolean =
@@ -185,7 +181,7 @@ class TrackLocationService() : Service(), LocationTracker {
 
 
     override fun disconnect() =
-        if (LocationTracker.Status.CONNECTED == status) {  // Disconnect only gor CONNECTED state, otherwise ignore, e.g. for RECORDING state
+        if (LocationTracker.Status.CONNECTED == status) {  // Disconnect only for CONNECTED state, otherwise ignore, e.g. for RECORDING state
             locationManager.disconnect()
 
             activeTrackId?.let { trackId ->
@@ -255,12 +251,15 @@ class TrackLocationService() : Service(), LocationTracker {
         }
     }
 
+    override fun getStatus(): LocationTracker.Status =
+        status
+
     inner class TrackLocationBinder : Binder() {
         fun getService(): TrackLocationService = this@TrackLocationService
     }
 
     private fun generateName(): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd_HH_mm_ss_SSS", Locale.US)
+        val sdf = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS", Locale.US)
         return sdf.format(Date())
     }
 

@@ -34,6 +34,9 @@
     <string name="home_location_is_not_available">Location is not available</string>
     <string name="home_location_suspended_status">Location suspended status: %d</string>
 
+    <!-- Map -->
+    <string name="map_iam_here">I\'am here</string>
+
     <!-- Tracks -->
     <string name="tracks_start">Start</string>
     <string name="tracks_finish">Finish</string>

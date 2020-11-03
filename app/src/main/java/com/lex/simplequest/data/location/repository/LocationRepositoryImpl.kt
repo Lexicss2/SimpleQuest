@@ -9,11 +9,14 @@ import android.util.Log
 import androidx.core.database.getDoubleOrNull
 import com.lex.core.utils.MainThreadHandler
 import com.lex.core.utils.ignoreErrors
+import com.lex.simplequest.data.location.repository.queries.AllTracksQuerySpecification
+import com.lex.simplequest.data.location.repository.queries.LatestTrackQuerySpecification
+import com.lex.simplequest.data.location.repository.queries.TrackByIdQuerySpecification
+import com.lex.simplequest.data.location.repository.queries.TrackByNameQuerySpecification
 import com.lex.simplequest.device.content.provider.QuestContract
 import com.lex.simplequest.domain.model.Point
 import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.domain.repository.LocationRepository
-import java.lang.IllegalStateException
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -57,7 +60,10 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
                 TrackByNameQuerySpecification(trackName)
 
             override fun allTracks(): LocationRepository.LocationQuerySpecification =
-                AllTracksSpecification()
+                AllTracksQuerySpecification()
+
+            override fun latestTrack(): LocationRepository.LocationQuerySpecification =
+                LatestTrackQuerySpecification()
         }
     }
 
@@ -125,7 +131,7 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
             null,
             (spec as LocationQuerySpecificationImpl).getWhereClause(),
             null,
-            null
+            QuestContract.Tracks.COLUMN_START_TIME + " DESC"//null
         )?.use { cursor ->
             if (cursor.moveToFirst()) {
                 handleTrackCursor(cursor)

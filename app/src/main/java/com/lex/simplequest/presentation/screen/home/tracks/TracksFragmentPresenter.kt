@@ -1,7 +1,7 @@
 package com.lex.simplequest.presentation.screen.home.tracks
 
 import com.lex.core.log.LogFactory
-import com.lex.simplequest.data.location.repository.AllTracksSpecification
+import com.lex.simplequest.data.location.repository.queries.AllTracksQuerySpecification
 import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracker
 import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractor
@@ -31,7 +31,7 @@ class TracksFragmentPresenter(
 
     override fun start() {
         super.start()
-        taskReadTracks.start(ReadTracksInteractor.Param(AllTracksSpecification()), Unit)
+        taskReadTracks.start(ReadTracksInteractor.Param(AllTracksQuerySpecification()), Unit)
     }
 
     override fun stop() {
