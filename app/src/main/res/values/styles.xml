@@ -67,4 +67,26 @@
         <item name="android:background">@color/colorBgStopButton</item>
     </style>
 
+    <style name="AppTheme.Text.Small" parent="">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/colorSimpleBlack</item>
+    </style>
+
+    <style name="AppTheme.Text.Small.DarkBlue" parent="AppTheme.Text.Small">
+        <item name="android:textColor">@color/colorDarkBlue</item>
+    </style>
+
+    <!--    <style name="AppTheme.Text.Normal.DarkBlue.Small" parent="AppTheme.Text.Small.DarkBlue">-->
+    <!--        <item name="android:textSize">12sp</item>-->
+    <!--    </style>-->
+
+    <style name="AppTheme.Text.Normal" parent="">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/colorSimpleBlack</item>
+    </style>
+
+    <style name="AppTheme.Text.Normal.DarkBlue" parent="AppTheme.Text.Normal">
+        <item name="android:textColor">@color/colorDarkBlue</item>
+    </style>
+
 </resources>

@@ -10,7 +10,6 @@ import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractor
 import com.lex.simplequest.presentation.base.BaseMvpLcePresenter
 import com.lex.simplequest.presentation.screen.home.MainRouter
-import com.lex.simplequest.presentation.screen.home.tracks.TracksFragmentPresenter
 import com.lex.simplequest.presentation.utils.asRxSingle
 import com.lex.simplequest.presentation.utils.tasks.MultiResultTask
 import com.lex.simplequest.presentation.utils.tasks.SingleResultTask
@@ -32,46 +31,83 @@ class HomeFragmentPresenter(
         private const val TAG = "HomeFragmentPresenter"
         private const val TASK_READ_TRACKS = "taskReadTracks"
         private const val TASK_TIMER = "taskTimer"
+
+        private const val FLAG_SET_TRACK_INFO = 0x0001
+        private const val FLAG_SET_BUTTON_STATUS = 0x0002
+        private const val FLAG_SET_LOCATION_AVAILABILITY_STATUS = 0x0004
+        private const val FLAG_SET_LOCATION_SUSPENDED_STATUS = 0x0008
+        private const val FLAG_SET_ERROR_STATUS = 0x0010
+        private const val FLAG_SETUP_UI =
+            FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS or FLAG_SET_LOCATION_AVAILABILITY_STATUS or
+                    FLAG_SET_LOCATION_SUSPENDED_STATUS or FLAG_SET_ERROR_STATUS
     }
 
     private val log = logFactory.get(TAG)
-    private var connectedlocationTracker: LocationTracker? = null
     private val taskReadTracks = createReadTracksTask()
     private val taskTimer = createTimerTask()
+
+    private var connectedLocationTracker: LocationTracker? = null
     private var lastTrack: Track? = null
+    private var isLocationAvailable: Boolean? = null
+    private var locationSuspendedReason: Int? = null
 
     private val trackingListener = object : LocationTracker.Listener {
 
         override fun onLocationManagerConnected() {
             Log.d("qaz", "1.onLocationManger Connected")
-            updateUi()
+            updateUi(FLAG_SETUP_UI)
         }
 
         override fun onLocationMangerConnectionSuspended(reason: Int) {
             Log.d("qaz", "2.onLocationManger Suspended")
-            updateUi()
+            locationSuspendedReason = reason
+            updateUi(FLAG_SET_LOCATION_SUSPENDED_STATUS)
         }
 
         override fun onLocationMangerConnectionFailed(error: Throwable) {
             Log.d("qaz", "3.onLocationManger Failed")
-            updateUi()
+            this@HomeFragmentPresenter.error = error
+            updateUi(FLAG_SET_ERROR_STATUS)
         }
 
         override fun onLocationUpdated(location: Location) {
             Log.d("qaz", "4.onLocationManger Updated")
-            updateUi()
+            updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS)
         }
 
         override fun onStatusUpdated(status: LocationTracker.Status) {
             Log.d("qaz", "5.onStatus Updated: $status")
-            updateUi()
+            updateUi(FLAG_SETUP_UI)
+        }
+
+        override fun onLocationAvailable(isAvailable: Boolean) {
+            Log.d("qaz", "onLocationAvailable")
+            isLocationAvailable = isAvailable
+            updateUi(FLAG_SET_LOCATION_AVAILABILITY_STATUS)
+        }
+    }
+
+    override fun saveState(state: HomeFragmentContract.Presenter.State) {
+        super.saveState(state)
+        state.error = error
+        state.isLocationAvailable = isLocationAvailable
+        state.locationSuspendedReason = locationSuspendedReason
+    }
+
+    override fun restoreState(savedState: HomeFragmentContract.Presenter.State?) {
+        super.restoreState(savedState)
+
+        savedState?.let { state ->
+            error = state.error
+            isLocationAvailable = state.isLocationAvailable
+            locationSuspendedReason = state.locationSuspendedReason
         }
     }
 
     override fun start() {
         super.start()
         taskReadTracks.start(ReadTracksInteractor.Param(AllTracksSpecification()), Unit)
-        updateUi()
+        updateUi(FLAG_SETUP_UI)
     }
 
     override fun stop() {
@@ -81,7 +117,7 @@ class HomeFragmentPresenter(
     }
 
     override fun startStopClicked() {
-        connectedlocationTracker?.let { tracker ->
+        connectedLocationTracker?.let { tracker ->
             if (tracker.isRecording()) {
                 Log.d("qaz", "STOP recording")
                 taskTimer.stop()
@@ -95,23 +131,23 @@ class HomeFragmentPresenter(
                 taskReadTracks.start(ReadTracksInteractor.Param(AllTracksSpecification()), Unit)
             }
         }
-        updateUi()
+        updateUi(FLAG_SET_BUTTON_STATUS)
     }
 
     override fun locationTrackerConnected(locationTracker: LocationTracker) {
-        connectedlocationTracker = locationTracker
-        connectedlocationTracker?.addListener(trackingListener)
+        connectedLocationTracker = locationTracker
+        connectedLocationTracker?.addListener(trackingListener)
         Log.i("qaz", "location tracker connected in presenter")
 
-        updateUi()
+        updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS)
     }
 
     override fun locationTrackerDisconnected() {
-        connectedlocationTracker?.removeListener(trackingListener)
-        connectedlocationTracker = null
+        connectedLocationTracker?.removeListener(trackingListener)
+        connectedLocationTracker = null
         Log.i("qaz", "location tracker disconnected in presenter")
         taskTimer.stop()
-        updateUi()
+        updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS)
     }
 
     override fun isLoading(): Boolean =
@@ -121,29 +157,65 @@ class HomeFragmentPresenter(
 
     }
 
-    override fun updateUi() {
-        Log.d("qaz", "updateUi, connectedLocationTracker, recording: ${connectedlocationTracker?.isRecording()}")
-
+    fun updateUi(flags: Int) {
+        Log.d(
+            "qaz",
+            "updateUi, connectedLocationTracker, recording: ${connectedLocationTracker?.isRecording()} flags: $flags"
+        )
         super.updateUi()
-        ui.showProgress(taskReadTracks.isRunning())
-        connectedlocationTracker?.let { tracker ->
 
-            val track = lastTrack
-            if (tracker.isRecording() && !taskTimer.isRunning() && track != null) {
-                taskTimer.start(track.startTime, Unit)
-            } else if (!tracker.isRecording() && taskTimer.isRunning()) {
-                taskTimer.stop()
+        val tracker = connectedLocationTracker
+        if (null != tracker) {
+            ui.showProgress(false)
+
+            if (0 != (flags and FLAG_SET_TRACK_INFO)) {
+                val track = lastTrack
+                if (tracker.isRecording() && !taskTimer.isRunning() && track != null) {
+                    taskTimer.start(track.startTime, Unit)
+                } else if (!tracker.isRecording() && taskTimer.isRunning()) {
+                    taskTimer.stop()
+                }
+
+                ui.showLastTrackInfo(track, tracker.isRecording())
+                lastTrack?.let {
+                    val endTime = it.endTime ?: System.currentTimeMillis()
+                    val durationInSeconds = endTime - it.startTime
+                    val (minutes, seconds) = durationInSeconds.toStringDurations()
+                    ui.setDurationMinutesSeconds(minutes, seconds)
+                }
             }
 
-            ui.setButtonStyleRecording(tracker.isRecording())
-            ui.showLastTrackInfo(lastTrack, tracker.isRecording())
+            if (0 != (flags and FLAG_SET_BUTTON_STATUS)) {
+                val status: RecordButtonType =
+                    when {
+                        tracker.isRecording() -> {
+                            RecordButtonType.RECORDING
+                        }
+                        tracker.isConnecting() -> {
+                            RecordButtonType.GOING_TO_RECORD
+                        }
+                        else -> RecordButtonType.STOPPED
+                    }
 
-            lastTrack?.let { track ->
-                val endTime = track.endTime ?: System.currentTimeMillis()
-                val durationInSeconds = endTime - track.startTime
-                val (minutes, seconds) = durationInSeconds.toStringDurations()
-                ui.setDurationMinutesSeconds(minutes, seconds)
+                ui.setButtonStyleRecording(status)
             }
+
+        } else {
+            if (0 != (flags and FLAG_SET_BUTTON_STATUS)) {
+                ui.setButtonStyleRecording(RecordButtonType.STOPPED)
+            }
+        }
+
+        if (0 != (flags and FLAG_SET_LOCATION_AVAILABILITY_STATUS)) {
+            ui.setLocationAvailableStatus(isLocationAvailable)
+        }
+
+        if (0 != (flags and FLAG_SET_LOCATION_SUSPENDED_STATUS)) {
+            ui.setLocationSuspendedStatus(locationSuspendedReason)
+        }
+
+        if (0 != (flags and FLAG_SET_ERROR_STATUS)) {
+            ui.setError(error)
         }
     }
 
@@ -152,10 +224,10 @@ class HomeFragmentPresenter(
             val lastTrack = if (tracks.isNotEmpty()) tracks.last() else null
             this.lastTrack = lastTrack
         } else if (null != error) {
-            // Show error
+            this.error = error
         }
 
-        val tracker = connectedlocationTracker
+        val tracker = connectedLocationTracker
         val track = lastTrack
         if (tracker != null && track != null) {
             if (!tracker.isRecording() && taskTimer.isRunning()) {
@@ -163,7 +235,7 @@ class HomeFragmentPresenter(
             }
         }
 
-        updateUi()
+        updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS)
     }
 
     private fun createReadTracksTask() =
@@ -183,7 +255,6 @@ class HomeFragmentPresenter(
         )
 
     private fun updateTimer(timer: Long) {
-        // time passed in minutes
         val (minutes, seconds) = timer.toStringDurations()
         ui.setDurationMinutesSeconds(minutes, seconds)
     }

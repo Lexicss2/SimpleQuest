@@ -23,12 +23,16 @@
     <!-- Home -->
     <string name="home_start_tracking">Start</string>
     <string name="home_stop_tracking">Stop</string>
+    <string name="home_starting_tracking">Starting…</string>
     <string name="info">info</string>
     <string name="home_last_track_name">Last track</string>
     <string name="home_last_track_distance">Distance</string>
     <string name="home_no_tracks">(no tracks)</string>
     <string name="home_is_recording">Is Recording</string>
     <string name="home_last_track_duration">Duration</string>
+    <string name="home_location_is_available">Location is available</string>
+    <string name="home_location_is_not_available">Location is not available</string>
+    <string name="home_location_suspended_status">Location suspended status: %d</string>
 
     <!-- Tracks -->
     <string name="tracks_start">Start</string>

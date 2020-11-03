@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.gms.common.ConnectionResult
 import com.lex.simplequest.App
 import com.lex.simplequest.R
 import com.lex.simplequest.databinding.FragmentHomeBinding
@@ -34,10 +35,6 @@ class HomeFragment :
                 }
             }
     }
-
-    // TODO: On recording state:
-    // Last track name = "Recording now .."
-    // Distance = "current distance"
 
     private var _viewBinding: FragmentHomeBinding? = null
     private val viewBinding: FragmentHomeBinding
@@ -74,11 +71,6 @@ class HomeFragment :
         super.onViewCreated(view, savedInstanceState)
     }
 
-
-    override fun onStart() {
-        super.onStart()
-    }
-
     override fun onResume() {
         super.onResume()
         Log.d("qaz", "Fragment onResume, bind to Service")
@@ -95,29 +87,47 @@ class HomeFragment :
         presenter.locationTrackerDisconnected() // Should be called because ServiceConnection.OnServiceDisconnected is not called
     }
 
-    override fun onStop() {
-        super.onStop()
-    }
-
-
-    override fun setButtonStyleRecording(recording: Boolean) {
+    override fun setButtonStyleRecording(recordButtonType: RecordButtonType) {
         viewBinding.layoutContent.apply {
-            if (recording) {
-                startStopButton.text = getString(R.string.home_stop_tracking)
-                startStopButton.setBackgroundColor(
-                    resources.getColor(
-                        R.color.colorBgStopButton,
-                        null
-                    )
-                )
-            } else {
-                startStopButton.text = getString(R.string.home_start_tracking)
-                startStopButton.setBackgroundColor(
-                    resources.getColor(
-                        R.color.colorBgStartButton,
-                        null
-                    )
-                )
+            when (recordButtonType) {
+                RecordButtonType.STOPPED -> {
+                    startStopButton.apply {
+                        text = getString(R.string.home_start_tracking)
+                        setBackgroundColor(
+                            resources.getColor(
+                                R.color.colorBgStartButton,
+                                null
+                            )
+                        )
+                        isEnabled = true
+                    }
+                }
+
+                RecordButtonType.GOING_TO_RECORD -> {
+                    startStopButton.apply {
+                        text = getString(R.string.home_start_tracking)
+                        setBackgroundColor(
+                            resources.getColor(
+                                R.color.colorBgGray,
+                                null
+                            )
+                        )
+                        isEnabled = false
+                    }
+                }
+
+                RecordButtonType.RECORDING -> {
+                    startStopButton.apply {
+                        text = getString(R.string.home_stop_tracking)
+                        setBackgroundColor(
+                            resources.getColor(
+                                R.color.colorBgStopButton,
+                                null
+                            )
+                        )
+                        isEnabled = true
+                    }
+                }
             }
         }
     }
@@ -150,6 +160,65 @@ class HomeFragment :
         viewBinding.layoutContent.apply {
             minutesDurationTextView.text = minutes
             secondsDurationTextView.text = seconds
+        }
+    }
+
+    override fun setLocationAvailableStatus(isAvailable: Boolean?) {
+        viewBinding.layoutContent.apply {
+            if (null != isAvailable) {
+                locationAvailabilityStatusTextView.visibility = View.VISIBLE
+                if (isAvailable) {
+                    locationAvailabilityStatusTextView.apply {
+                        setTextColor(resources.getColor(R.color.colorSuccess, null))
+                        text = resources.getString(R.string.home_location_is_available)
+                    }
+                } else {
+                    locationAvailabilityStatusTextView.apply {
+                        setTextColor(resources.getColor(R.color.colorWarning, null))
+                        text = resources.getString(R.string.home_location_is_not_available)
+                    }
+                }
+            } else {
+                locationAvailabilityStatusTextView.visibility = View.GONE
+            }
+        }
+    }
+
+    override fun setLocationSuspendedStatus(reason: Int?) {
+        viewBinding.layoutContent.apply {
+            if (null != reason) {
+                locationSuspendedStatusTextView.visibility = View.VISIBLE
+                if (ConnectionResult.SUCCESS == reason) {
+                    locationSuspendedStatusTextView.apply {
+                        setTextColor(resources.getColor(R.color.colorSuccess, null))
+                        text = String.format(
+                            resources.getString(R.string.home_location_suspended_status),
+                            reason
+                        )
+                    }
+                } else {
+                    locationSuspendedStatusTextView.apply {
+                        setTextColor(resources.getColor(R.color.colorError, null))
+                        text = String.format(
+                            resources.getString(R.string.home_location_suspended_status),
+                            reason
+                        )
+                    }
+                }
+            } else {
+                locationSuspendedStatusTextView.visibility = View.GONE
+            }
+        }
+    }
+
+    override fun setError(error: Throwable?) {
+        viewBinding.layoutContent.apply {
+            if (null != error) {
+                errorStatusTextView.visibility = View.VISIBLE
+                errorStatusTextView.text = error.localizedMessage
+            } else {
+                errorStatusTextView.visibility = View.GONE
+            }
         }
     }
 

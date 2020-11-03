@@ -40,6 +40,10 @@ class MapFragmentPresenter(
         override fun onStatusUpdated(status: LocationTracker.Status) {
 
         }
+
+        override fun onLocationAvailable(isAvailable: Boolean) {
+
+        }
     }
 
     override fun saveState(state: MapFragmentContract.Presenter.State) {

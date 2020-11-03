@@ -2,16 +2,18 @@ package com.lex.simplequest.presentation.screen.home.home
 
 import com.lex.simplequest.domain.locationmanager.LocationTracker
 import com.lex.simplequest.domain.model.Track
-import com.lex.simplequest.presentation.base.BaseMvpContract
 import com.lex.simplequest.presentation.base.BaseMvpLceContract
 
 interface HomeFragmentContract {
 
     interface Ui : BaseMvpLceContract.Ui {
-        fun setButtonStyleRecording(recording: Boolean)
+        fun setButtonStyleRecording(recordButtonType: RecordButtonType)
         fun showLastTrackInfo(track: Track?, isRecording: Boolean)
         fun showProgress(show: Boolean)
         fun setDurationMinutesSeconds(minutes: String, seconds: String)
+        fun setLocationAvailableStatus(isAvailable: Boolean?)
+        fun setLocationSuspendedStatus(reason: Int?)
+        fun setError(error: Throwable?)
     }
 
     interface Presenter : BaseMvpLceContract.Presenter<Ui, Presenter.State> {
@@ -19,6 +21,9 @@ interface HomeFragmentContract {
         fun locationTrackerConnected(locationTracker: LocationTracker)
         fun locationTrackerDisconnected()
 
-        interface State : BaseMvpLceContract.Presenter.State
+        interface State : BaseMvpLceContract.Presenter.State {
+            var isLocationAvailable: Boolean?
+            var locationSuspendedReason: Int?
+        }
     }
 }

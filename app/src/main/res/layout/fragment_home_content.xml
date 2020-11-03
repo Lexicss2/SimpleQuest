@@ -25,6 +25,7 @@
 
             <TextView
                 android:id="@+id/last_track_caption"
+                style="@style/AppTheme.Text.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -32,28 +33,36 @@
 
             <TextView
                 android:id="@+id/last_track_name_view"
+                style="@style/AppTheme.Text.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:textStyle="bold"
                 tools:text="29.10.2020,13:25:00:000" />
 
             <TextView
+                style="@style/AppTheme.Text.Small.DarkBlue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:layout_marginTop="5dp"
                 android:text="@string/home_last_track_distance" />
 
             <TextView
                 android:id="@+id/last_track_distance_view"
+                style="@style/AppTheme.Text.Normal.DarkBlue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:textStyle="bold"
                 tools:text="1.0 km" />
 
             <TextView
+                style="@style/AppTheme.Text.Small.DarkBlue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:layout_marginTop="5dp"
                 android:text="@string/home_last_track_duration" />
 
             <LinearLayout
@@ -64,16 +73,20 @@
 
                 <TextView
                     android:id="@+id/minutes_duration_text_view"
+                    style="@style/AppTheme.Text.Normal.DarkBlue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textStyle="bold"
                     tools:text="0:27" />
 
                 <TextView
-                    android:layout_marginStart="3dp"
                     android:id="@+id/seconds_duration_text_view"
+                    style="@style/AppTheme.Text.Small.DarkBlue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="09"/>
+                    android:layout_marginStart="3dp"
+                    android:textStyle="bold"
+                    tools:text="09" />
             </LinearLayout>
 
         </LinearLayout>
@@ -90,6 +103,54 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/monitor_layout" />
+
+        <TextView
+            android:id="@+id/location_availability_status_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_marginStart="50dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="50dp"
+            android:textColor="@color/colorSuccess"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/start_stop_button"
+            tools:text="@string/home_location_is_available" />
+
+        <TextView
+            android:id="@+id/location_suspended_status_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_marginStart="50dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="50dp"
+            android:textColor="@color/colorSuccess"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/location_availability_status_text_view"
+            tools:text="Location suspended, reason: 0"/>
+
+        <TextView
+            android:id="@+id/error_status_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_marginStart="50dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="50dp"
+            android:textColor="@color/colorError"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/location_suspended_status_text_view"
+            tools:text="Location error"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -122,6 +122,9 @@ class TrackLocationService() : Service(), LocationTracker {
 
         override fun onLocationAvailable(available: Boolean) {
             Log.w(TAG, "onLocationAvailable called, available: $available")
+            locationListeners.forEach {
+                it.onLocationAvailable(available)
+            }
         }
     }
 
@@ -195,6 +198,9 @@ class TrackLocationService() : Service(), LocationTracker {
             true
         } else false
 
+
+    override fun isConnecting(): Boolean =
+        LocationTracker.Status.CONNECTING == status
 
     override fun isConnected(): Boolean =
         LocationTracker.Status.CONNECTED == status || LocationTracker.Status.RECORDING == status
