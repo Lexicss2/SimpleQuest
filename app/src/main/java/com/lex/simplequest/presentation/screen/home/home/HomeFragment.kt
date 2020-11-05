@@ -45,12 +45,12 @@ class HomeFragment :
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             Log.i("qaz", "on service Connected")
             val binder = service as TrackLocationService.TrackLocationBinder
-            presenter.locationTrackerConnected(binder.getService() as LocationTracker)
+            presenter.locationTrackerServiceConnected(binder.getService() as LocationTracker)
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
             Log.e("qaz", "on service disconnected")
-            presenter.locationTrackerDisconnected()
+            presenter.locationTrackerServiceDisconnected()
         }
     }
 
@@ -84,7 +84,7 @@ class HomeFragment :
         super.onPause()
         Log.w("qaz", "Fragment onPause, unbind to Service")
         activity?.unbindService(connection)
-        presenter.locationTrackerDisconnected() // Should be called because ServiceConnection.OnServiceDisconnected is not called
+        presenter.locationTrackerServiceDisconnected() // Should be called because ServiceConnection.OnServiceDisconnected is not called
     }
 
     override fun setButtonStyleRecording(recordButtonType: RecordButtonType) {

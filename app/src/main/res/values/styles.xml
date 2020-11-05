@@ -89,4 +89,9 @@
         <item name="android:textColor">@color/colorDarkBlue</item>
     </style>
 
+    <style name="AppTheme.Text.Large" parent="">
+        <item name="android:textSize">30sp</item>
+        <item name="android:textColor">@color/colorSimpleBlack</item>
+    </style>
+
 </resources>

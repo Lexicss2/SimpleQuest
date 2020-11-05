@@ -1,5 +1,6 @@
 package com.lex.simplequest.presentation.screen.home.map
 
+import android.util.Log
 import com.lex.core.log.LogFactory
 import com.lex.simplequest.data.location.repository.queries.LatestTrackQuerySpecification
 import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracker
@@ -32,14 +33,15 @@ class MapFragmentPresenter(
     private val log = logFactory.get(TAG)
     private val taskReadTracks = createReadTracksTask()
 
-    private var location: Location? = null
+    private var currentLocation: Location? = null
     private var connectedLocationTracker: LocationTracker? = null
     private var locationsReceivedCount = 0
     private var latestTrack: Track? = null
+    private var wasCameraMoved: Boolean = false
 
     private val trackingListener = object : LocationTracker.Listener {
         override fun onLocationManagerConnected() {
-            updateUi(FLAG_LOCATION)
+            updateUi(0)
         }
 
         override fun onLocationMangerConnectionSuspended(reason: Int) {
@@ -51,15 +53,22 @@ class MapFragmentPresenter(
         }
 
         override fun onLocationUpdated(location: Location) {
-            this@MapFragmentPresenter.location = location
-            if (++locationsReceivedCount % 10 == 0) {
-                latestTrack?.let { track ->
-                    if (null == track.endTime) {
-                        updateUi(FLAG_SETUP_ALL)
+            this@MapFragmentPresenter.currentLocation = location
+            val count = locationsReceivedCount++
+            when {
+                0 == count % 10 && true == connectedLocationTracker?.isRecording() -> {
+                    if (!taskReadTracks.isRunning()) {
+                        Log.w("qaz", "Force update track")
+                        taskReadTracks.start(ReadTracksInteractor.Param(LatestTrackQuerySpecification()), Unit)
                     }
                 }
+
+                0 == count % 5 -> {
+                    Log.i("qaz", "update")
+                    updateUi(0)
+                }
             }
-            updateUi(FLAG_LOCATION)
+            ui.showIndicatorProgress(count.toIndicatorText())
         }
 
         override fun onStatusUpdated(status: LocationTracker.Status) {
@@ -73,7 +82,7 @@ class MapFragmentPresenter(
 
     override fun saveState(state: MapFragmentContract.Presenter.State) {
         super.saveState(state)
-        location?.let {
+        currentLocation?.let {
             state.location = it
         }
         state.locationsReceivedCount = locationsReceivedCount
@@ -82,7 +91,7 @@ class MapFragmentPresenter(
     override fun restoreState(savedState: MapFragmentContract.Presenter.State?) {
         super.restoreState(savedState)
         savedState?.let {
-            location = it.location
+            currentLocation = it.location
             locationsReceivedCount = it.locationsReceivedCount
         }
     }
@@ -97,14 +106,14 @@ class MapFragmentPresenter(
         taskReadTracks.stop()
     }
 
-    override fun locationTrackerConnected(locationTracker: LocationTracker) {
+    override fun locationTrackerServiceConnected(locationTracker: LocationTracker) {
         connectedLocationTracker = locationTracker
         connectedLocationTracker?.addListener(trackingListener)
         connectedLocationTracker?.connect()
         updateUi(0)
     }
 
-    override fun locationTrackerDisconnected() {
+    override fun locationTrackerServiceDisconnected() {
         connectedLocationTracker?.disconnect()
         connectedLocationTracker?.removeListener(trackingListener)
         connectedLocationTracker = null
@@ -112,50 +121,104 @@ class MapFragmentPresenter(
     }
 
     override fun mapReady() {
-        updateUi(FLAG_LOCATION)
+        updateUi(0)
     }
 
     override fun refreshClicked() {
-        location?.let {
-            ui.updateMarker(it)
-        }
+        wasCameraMoved = false
+        updateUi(0)
     }
 
     private fun updateUi(flag: Int) {
-        if (flag and FLAG_LOCATION != 0) {
-            location?.let {
-                ui.showMarkerIfNeeded(it)
-            }
-        }
+        val track = latestTrack
+        val isRecording = connectedLocationTracker?.isRecording() ?: false
+        val location = currentLocation
 
-        if (flag and FLAG_TRACK != 0) {
-            latestTrack?.let { track ->
-                ui.setTrack(track)
+        when {
+            isRecording && null != track -> {
+                Log.d("qaz", "Case 1")
+                if (track.points.isNotEmpty()) {
+                    val firstPoint = track.points.first()
+                    val startLocation =
+                        Location(firstPoint.latitude, firstPoint.longitude, firstPoint.altitude)
+                    if (1 == track.points.size) {
+                        ui.showStartMarker(null)
+                        ui.showFinishMarker(startLocation, isRecording = true, shouldMoveCamera = !wasCameraMoved)
+                    } else {
+                        val lastPoint = track.points.last()
+                        val lastLocation =
+                            Location(lastPoint.latitude, lastPoint.longitude, lastPoint.altitude)
+                        ui.showStartMarker(startLocation)
+                        ui.showFinishMarker(lastLocation, isRecording = true, shouldMoveCamera = false)
+                        ui.showTrack(track, isRecording = true, shouldMoveCamera = !wasCameraMoved)
+                    }
+                    if (!wasCameraMoved) {
+                        wasCameraMoved = true
+                    }
+                } else {
+                    ui.showStartMarker(null)
+                    ui.showFinishMarker(null)
+                    ui.showTrack(null)
+                }
+            }
+
+            null != track -> {
+                Log.d("qaz", "Case 2")
+                if (track.points.isNotEmpty()) {
+                    val firstPoint = track.points.first()
+                    val startLocation =
+                        Location(firstPoint.latitude, firstPoint.longitude, firstPoint.altitude)
+                    if (1 == track.points.size) {
+                        ui.showStartMarker(null)
+                        ui.showFinishMarker(startLocation, isRecording = false, shouldMoveCamera = !wasCameraMoved)
+                    } else {
+                        val lastPoint = track.points.last()
+                        val lastLocation =
+                            Location(lastPoint.latitude, lastPoint.longitude, lastPoint.altitude)
+                        ui.showStartMarker(startLocation)
+                        ui.showFinishMarker(lastLocation, isRecording = false, shouldMoveCamera = false)
+                        ui.showTrack(track, isRecording = false, shouldMoveCamera = !wasCameraMoved)
+                    }
+                    if (!wasCameraMoved) {
+                        wasCameraMoved = true
+                    }
+                } else {
+                    ui.showStartMarker(null)
+                    ui.showFinishMarker(null)
+                    ui.showTrack(null)
+                }
+            }
+
+            null != location -> {
+                Log.d("qaz", "Case 3")
+                ui.showStartMarker(null)
+                ui.showFinishMarker(location, isRecording = false, shouldMoveCamera = !wasCameraMoved)
+                ui.showTrack(null)
+                if (!wasCameraMoved) {
+                    wasCameraMoved = true
+                }
+            }
+
+            else -> {
+                Log.d("qaz", "Case 4, do nothing")
             }
         }
     }
 
     private fun handleReadTracks(tracks: List<Track>?, error: Throwable?) {
-        var flags = 0
         if (null != tracks) {
             val latestTrack = if (tracks.isNotEmpty()) tracks[0] else null
             this.latestTrack = latestTrack
-            val isRecording = latestTrack != null && null == latestTrack.endTime
 
-            if (null == location && null != latestTrack && latestTrack.points.isNotEmpty()) {
+            if (null == currentLocation && null != latestTrack && latestTrack.points.isNotEmpty()) {
                 val lastPoint = latestTrack.points.last()
-                location = Location(lastPoint.latitude, lastPoint.longitude, lastPoint.altitude)
-            }
-
-            flags = if (isRecording) {
-                FLAG_TRACK
-            } else {
-                FLAG_LOCATION
+                currentLocation =
+                    Location(lastPoint.latitude, lastPoint.longitude, lastPoint.altitude)
             }
         } else if (null != error) {
-            // handle error
+            ui.showError(error)
         }
-        updateUi(flags)
+        updateUi(0)
     }
 
     private fun createReadTracksTask() =
@@ -173,4 +236,14 @@ class MapFragmentPresenter(
                 handleReadTracks(null, error)
             }
         )
+
 }
+
+fun Int.toIndicatorText(): String =
+    when(this % 4) {
+        0 -> "|"
+        1 -> "/"
+        2 -> "-"
+        3 -> "\\"
+        else -> "?"
+    }

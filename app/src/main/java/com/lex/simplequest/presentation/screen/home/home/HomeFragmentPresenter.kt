@@ -137,7 +137,7 @@ class HomeFragmentPresenter(
         updateUi(FLAG_SET_BUTTON_STATUS)
     }
 
-    override fun locationTrackerConnected(locationTracker: LocationTracker) {
+    override fun locationTrackerServiceConnected(locationTracker: LocationTracker) {
         connectedLocationTracker = locationTracker
         connectedLocationTracker?.addListener(trackingListener)
         Log.i("qaz", "location tracker connected in presenter")
@@ -145,7 +145,7 @@ class HomeFragmentPresenter(
         updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS)
     }
 
-    override fun locationTrackerDisconnected() {
+    override fun locationTrackerServiceDisconnected() {
         connectedLocationTracker?.removeListener(trackingListener)
         connectedLocationTracker = null
         Log.i("qaz", "location tracker disconnected in presenter")

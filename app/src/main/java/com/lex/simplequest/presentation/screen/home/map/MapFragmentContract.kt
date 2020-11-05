@@ -7,14 +7,16 @@ import com.lex.simplequest.presentation.base.BaseMvpContract
 
 interface MapFragmentContract {
     interface Ui : BaseMvpContract.Ui {
-        fun showMarkerIfNeeded(location: Location)
-        fun updateMarker(location: Location)
-        fun setTrack(track: Track)
+        fun showStartMarker(location: Location?)
+        fun showFinishMarker(location: Location?, isRecording: Boolean = false, shouldMoveCamera: Boolean = false)
+        fun showTrack(track: Track?, isRecording: Boolean = false, shouldMoveCamera: Boolean = false)
+        fun showIndicatorProgress(text: String)
+        fun showError(error: Throwable)
     }
 
     interface Presenter : BaseMvpContract.Presenter<Ui, Presenter.State> {
-        fun locationTrackerConnected(locationTracker: LocationTracker)
-        fun locationTrackerDisconnected()
+        fun locationTrackerServiceConnected(locationTracker: LocationTracker)
+        fun locationTrackerServiceDisconnected()
         fun mapReady()
         fun refreshClicked()
 

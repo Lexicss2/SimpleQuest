@@ -12,6 +12,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.TextView
+import android.widget.Toast
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -29,7 +31,6 @@ import com.lex.simplequest.presentation.base.BaseMvpFragment
 import com.lex.simplequest.presentation.screen.home.MainRouter
 import com.softeq.android.mvp.PresenterStateHolder
 
-
 class MapFragment :
     BaseMvpFragment<MapFragmentContract.Ui, MapFragmentContract.Presenter.State, MapFragmentContract.Presenter>(),
     MapFragmentContract.Ui, OnMapReadyCallback {
@@ -37,6 +38,7 @@ class MapFragment :
         private const val BOUND_WIDTH = 300
         private const val BOUND_HEIGHT = 300
         private const val BOUND_PADDING = 5
+        private const val TRACK_WIDTH = 6.0f
 
         fun newInstance(): MapFragment =
             MapFragment().apply {
@@ -47,22 +49,24 @@ class MapFragment :
     }
 
     private var googleMap: GoogleMap? = null
-    private var currentMarker: Marker? = null
-
     private lateinit var refreshButton: ImageButton
+    private lateinit var trackNameTextView: TextView
+    private lateinit var indicatorTextView: TextView
+    private var startMarker: Marker? = null
+    private var finishMarker: Marker? = null
+    private var currentPolyline: Polyline? = null
 
     private val connection = object : ServiceConnection {
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as TrackLocationService.TrackLocationBinder
-            presenter.locationTrackerConnected(binder.getService() as LocationTracker)
+            presenter.locationTrackerServiceConnected(binder.getService() as LocationTracker)
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            presenter.locationTrackerDisconnected()
+            presenter.locationTrackerServiceDisconnected()
         }
     }
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -78,6 +82,8 @@ class MapFragment :
         refreshButton.setOnClickListener {
             presenter.refreshClicked()
         }
+        trackNameTextView = view.findViewById(R.id.track_name_text_view)
+        indicatorTextView = view.findViewById(R.id.indicator_text_view)
         super.onViewCreated(view, savedInstanceState)
     }
 
@@ -95,7 +101,7 @@ class MapFragment :
     override fun onPause() {
         super.onPause()
         activity?.unbindService(connection)
-        presenter.locationTrackerDisconnected() // Should be called because ServiceConnection.OnServiceDisconnected is not called
+        presenter.locationTrackerServiceDisconnected() // Should be called because ServiceConnection.OnServiceDisconnected is not called
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -105,35 +111,108 @@ class MapFragment :
         presenter.mapReady()
     }
 
-    override fun showMarkerIfNeeded(location: Location) {
+    override fun showStartMarker(location: Location?) {
         googleMap?.let { map ->
-            if (null == currentMarker) {
-                val markerOptions =
-                    MarkerOptions().position(LatLng(location.latitude, location.longitude))
-                        .title(resources.getString(R.string.map_iam_here)).icon(
-                            BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
-                        )
-                currentMarker = map.addMarker(markerOptions)
-                
-                val cameraUpdate = CameraUpdateFactory.newLatLng(currentMarker!!.position)
-                map.moveCamera(cameraUpdate) // or map.animateCamera(cameraUpdate)
+            startMarker?.remove()
+            startMarker = null
+
+            if (null != location) {
+                val markerOptions = MarkerOptions()
+                    .position(LatLng(location.latitude, location.longitude))
+                    .title(resources.getString(R.string.map_start))
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                val marker = map.addMarker(markerOptions)
+                // No need to move camera
+                startMarker = marker
             }
         }
     }
 
-    override fun updateMarker(location: Location) {
-        currentMarker?.remove()
-        currentMarker = null
-        showMarkerIfNeeded(location)
-    }
+    override fun showFinishMarker(location: Location?, isRecording: Boolean, shouldMoveCamera: Boolean) {
+        googleMap?.let { map ->
+            finishMarker?.remove()
+            finishMarker = null
 
-    override fun setTrack(track: Track) {
-        val map = googleMap
-        if (null != map) {
-            if (track.points.isNotEmpty()) {
-                showTrack(track)
+            if (null != location) {
+                val title =
+                    if (isRecording) resources.getString(R.string.map_iam_here) else resources.getString(
+                        R.string.map_finish
+                    )
+                val color =
+                    if (isRecording) BitmapDescriptorFactory.HUE_AZURE else BitmapDescriptorFactory.HUE_RED
+                val markerOptions = MarkerOptions()
+                    .position(LatLng(location.latitude, location.longitude))
+                    .title(title)
+                    .icon(BitmapDescriptorFactory.defaultMarker(color))
+                val marker = map.addMarker(markerOptions)
+
+                if (shouldMoveCamera) {
+                    val cameraUpdate =
+                        CameraUpdateFactory.newLatLng(marker.position)
+                    map.moveCamera(cameraUpdate)
+                }
+
+                finishMarker = marker
             }
         }
+    }
+
+    override fun showTrack(track: Track?, isRecording: Boolean, shouldMoveCamera: Boolean) {
+        googleMap?.let { map ->
+            currentPolyline?.remove()
+            currentPolyline = null
+
+            if (null != track) {
+                val points = track.points.toLatLngs()
+                val color = if (isRecording) Color.RED else Color.BLUE
+                val polylineOptions = PolylineOptions()
+                    .width(TRACK_WIDTH)
+                    .color(color)
+                    .geodesic(true)
+                    .addAll(points)
+
+                val polyline = map.addPolyline(polylineOptions)
+
+                if (shouldMoveCamera && polyline.points.size > 1) {
+                    val boundsBuilder = LatLngBounds.Builder()
+                    polyline.points.forEach {
+                        boundsBuilder.include(it)
+                    }
+                    val bounds = boundsBuilder.build()
+                    val cameraUpdate = CameraUpdateFactory.newLatLngBounds(
+                        bounds,
+                        BOUND_WIDTH,
+                        BOUND_HEIGHT,
+                        BOUND_PADDING
+                    )
+                    map.moveCamera(cameraUpdate)
+                }
+
+                currentPolyline = polyline
+
+                trackNameTextView.apply {
+                    if (isRecording) {
+                        text = String.format(resources.getString(R.string.map_recording_track), track.name)
+                        setTextColor(resources.getColor(R.color.colorSimpleRed, null))
+                    } else {
+                        text = track.name
+                        setTextColor(resources.getColor(R.color.colorSimpleBlack, null))
+                    }
+                    visibility = View.VISIBLE
+                }
+                trackNameTextView.visibility = View.VISIBLE
+            } else {
+                trackNameTextView.visibility = View.GONE
+            }
+        }
+    }
+
+    override fun showIndicatorProgress(text: String) {
+        indicatorTextView.text = text
+    }
+
+    override fun showError(error: Throwable) {
+        Toast.makeText(activity, error.localizedMessage, Toast.LENGTH_SHORT).show()
     }
 
     private fun initGoogleMap() {
@@ -146,32 +225,6 @@ class MapFragment :
 
             Log.i("qaz", "Map initialized ok!")
             googleMap.getMapAsync(this)
-        }
-    }
-
-    private fun showTrack(track: Track) {
-        googleMap?.let { map ->
-            val points = track.points.toLatLngs()
-
-            val polylineOptions = PolylineOptions().width(6.0f).color(Color.BLUE)
-            polylineOptions.geodesic(true)
-            polylineOptions.addAll(points)
-            val polyline = map.addPolyline(polylineOptions)
-
-            if (polyline.points.isNotEmpty()) {
-                val b = LatLngBounds.Builder()
-                polyline.points.forEach {
-                    b.include(it)
-                }
-                val bounds = b.build()
-                val cameraUpdate = CameraUpdateFactory.newLatLngBounds(
-                    bounds,
-                    BOUND_WIDTH,
-                    BOUND_HEIGHT,
-                    BOUND_PADDING
-                )
-                map.moveCamera(cameraUpdate)
-            }
         }
     }
 

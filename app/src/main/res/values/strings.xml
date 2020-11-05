@@ -36,6 +36,10 @@
 
     <!-- Map -->
     <string name="map_iam_here">I\'am here</string>
+    <string name="map_start">start</string>
+    <string name="map_finish">finish</string>
+    <string name="map_refresh">Refresh</string>
+    <string name="map_recording_track">Recording track: %s</string>
 
     <!-- Tracks -->
     <string name="tracks_start">Start</string>

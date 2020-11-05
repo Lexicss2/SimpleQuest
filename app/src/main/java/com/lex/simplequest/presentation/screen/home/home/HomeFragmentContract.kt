@@ -19,8 +19,8 @@ interface HomeFragmentContract {
 
     interface Presenter : BaseMvpLceContract.Presenter<Ui, Presenter.State> {
         fun startStopClicked()
-        fun locationTrackerConnected(locationTracker: LocationTracker)
-        fun locationTrackerDisconnected()
+        fun locationTrackerServiceConnected(locationTracker: LocationTracker)
+        fun locationTrackerServiceDisconnected()
 
         interface State : BaseMvpLceContract.Presenter.State {
             var isLocationAvailable: Boolean?
