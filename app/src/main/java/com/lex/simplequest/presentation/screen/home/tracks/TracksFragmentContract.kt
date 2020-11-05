@@ -6,6 +6,8 @@ import com.lex.simplequest.presentation.base.BaseMvpContract
 interface TracksFragmentContract {
     interface Ui : BaseMvpContract.Ui {
         fun setTracks(items: List<Track>)
+        fun showNoContent()
+        fun showProgress(show: Boolean)
     }
 
     interface Presenter : BaseMvpContract.Presenter<Ui, Presenter.State> {

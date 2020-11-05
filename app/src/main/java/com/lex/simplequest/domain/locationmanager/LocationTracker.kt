@@ -16,9 +16,7 @@ interface LocationTracker {
     fun getLastTrack(): Track?
     fun addListener(listener: Listener)
     fun removeListener(listener: Listener)
-    fun getStatus(): LocationTracker.Status
-
-//    var locationTrackerListener: Listener?
+    fun getStatus(): Status
 
     interface Listener {
         fun onLocationManagerConnected()

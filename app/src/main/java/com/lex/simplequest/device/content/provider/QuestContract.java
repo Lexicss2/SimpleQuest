@@ -29,5 +29,6 @@ public interface QuestContract {
         String COLUMN_LATITUDE = "latitude";
         String COLUMN_LONGITUDE = "longitude";
         String COLUMN_ALTITUDE = "altitude";
+        String COLUMN_TIMESTAMP = "timestamp";
     }
 }

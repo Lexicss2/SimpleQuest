@@ -14,9 +14,9 @@ import com.lex.simplequest.presentation.base.BaseMvpFragment
 import com.lex.simplequest.presentation.screen.home.MainRouter
 import com.softeq.android.mvp.PresenterStateHolder
 import com.softeq.android.mvp.VoidPresenterStateHolder
-import kotlinx.android.synthetic.main.fragment_tracks.*
 
-class TracksFragment : BaseMvpFragment<TracksFragmentContract.Ui, TracksFragmentContract.Presenter.State, TracksFragmentContract.Presenter>(),
+class TracksFragment :
+    BaseMvpFragment<TracksFragmentContract.Ui, TracksFragmentContract.Presenter.State, TracksFragmentContract.Presenter>(),
     TracksFragmentContract.Ui {
     companion object {
         fun newInstance(): TracksFragment =
@@ -29,7 +29,7 @@ class TracksFragment : BaseMvpFragment<TracksFragmentContract.Ui, TracksFragment
 
     private var _viewBinding: FragmentTracksBinding? = null
     private val viewBinding: FragmentTracksBinding
-    get() = _viewBinding!!
+        get() = _viewBinding!!
 
     private var adapterTracks: AdapterTracks? = null
 
@@ -53,16 +53,36 @@ class TracksFragment : BaseMvpFragment<TracksFragmentContract.Ui, TracksFragment
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         adapterTracks = AdapterTracks(context!!, tracksClickListener)
-        tracksListView.apply {
-            layoutManager = LinearLayoutManager(context!!, RecyclerView.VERTICAL, false)
-            adapter = adapterTracks
-            setHasFixedSize(true)
+        viewBinding.apply {
+            tracksListView.apply {
+                layoutManager = LinearLayoutManager(context!!, RecyclerView.VERTICAL, false)
+                adapter = adapterTracks
+                setHasFixedSize(true)
+            }
         }
+
         super.onViewCreated(view, savedInstanceState)
     }
 
     override fun setTracks(items: List<Track>) {
-        adapterTracks?.set(items)
+        viewBinding.apply {
+            adapterTracks?.set(items)
+            tracksListView.visibility = View.VISIBLE
+            notTrackTextView.visibility = View.GONE
+        }
+    }
+
+    override fun showNoContent() {
+        viewBinding.apply {
+            tracksListView.visibility = View.GONE
+            notTrackTextView.visibility = View.VISIBLE
+        }
+    }
+
+    override fun showProgress(show: Boolean) {
+        viewBinding.apply {
+            progressBar.visibility = if (show) View.VISIBLE else View.GONE
+        }
     }
 
     override fun getUi(): TracksFragmentContract.Ui =

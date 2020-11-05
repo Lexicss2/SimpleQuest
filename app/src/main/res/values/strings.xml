@@ -44,4 +44,5 @@
     <!-- Tracks -->
     <string name="tracks_start">Start</string>
     <string name="tracks_finish">Finish</string>
+    <string name="tracks_no_tracks">No tracks</string>
 </resources>

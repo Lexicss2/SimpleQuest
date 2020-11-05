@@ -31,6 +31,7 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
     private val context = ctx
     private val listeners = CopyOnWriteArrayList<LocationRepository.OnUpdateListener>()
     private val isClosed = AtomicBoolean(false)
+
     private val contentObserver = object : ContentObserver(MainThreadHandler.instance()) {
         private val delayedNotificationRunnable = object : Runnable {
             override fun run() {
@@ -112,18 +113,23 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
         return updatedRows > 0
     }
 
-    //    override fun getTracks(spec: LocationRepository.LocationQuerySpecification): List<Track> {
+//    override fun getTracks(spec: LocationRepository.LocationQuerySpecification): List<Track> {
 //        checkNotClosed()
 //        return context.contentResolver.query(
 //            QuestContract.Tracks.CONTENT_URI,
 //            null,
 //            (spec as LocationQuerySpecificationImpl).getWhereClause(),
 //            null,
-//            null
-//        ).use { cursor ->
-//            cursor?.toTracks() ?: emptyList()
-//        }
+//            QuestContract.Tracks.COLUMN_START_TIME + " DESC"
+//        )?.use { cursor ->
+//            if (cursor.moveToFirst()) {
+//                handleTrackCursor(cursor)
+//            } else {
+//                emptyList()
+//            }
+//        } ?: emptyList()
 //    }
+
     override fun getTracks(spec: LocationRepository.LocationQuerySpecification): List<Track> {
         checkNotClosed()
         return context.contentResolver.query(
@@ -131,50 +137,11 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
             null,
             (spec as LocationQuerySpecificationImpl).getWhereClause(),
             null,
-            QuestContract.Tracks.COLUMN_START_TIME + " DESC"//null
+            QuestContract.Tracks.COLUMN_START_TIME + " DESC"
         )?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                handleTrackCursor(cursor)
-            } else {
-                emptyList()
-            }
+            cursor.toFullTracks(context)
         } ?: emptyList()
     }
-
-    private fun handleTrackCursor(cursor: Cursor): List<Track> {
-        val trackLists = mutableListOf<Track>()
-        do {
-            val trackId = cursor.getTrackId()
-            val trackPoints = getTrackPoints(trackId)
-            val id = cursor.getLong(cursor.getColumnIndex(QuestContract.Tracks.COLUMN_ID))
-            val name = cursor.getString(cursor.getColumnIndex(QuestContract.Tracks.COLUMN_NAME))
-            val startTime =
-                cursor.getLong(cursor.getColumnIndex(QuestContract.Tracks.COLUMN_START_TIME))
-            val indexStopTime = cursor.getColumnIndex(QuestContract.Tracks.COLUMN_END_TIME)
-            val entTime = if (!cursor.isNull(indexStopTime)) cursor.getLong(indexStopTime) else null
-            val track = Track(id, name, startTime, entTime, trackPoints)
-            trackLists.add(track)
-        } while (cursor.moveToNext())
-
-        return trackLists.toList()
-    }
-
-    private fun getTrackPoints(trackId: Long): List<Point> =
-        context.contentResolver.query(
-            QuestContract.Points.CONTENT_URI, null,
-            "${QuestContract.Points.COLUMN_TRACK_ID} = $trackId", null, null
-        )?.use {
-            it.toList {
-                val pointId = this.getTrackPointId()
-                val latitude = this.getDouble(getColumnIndex(QuestContract.Points.COLUMN_LATITUDE))
-                val longitude =
-                    this.getDouble(getColumnIndex(QuestContract.Points.COLUMN_LONGITUDE))
-                val altitude =
-                    this.getDoubleOrNull(getColumnIndex(QuestContract.Points.COLUMN_ALTITUDE))
-                Point(pointId, trackId, latitude, longitude, altitude)
-            }
-        } ?: emptyList()
-
 
     override fun updateTrack(track: Track): Boolean {
         TODO("Not yet implemented")
@@ -198,10 +165,9 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
         altitude: Double?
     ) {
         checkNotClosed()
-        val point = Point(-1, trackId, latitude, longitude, altitude)
+        val point = Point(-1, trackId, latitude, longitude, altitude, System.currentTimeMillis())
         context.contentResolver.insert(QuestContract.Points.CONTENT_URI, point.toContentValues())
         // Not necessary to read the inserted point
-        Log.d("qaz", "point added")
     }
 
     override fun getQuerySpecificationFactory(): LocationRepository.LocationQuerySpecificationFactory {
@@ -220,23 +186,8 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
     }
 
     private fun checkNotClosed() {
-        //Preconditions.checkState(!isClosed.get(), "This instance is closed")
         if (isClosed.get()) {
             Log.e("qaz", "This instance is closed")
         }
     }
-
-//    private fun getTrack(spec: LocationRepository.LocationQuerySpecification): Track? {
-//        checkNotClosed()
-//        return context.contentResolver.query(
-//            QuestContract.Tracks.CONTENT_URI,
-//            null,
-//            (spec as LocationQuerySpecificationImpl).getWhereClause(),
-//            null,
-//            null
-//        ).use { cursor ->
-//            val t = cursor?.toTrack()
-//            t
-//        }
-//    }
 }

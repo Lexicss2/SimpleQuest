@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.lex.simplequest.R
 import com.lex.simplequest.databinding.ItemTrackBinding
 import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.domain.model.distance
@@ -46,11 +47,18 @@ class AdapterTracks(private val context: Context, private val clickListener: Ite
                 trackNameView.text = track.name
                 val duration = track.duration()
                 trackTimeDistanceView.text =
-                String.format("%s, %.2f", duration.toStringDuration(), track.distance())
-//                track.points.forEach {
-//                    Log.d("qaz", "point = $it")
+                    String.format("%s, %.2f", duration.toStringDuration(), track.distance())
+                if (null == track.endTime) {
+                    trackNameView.setTextAppearance(R.style.AppTheme_Text_Small_Red)
+                    trackTimeDistanceView.setTextAppearance(R.style.AppTheme_Text_ExtraSmall_Red)
+                } else {
+                    trackNameView.setTextAppearance(R.style.AppTheme_Text_Small)
+                    trackTimeDistanceView.setTextAppearance(R.style.AppTheme_Text_ExtraSmall)
+                }
+//                trackInfoButton.setOnClickListener {
+//                    clickListener.onInfoClicked(track)
 //                }
-                trackInfoButton.setOnClickListener {
+                infoView.setOnClickListener {
                     clickListener.onInfoClicked(track)
                 }
             }

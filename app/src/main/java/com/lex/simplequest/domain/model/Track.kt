@@ -1,7 +1,6 @@
 package com.lex.simplequest.domain.model
 
 import android.location.Location
-import android.util.Log
 
 data class Track(
     val id: Long,
@@ -17,7 +16,7 @@ fun Track.duration(): Long =
 fun Track.distance(): Float =
     if (points.size > 1) {
         val results = FloatArray(3)
-        var distanceInmeters = .0f
+        var distanceInMeters = .0f
         for (i in 1 until points.size) {
             val start = points[i - 1]
             val end = points[i]
@@ -28,9 +27,8 @@ fun Track.distance(): Float =
                 end.longitude,
                 results
             )
-            distanceInmeters += results[2]
-            //Log.d("qaz", "results = ${results[0]}, ${results[1]}, ${results[2]}")
+            distanceInMeters += results[0]
         }
 
-        distanceInmeters
+        distanceInMeters
     } else .0f

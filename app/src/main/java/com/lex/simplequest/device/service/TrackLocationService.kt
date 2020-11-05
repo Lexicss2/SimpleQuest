@@ -36,15 +36,13 @@ class TrackLocationService() : Service(), LocationTracker {
     private lateinit var locationRepository: LocationRepository
     private val binder = TrackLocationBinder()
 
-    //private var isActive: Boolean = false
     private var status: LocationTracker.Status = LocationTracker.Status.NONE
-    private var activeTrack: Track? = null // TODO: May be remove it
     private var activeTrackId: Long? = null
     private val taskStartTrack = createStartTrackTask()
     private val taskStopTrack = createStopTrackTask()
     private val taskAddPoint = createAddPointTask()
 
-    private val pointObservableValue = ObservableValue(Point(-1, -1, 0.0, 0.0, null))
+    private val pointObservableValue = ObservableValue(Point(-1, -1, 0.0, 0.0, null, 0L))
 
     private val log = App.instance.logFactory.get(TAG)
 
@@ -55,18 +53,10 @@ class TrackLocationService() : Service(), LocationTracker {
     private val addPointInteractor: AddPointInteractor =
         AddPointInteractorImpl(App.instance.locationRepository)
 
-//    private var _locationTrackerListener: LocationTracker.Listener? = null
-
-    //    override var locationTrackerListener: LocationTracker.Listener?
-//        get() = _locationTrackerListener
-//        set(value) {
-//            _locationTrackerListener = value
-//        }
     private val locationListeners = CopyOnWriteArrayList<LocationTracker.Listener>()
     private var locationManagerCallback = object : LocationManager.Callback {
 
         override fun onConnected() {
-//            _locationTrackerListener?.onLocationManagerConnected()
             Log.i(TAG, "Manager onConnected")
             locationListeners.forEach {
                 it.onLocationManagerConnected()
@@ -77,7 +67,6 @@ class TrackLocationService() : Service(), LocationTracker {
         }
 
         override fun onConnectionSuspended(reason: Int) {
-//            _locationTrackerListener?.onLocationMangerConnectionSuspended(reason)
             Log.w(TAG, "Manager onSuspended")
             locationListeners.forEach {
                 it.onLocationMangerConnectionSuspended(reason)
@@ -86,7 +75,6 @@ class TrackLocationService() : Service(), LocationTracker {
         }
 
         override fun onConnectionFailed(error: Throwable) {
-//            _locationTrackerListener?.onLocationMangerConnectionFailed(error)
             Log.e(TAG, "Manager onFailed")
             locationListeners.forEach {
                 it.onLocationMangerConnectionFailed(error)
@@ -96,7 +84,6 @@ class TrackLocationService() : Service(), LocationTracker {
 
         override fun onLocationChanged(location: Location) {
             Log.v(TAG, "Manager onChanged")
-
             locationListeners.forEach {
                 it.onLocationUpdated(location)
             }
@@ -109,7 +96,7 @@ class TrackLocationService() : Service(), LocationTracker {
                 // TODO: RM if Location is recording update current Track
                 Log.v(TAG, "location: ${location.latitude}: ${location.longitude}")
                 val point =
-                    Point(-1, trackId, location.latitude, location.longitude, location.altitude)
+                    Point(-1, trackId, location.latitude, location.longitude, location.altitude, System.currentTimeMillis())
                 pointObservableValue.set(point)
 
                 if (taskAddPoint.isRunning()) {
@@ -131,7 +118,6 @@ class TrackLocationService() : Service(), LocationTracker {
     override fun onCreate() {
         Log.i(TAG, "LT onCreate --------")
         super.onCreate()
-        //isActive = true
         changeStatus(LocationTracker.Status.IDLE)
     }
 
@@ -158,7 +144,6 @@ class TrackLocationService() : Service(), LocationTracker {
     override fun onDestroy() {
         Log.e(TAG, "LT onDestroy ---------")
         super.onDestroy()
-        //isActive = false
         changeStatus(LocationTracker.Status.NONE)
         locationListeners.clear()
         taskStartTrack.stop()
@@ -230,8 +215,6 @@ class TrackLocationService() : Service(), LocationTracker {
         changeStatus(LocationTracker.Status.IDLE)
     }
 
-    //    override fun isRecording(): Boolean =
-//        locationManager.isConnected()
     override fun isRecording(): Boolean =
         LocationTracker.Status.RECORDING == status
 

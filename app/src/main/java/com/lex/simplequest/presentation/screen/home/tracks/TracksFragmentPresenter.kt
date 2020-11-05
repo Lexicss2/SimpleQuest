@@ -28,10 +28,12 @@ class TracksFragmentPresenter(
 
     private val log = logFactory.get(TAG)
     private val taskReadTracks = createReadTracksTask()
+    private var tracks = emptyList<Track>()
 
     override fun start() {
         super.start()
         taskReadTracks.start(ReadTracksInteractor.Param(AllTracksQuerySpecification()), Unit)
+        updateUi()
     }
 
     override fun stop() {
@@ -49,9 +51,24 @@ class TracksFragmentPresenter(
 
     private fun handleReadTracks(tracks: List<Track>?, error: Throwable?) {
         if (null != tracks) {
-            ui.setTracks(tracks)
+            this.tracks = tracks
+        } else if (null != error) {
+            // handle
         }
-        //
+
+        updateUi()
+    }
+
+    private fun updateUi() {
+        ui.showProgress(taskReadTracks.isRunning())
+
+        if (!taskReadTracks.isRunning()) {
+            if (tracks.isNotEmpty()) {
+                ui.setTracks(tracks)
+            } else {
+                ui.showNoContent()
+            }
+        }
     }
 
     private fun createReadTracksTask() =

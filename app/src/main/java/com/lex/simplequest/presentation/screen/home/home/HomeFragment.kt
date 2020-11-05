@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.location.Location
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
@@ -68,6 +69,12 @@ class HomeFragment :
                 presenter.startStopClicked()
             }
         }
+
+        val r = FloatArray(3)
+        Location.distanceBetween(
+            53.926816, 27.602703, 53.931588, 27.606666, r
+        )
+        Log.d("qaz", "${r[0]}, ${r[1]}, ${r[2]}")
         super.onViewCreated(view, savedInstanceState)
     }
 

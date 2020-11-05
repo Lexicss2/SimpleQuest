@@ -31,6 +31,7 @@ class QuestDatabase(
                     "${QuestContract.Points.COLUMN_LATITUDE} REAL NOT NULL DEFAULT 0.0, " +
                     "${QuestContract.Points.COLUMN_LONGITUDE} REAL NOT NULL DEFAULT 0.0, " +
                     "${QuestContract.Points.COLUMN_ALTITUDE} REAL DEFAULT NULL, " +
+                    "${QuestContract.Points.COLUMN_TIMESTAMP} REAL NOT NULL," +
                     "FOREIGN KEY (${QuestContract.Points.COLUMN_TRACK_ID}) REFERENCES ${QuestContract.Tracks.TABLE_NAME} (${QuestContract.Tracks.COLUMN_ID}) ON DELETE CASCADE ON UPDATE CASCADE);"
     }
 
