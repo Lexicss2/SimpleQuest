@@ -134,14 +134,29 @@ class HomeFragment :
         }
     }
 
-    override fun showLastTrackInfo(track: Track?, isRecording: Boolean) {
+//    override fun showLastTrackName(track: Track?, isRecording: Boolean) {
+//        viewBinding.layoutContent.apply {
+//            if (track != null) {
+//                lastTrackNameView.text = track.name
+//                lastTrackDistanceView.text = String.format("%.2f m", track.distance())
+//            } else {
+//                lastTrackNameView.text = resources.getString(R.string.home_no_tracks)
+//                lastTrackDistanceView.text = "---"
+//            }
+//
+//            lastTrackCaption.text =
+//                if (isRecording) resources.getString(R.string.home_is_recording) else resources.getString(
+//                    R.string.home_last_track_name
+//                )
+//        }
+//    }
+
+    override fun showLastTrackName(trackName: String?, isRecording: Boolean) {
         viewBinding.layoutContent.apply {
-            if (track != null) {
-                lastTrackNameView.text = track.name
-                lastTrackDistanceView.text = String.format("%.2f m", track.distance())
+            if (trackName != null) {
+                lastTrackNameView.text = trackName
             } else {
                 lastTrackNameView.text = resources.getString(R.string.home_no_tracks)
-                lastTrackDistanceView.text = "---"
             }
 
             lastTrackCaption.text =
@@ -158,10 +173,16 @@ class HomeFragment :
         }
     }
 
-    override fun setDurationMinutesSeconds(minutes: String, seconds: String) {
+    override fun showLastTrackDuration(minutes: String, seconds: String) {
         viewBinding.layoutContent.apply {
             minutesDurationTextView.text = minutes
             secondsDurationTextView.text = seconds
+        }
+    }
+
+    override fun showLastTrackDistance(distance: String?) {
+        viewBinding.layoutContent.apply {
+            lastTrackDistanceView.text = distance ?: "---"
         }
     }
 

@@ -8,9 +8,11 @@ interface HomeFragmentContract {
 
     interface Ui : BaseMvpLceContract.Ui {
         fun setButtonStyleRecording(recordButtonType: RecordButtonType)
-        fun showLastTrackInfo(track: Track?, isRecording: Boolean)
+        //fun showLastTrackName(track: Track?, isRecording: Boolean)
+        fun showLastTrackName(trackName: String?, isRecording: Boolean)
         fun showProgress(show: Boolean)
-        fun setDurationMinutesSeconds(minutes: String, seconds: String)
+        fun showLastTrackDuration(minutes: String, seconds: String)
+        fun showLastTrackDistance(distance: String?)
         fun setLocationAvailableStatus(isAvailable: Boolean?)
         fun setLocationSuspendedStatus(reason: Int?)
         fun setError(error: Throwable?)

@@ -2,12 +2,13 @@ package com.lex.simplequest.presentation.screen.home.home
 
 import android.util.Log
 import com.lex.core.log.LogFactory
-import com.lex.simplequest.data.location.repository.queries.AllTracksQuerySpecification
 import com.lex.simplequest.data.location.repository.queries.LatestTrackQuerySpecification
 import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracker
 import com.lex.simplequest.domain.locationmanager.LocationTracker
 import com.lex.simplequest.domain.locationmanager.model.Location
+import com.lex.simplequest.domain.model.Point
 import com.lex.simplequest.domain.model.Track
+import com.lex.simplequest.domain.model.distance
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractor
 import com.lex.simplequest.presentation.base.BaseMvpLcePresenter
 import com.lex.simplequest.presentation.screen.home.MainRouter
@@ -51,6 +52,7 @@ class HomeFragmentPresenter(
     private var lastTrack: Track? = null
     private var isLocationAvailable: Boolean? = null
     private var locationSuspendedReason: Int? = null
+    private val newRecordedLocations = mutableListOf<Location>()
 
     private val trackingListener = object : LocationTracker.Listener {
 
@@ -73,6 +75,9 @@ class HomeFragmentPresenter(
 
         override fun onLocationUpdated(location: Location) {
             Log.d("qaz", "4.onLocationManger Updated")
+            if (true == connectedLocationTracker?.isRecording()) {
+                newRecordedLocations.add(location)
+            }
             updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS)
         }
 
@@ -107,8 +112,8 @@ class HomeFragmentPresenter(
 
     override fun start() {
         super.start()
-        //taskReadTracks.start(ReadTracksInteractor.Param(AllTracksQuerySpecification()), Unit)
         taskReadTracks.start(ReadTracksInteractor.Param(LatestTrackQuerySpecification()), Unit)
+        newRecordedLocations.clear()
         updateUi(FLAG_SETUP_UI)
     }
 
@@ -130,8 +135,10 @@ class HomeFragmentPresenter(
                 if (taskReadTracks.isRunning()) {
                     taskReadTracks.stop()
                 }
-                //taskReadTracks.start(ReadTracksInteractor.Param(AllTracksQuerySpecification()), Unit)
-                taskReadTracks.start(ReadTracksInteractor.Param(LatestTrackQuerySpecification()), Unit)
+                taskReadTracks.start(
+                    ReadTracksInteractor.Param(LatestTrackQuerySpecification()),
+                    Unit
+                )
             }
         }
         updateUi(FLAG_SET_BUTTON_STATUS)
@@ -179,12 +186,29 @@ class HomeFragmentPresenter(
                     taskTimer.stop()
                 }
 
-                ui.showLastTrackInfo(track, tracker.isRecording())
-                lastTrack?.let {
-                    val endTime = it.endTime ?: System.currentTimeMillis()
-                    val durationInSeconds = endTime - it.startTime
+                ui.showLastTrackName(track?.name, tracker.isRecording())
+
+//                lastTrack?.let {
+//                    val endTime = it.endTime ?: System.currentTimeMillis()
+//                    val durationInSeconds = endTime - it.startTime
+//                    val (minutes, seconds) = durationInSeconds.toStringDurations()
+//                    ui.showLastTrackDuration(minutes, seconds)
+//                }
+                if (null != track) {
+                    val endTime = track.endTime ?: System.currentTimeMillis()
+                    val durationInSeconds = endTime - track.startTime
                     val (minutes, seconds) = durationInSeconds.toStringDurations()
-                    ui.setDurationMinutesSeconds(minutes, seconds)
+                    ui.showLastTrackDuration(minutes, seconds)
+                    val originDistance = track.distance()
+                    val originLocation = if (track.points.isNotEmpty()) Location(
+                        track.points[0].latitude,
+                        track.points[0].longitude,
+                        track.points[0].altitude
+                    ) else null
+                    val additionalDistance = newRecordedLocations.additionalDistance(originLocation)
+                    val summaryDistance = originDistance + additionalDistance
+                    // String.format("%.2f m", track.distance())
+                    ui.showLastTrackDistance(String.format("%.2f m", summaryDistance))
                 }
             }
 
@@ -261,7 +285,7 @@ class HomeFragmentPresenter(
 
     private fun updateTimer(timer: Long) {
         val (minutes, seconds) = timer.toStringDurations()
-        ui.setDurationMinutesSeconds(minutes, seconds)
+        ui.showLastTrackDuration(minutes, seconds)
     }
 
     private fun createTimerTask() =
@@ -281,4 +305,43 @@ class HomeFragmentPresenter(
                 log.e(error, "Timer failed")
             }
         )
+}
+
+// Optimize
+fun List<Location>.additionalDistance(origin: Location?): Float {
+    if (this.isEmpty()) {
+        return .0f
+    }
+
+    if (null == origin && this.size < 2) {
+        return .0f
+    }
+
+    val results = FloatArray(3)
+    var distanceInMeters = .0f
+
+    if (null != origin) {
+        android.location.Location.distanceBetween(
+            origin.latitude,
+            origin.longitude,
+            this[0].latitude,
+            this[0].longitude,
+            results
+        )
+        distanceInMeters = results[0]
+    }
+    for (i in 1 until this.size) {
+        val start = this[i - 1]
+        val end = this[i]
+        android.location.Location.distanceBetween(
+            start.latitude,
+            start.longitude,
+            end.latitude,
+            end.longitude,
+            results
+        )
+        distanceInMeters += results[0]
+    }
+
+    return distanceInMeters
 }
