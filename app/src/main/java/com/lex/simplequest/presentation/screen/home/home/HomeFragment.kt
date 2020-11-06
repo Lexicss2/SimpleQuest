@@ -70,11 +70,6 @@ class HomeFragment :
             }
         }
 
-        val r = FloatArray(3)
-        Location.distanceBetween(
-            53.926816, 27.602703, 53.931588, 27.606666, r
-        )
-        Log.d("qaz", "${r[0]}, ${r[1]}, ${r[2]}")
         super.onViewCreated(view, savedInstanceState)
     }
 

@@ -1,12 +1,16 @@
 package com.lex.simplequest.device.service
 
-import android.app.Service
+import android.app.*
 import android.content.Intent
+import android.graphics.Color
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.lex.core.utils.ObservableValue
 import com.lex.simplequest.App
+import com.lex.simplequest.R
 import com.lex.simplequest.domain.locationmanager.LocationManager
 import com.lex.simplequest.domain.locationmanager.LocationTracker
 import com.lex.simplequest.domain.locationmanager.model.Location
@@ -14,6 +18,7 @@ import com.lex.simplequest.domain.model.Point
 import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.domain.repository.LocationRepository
 import com.lex.simplequest.domain.track.interactor.*
+import com.lex.simplequest.presentation.screen.home.MainActivity
 import com.lex.simplequest.presentation.utils.asRxObservable
 import com.lex.simplequest.presentation.utils.asRxSingle
 import com.lex.simplequest.presentation.utils.tasks.MultiResultTask
@@ -30,6 +35,9 @@ class TrackLocationService() : Service(), LocationTracker {
         private const val TASK_START_TRACK = "startTrack"
         private const val TASK_STOP_TRACK = "stopTrack"
         private const val TASK_ADD_POINT = "addPoint"
+
+        private const val ONGOING_NOTIFICATION_ID = 1
+        private const val NOTIFICATION_CHANNEL_ID = "trackLocationNotificationId"
     }
 
     private lateinit var locationManager: LocationManager
@@ -93,10 +101,16 @@ class TrackLocationService() : Service(), LocationTracker {
             }
 
             activeTrackId?.let { trackId ->
-                // TODO: RM if Location is recording update current Track
                 Log.v(TAG, "location: ${location.latitude}: ${location.longitude}")
                 val point =
-                    Point(-1, trackId, location.latitude, location.longitude, location.altitude, System.currentTimeMillis())
+                    Point(
+                        -1,
+                        trackId,
+                        location.latitude,
+                        location.longitude,
+                        location.altitude,
+                        System.currentTimeMillis()
+                    )
                 pointObservableValue.set(point)
 
                 if (taskAddPoint.isRunning()) {
@@ -187,6 +201,25 @@ class TrackLocationService() : Service(), LocationTracker {
         LocationTracker.Status.CONNECTED == status || LocationTracker.Status.RECORDING == status
 
     override fun startRecording() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val pendingIntent: PendingIntent =
+                Intent(this, MainActivity::class.java).let { notificationIntent ->
+                    PendingIntent.getActivity(this, 0, notificationIntent, 0)
+                }
+
+            val channelId =
+                createNotificationChannel(NOTIFICATION_CHANNEL_ID, resources.getString(R.string.service_notification_channel_name))
+
+            val notification: Notification = Notification.Builder(this, channelId)
+                .setContentTitle(resources.getString(R.string.app_name))
+                .setContentText(resources.getString(R.string.home_is_recording))
+                .setSmallIcon(R.drawable.ic_directions_walk_24px)
+                .setContentIntent(pendingIntent)
+                .build()
+
+            startForeground(ONGOING_NOTIFICATION_ID, notification)
+        }
+
         if (status == LocationTracker.Status.IDLE) {
             locationManager.connect(locationManagerCallback)
             changeStatus(LocationTracker.Status.CONNECTING)
@@ -213,6 +246,11 @@ class TrackLocationService() : Service(), LocationTracker {
         activeTrackId = null
 
         changeStatus(LocationTracker.Status.IDLE)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.i(TAG, "stopForeground")
+            stopForeground(true)
+        }
     }
 
     override fun isRecording(): Boolean =
@@ -259,6 +297,19 @@ class TrackLocationService() : Service(), LocationTracker {
         locationListeners.forEach {
             it.onStatusUpdated(newStatus)
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createNotificationChannel(channelId: String, channelName: String): String {
+        val channel = NotificationChannel(
+            channelId,
+            channelName, NotificationManager.IMPORTANCE_DEFAULT
+        )
+        channel.lightColor = Color.BLUE
+        channel.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+        val service = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        service.createNotificationChannel(channel)
+        return channelId
     }
 
     private fun handleStartTrack(trackId: Long?, error: Throwable?) {
