@@ -14,6 +14,11 @@ import com.lex.simplequest.presentation.utils.toStringDuration
 
 class AdapterTracks(private val context: Context, private val clickListener: ItemClickListener) :
     RecyclerView.Adapter<AdapterTracks.TracksViewHolder>() {
+
+    companion object {
+        private const val METERS_IN_KILOMETER = 1000.0f
+    }
+
     private var items: List<Track> = listOf()
 
     fun set(items: List<Track>) {
@@ -46,8 +51,17 @@ class AdapterTracks(private val context: Context, private val clickListener: Ite
                 }
                 trackNameView.text = track.name
                 val duration = track.duration()
+                val format: String
+                var distance = track.distance()
+                if (distance >= METERS_IN_KILOMETER) {
+                    format = "%s, %.2f km"
+                    distance /= METERS_IN_KILOMETER
+                } else {
+                    format = "%s, %.2f m"
+                }
+
                 trackTimeDistanceView.text =
-                    String.format("%s, %.2f", duration.toStringDuration(), track.distance())
+                    String.format(format, duration.toStringDuration(), distance)
                 if (null == track.endTime) {
                     trackNameView.setTextAppearance(R.style.AppTheme_Text_Small_Red)
                     trackTimeDistanceView.setTextAppearance(R.style.AppTheme_Text_ExtraSmall_Red)

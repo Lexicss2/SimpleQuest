@@ -11,7 +11,7 @@ data class Track(
 )
 
 fun Track.duration(): Long =
-    if (null != endTime) endTime - startTime else 0L
+    if (null != endTime) endTime - startTime else if (points.isNotEmpty()) points[points.lastIndex].timestamp - startTime else 0L
 
 fun Track.distance(): Float =
     if (points.size > 1) {

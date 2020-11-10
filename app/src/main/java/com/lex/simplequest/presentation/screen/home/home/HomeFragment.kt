@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.Typeface
 import android.location.Location
 import android.os.Bundle
 import android.os.IBinder
@@ -180,9 +181,10 @@ class HomeFragment :
         }
     }
 
-    override fun showLastTrackDistance(distance: String?) {
-        viewBinding.layoutContent.apply {
-            lastTrackDistanceView.text = distance ?: "---"
+    override fun showLastTrackDistance(distance: String?, withBoldStyle: Boolean) {
+        viewBinding.layoutContent.lastTrackDistanceView.apply {
+            setTypeface(typeface, if (withBoldStyle) Typeface.BOLD else Typeface.NORMAL)
+            text = distance ?: "---"
         }
     }
 

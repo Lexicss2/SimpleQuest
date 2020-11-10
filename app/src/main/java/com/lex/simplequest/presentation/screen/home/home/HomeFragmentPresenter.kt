@@ -42,6 +42,7 @@ class HomeFragmentPresenter(
         private const val FLAG_SETUP_UI =
             FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS or FLAG_SET_LOCATION_AVAILABILITY_STATUS or
                     FLAG_SET_LOCATION_SUSPENDED_STATUS or FLAG_SET_ERROR_STATUS
+        private const val METERS_IN_KILOMETER = 1000.0f
     }
 
     private val log = logFactory.get(TAG)
@@ -113,7 +114,6 @@ class HomeFragmentPresenter(
     override fun start() {
         super.start()
         taskReadTracks.start(ReadTracksInteractor.Param(LatestTrackQuerySpecification()), Unit)
-        newRecordedLocations.clear()
         updateUi(FLAG_SETUP_UI)
     }
 
@@ -121,6 +121,7 @@ class HomeFragmentPresenter(
         super.stop()
         taskReadTracks.stop()
         taskTimer.stop()
+        newRecordedLocations.clear()
     }
 
     override fun startStopClicked() {
@@ -206,9 +207,19 @@ class HomeFragmentPresenter(
                         track.points[0].altitude
                     ) else null
                     val additionalDistance = newRecordedLocations.additionalDistance(originLocation)
-                    val summaryDistance = originDistance + additionalDistance
-                    // String.format("%.2f m", track.distance())
-                    ui.showLastTrackDistance(String.format("%.2f m", summaryDistance))
+                    val format: String
+                    var summaryDistance = originDistance + additionalDistance
+                    val withBoldStyle: Boolean
+                    if (summaryDistance >= METERS_IN_KILOMETER) {
+                        format = "%.2f km"
+                        summaryDistance /= METERS_IN_KILOMETER
+                        withBoldStyle = true
+                    } else {
+                        format = "%.2f m"
+                        withBoldStyle = false
+                    }
+
+                    ui.showLastTrackDistance(String.format(format, summaryDistance), withBoldStyle)
                 }
             }
 
@@ -292,7 +303,7 @@ class HomeFragmentPresenter(
         MultiResultTask<Long, Long, Unit>(
             TASK_TIMER,
             { origin, _ ->
-                Observable.interval(1000, TimeUnit.MILLISECONDS)
+                Observable.interval(500, TimeUnit.MILLISECONDS)
                     .map {
                         System.currentTimeMillis() - origin
                     }
