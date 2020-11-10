@@ -90,6 +90,12 @@ class HomeFragment :
         presenter.locationTrackerServiceDisconnected() // Should be called because ServiceConnection.OnServiceDisconnected is not called
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        _viewBinding = null
+    }
+
     override fun setButtonStyleRecording(recordButtonType: RecordButtonType) {
         viewBinding.layoutContent.apply {
             when (recordButtonType) {

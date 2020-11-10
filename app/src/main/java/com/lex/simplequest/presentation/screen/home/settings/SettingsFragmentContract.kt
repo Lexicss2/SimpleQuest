@@ -1,14 +1,18 @@
 package com.lex.simplequest.presentation.screen.home.settings
 
 import com.lex.simplequest.presentation.base.BaseMvpContract
+import com.lex.simplequest.presentation.base.BaseMvpLceContract
 
 interface SettingsFragmentContract {
-    interface Ui : BaseMvpContract.Ui {
-
+    interface Ui : BaseMvpLceContract.Ui {
+        fun showProgress(show: Boolean)
+        fun showTimePeriod(timePeriodMs: Long?)
+        fun showAccuracyPopup(timePeriodMs: Long?)
     }
 
-    interface Presenter : BaseMvpContract.Presenter<Ui, Presenter.State> {
+    interface Presenter : BaseMvpLceContract.Presenter<Ui, Presenter.State> {
 
-        interface State : BaseMvpContract.Presenter.State
+        fun accuracyClicked()
+        interface State : BaseMvpLceContract.Presenter.State
     }
 }

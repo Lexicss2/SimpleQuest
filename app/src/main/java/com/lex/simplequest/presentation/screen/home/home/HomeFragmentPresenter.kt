@@ -121,7 +121,6 @@ class HomeFragmentPresenter(
         super.stop()
         taskReadTracks.stop()
         taskTimer.stop()
-        newRecordedLocations.clear()
     }
 
     override fun startStopClicked() {
@@ -262,6 +261,7 @@ class HomeFragmentPresenter(
         if (null != tracks) {
             val lastTrack = if (tracks.isNotEmpty()) tracks.last() else null
             this.lastTrack = lastTrack
+            newRecordedLocations.clear()
         } else if (null != error) {
             this.error = error
             updateUi(FLAG_SET_ERROR_STATUS)

@@ -2,6 +2,35 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="#e0e077">
+
+    <include
+        android:id="@id/layout_loading"
+        layout="@layout/layout_loading_transparent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone" />
+
+    <include
+        android:id="@id/layout_error_no_internet"
+        layout="@layout/layout_error_no_internet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone" />
+
+    <include
+        android:id="@id/layout_error_loading_data"
+        layout="@layout/layout_error_loading_data"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone" />
+
+    <include
+        android:id="@id/layout_content"
+        layout="@layout/fragment_settings_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="visible" />
 
 </FrameLayout>

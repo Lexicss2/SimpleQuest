@@ -48,4 +48,14 @@
     <string name="tracks_start">Start</string>
     <string name="tracks_finish">Finish</string>
     <string name="tracks_no_tracks">No tracks</string>
+
+    <!-- Settings -->
+    <string name="settings_gps_accuracy">GPS accuracy</string>
+    <string name="settings_time_period">Time period: %d s</string>
+    <string name="settings_track_record_sensitivity">Track record sensitivity</string>
+    <string name="settings_start_record_if">Start record if track has at least %d m</string>
+
+    <string name="settings_accuracy_description">Please select the time period how often the location should be updated</string>
+    <string name="settings_accuracy_hint">More higher value reduces battery consumption but reduces the track accuracy</string>
+    <string name="settings_apply">Apply</string>
 </resources>
