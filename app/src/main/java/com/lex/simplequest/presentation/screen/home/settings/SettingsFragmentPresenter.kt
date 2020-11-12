@@ -24,6 +24,7 @@ class SettingsFragmentPresenter(
     companion object {
         private const val TAG = "SettingsFragmentPresenter"
         private const val TASK_READ_SETTINGS = "task_read_settings"
+        private val PERIODS = arrayOf("1", "2", "5", "10", "30", "60", "120")
     }
 
     private val log = logFactory.get(TAG)
@@ -42,7 +43,7 @@ class SettingsFragmentPresenter(
     }
 
     override fun accuracyClicked() {
-        ui.showAccuracyPopup(timePeriod)
+        ui.showAccuracyPopup(timePeriod, PERIODS)
     }
 
     override fun reload() {

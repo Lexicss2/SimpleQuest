@@ -1,6 +1,7 @@
 package com.lex.simplequest.presentation.screen.home.settings
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +18,7 @@ import com.softeq.android.mvp.VoidPresenterStateHolder
 
 class SettingsFragment :
     BaseMvpLceFragment<SettingsFragmentContract.Ui, SettingsFragmentContract.Presenter.State, SettingsFragmentContract.Presenter>(),
-    SettingsFragmentContract.Ui {
+    SettingsFragmentContract.Ui, SelectAccuracyDialog.OnTimePeriodSelectedListener {
     companion object {
         private const val DLG_SELECT_ACCURACY = "select_accuracy"
 
@@ -79,13 +80,18 @@ class SettingsFragment :
         }
     }
 
-    override fun showAccuracyPopup(timePeriodMs: Long?) {
+    override fun showAccuracyPopup(timePeriodMs: Long?, periods: Array<String>) {
         if (!childFragmentManager.isDialogShown(DLG_SELECT_ACCURACY)) {
-            val dlg = SelectAccuracyDialog.newInstance(timePeriodMs).apply {
-
+            val dlg = SelectAccuracyDialog.newInstance(timePeriodMs, periods).apply {
+                //setTargetFragment(this@SettingsFragment, 1)
             }
+
             childFragmentManager.showDialog(dlg, DLG_SELECT_ACCURACY)
         }
+    }
+
+    override fun onTimePeriodSelected(timePeriodMs: Long) {
+        Log.d("qaz", "onTimePeriodSelected: $timePeriodMs")
     }
 
     override fun getUi(): SettingsFragmentContract.Ui =
