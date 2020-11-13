@@ -1,14 +1,11 @@
 package com.lex.simplequest.device.locationmanager
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
-import androidx.core.app.ActivityCompat
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.api.GoogleApiClient
@@ -18,19 +15,19 @@ import com.lex.simplequest.domain.exception.PermissionDeniedException
 import com.lex.simplequest.domain.locationmanager.LocationManager
 import com.lex.simplequest.domain.locationmanager.model.Location
 import com.lex.simplequest.domain.permission.repository.PermissionChecker
-import com.lex.simplequest.domain.repository.LocationRepository
 import java.lang.IllegalStateException
+import kotlin.math.min
 
 class LocationManagerImpl(
     ctx: Context,
-    //private val locationRepository: LocationRepository,
     private val permissionChecker: PermissionChecker,
 ) : LocationManager {
 
     companion object {
         private const val PLAY_SERVICES_RESOLUTION_REQUEST = 9000
-        const val UPDATE_INTERVAL = 5000L
-        const val FASTEST_INTERVAL = 5000L
+        private const val DEFAULT_UPDATE_INTERVAL = 5000L
+        private const val FASTEST_INTERVAL = 5000L
+        private const val SMALLEST_DISPLACEMENT = 5.0f
     }
 
     private val context = ctx
@@ -38,6 +35,8 @@ class LocationManagerImpl(
     private var locationRequest: LocationRequest? = null
 
     private var locationManagerCallback: LocationManager.Callback? = null
+    //private var timePeriodMs: Long = DEFAULT_UPDATE_INTERVAL
+    private var connectionConfig: LocationManager.ConnectionConfig? = null
 
     private val connectionCallbacks = object : GoogleApiClient.ConnectionCallbacks {
         @SuppressLint("MissingPermission")
@@ -47,10 +46,13 @@ class LocationManagerImpl(
                 // TODO: call callback fun onPermissionRequired
                 throw PermissionDeniedException("Location permissions was not granted")
             }
+            val config = connectionConfig
+            val timeInterval = config?.timePeriodMs ?: DEFAULT_UPDATE_INTERVAL
             locationRequest = LocationRequest().apply {
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-                interval = UPDATE_INTERVAL
-                fastestInterval = FASTEST_INTERVAL
+                interval = timeInterval
+                fastestInterval = min(timeInterval, FASTEST_INTERVAL)
+                smallestDisplacement = SMALLEST_DISPLACEMENT
             }
 
             val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
@@ -106,9 +108,10 @@ class LocationManagerImpl(
     override fun isConnected(): Boolean =
         null != locationRequest
 
-    override fun connect(callback: LocationManager.Callback?) {
+    override fun connect(connectionConfig: LocationManager.ConnectionConfig?, callback: LocationManager.Callback?) {
         Log.i("qaz", "connect called")
         if (!googleApiClient.isConnected) {
+            this.connectionConfig = connectionConfig
             googleApiClient.connect()
             locationManagerCallback = callback
         } else {
@@ -128,6 +131,7 @@ class LocationManagerImpl(
             Log.d("qaz", "already disconnected")
         }
     }
+
 
     private fun initGoogleApiClient(): GoogleApiClient =
         GoogleApiClient.Builder(context).apply {

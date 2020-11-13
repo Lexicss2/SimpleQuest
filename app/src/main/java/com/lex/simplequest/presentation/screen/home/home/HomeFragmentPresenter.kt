@@ -39,6 +39,7 @@ class HomeFragmentPresenter(
         private const val FLAG_SET_LOCATION_AVAILABILITY_STATUS = 0x0004
         private const val FLAG_SET_LOCATION_SUSPENDED_STATUS = 0x0008
         private const val FLAG_SET_ERROR_STATUS = 0x0010
+        private const val FLAG_START_TIMER = 0x0020
         private const val FLAG_SETUP_UI =
             FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS or FLAG_SET_LOCATION_AVAILABILITY_STATUS or
                     FLAG_SET_LOCATION_SUSPENDED_STATUS or FLAG_SET_ERROR_STATUS
@@ -84,7 +85,11 @@ class HomeFragmentPresenter(
 
         override fun onStatusUpdated(status: LocationTracker.Status) {
             Log.d("qaz", "5.onStatus Updated: $status")
-            updateUi(FLAG_SETUP_UI)
+            if (status == LocationTracker.Status.RECORDING) {
+                updateUi(FLAG_SETUP_UI or FLAG_START_TIMER)
+            } else {
+                updateUi(FLAG_SETUP_UI)
+            }
         }
 
         override fun onLocationAvailable(isAvailable: Boolean) {
@@ -180,7 +185,8 @@ class HomeFragmentPresenter(
 
             if (0 != (flags and FLAG_SET_TRACK_INFO)) {
                 val track = lastTrack
-                if (tracker.isRecording() && !taskTimer.isRunning() && track != null) {
+                val shouldStartTimer = (0 != (flags and FLAG_START_TIMER))
+                if (tracker.isRecording() && !taskTimer.isRunning() && track != null && shouldStartTimer) {
                     taskTimer.start(track.startTime, Unit)
                 } else if (!tracker.isRecording() && taskTimer.isRunning()) {
                     taskTimer.stop()
@@ -188,12 +194,6 @@ class HomeFragmentPresenter(
 
                 ui.showLastTrackName(track?.name, tracker.isRecording())
 
-//                lastTrack?.let {
-//                    val endTime = it.endTime ?: System.currentTimeMillis()
-//                    val durationInSeconds = endTime - it.startTime
-//                    val (minutes, seconds) = durationInSeconds.toStringDurations()
-//                    ui.showLastTrackDuration(minutes, seconds)
-//                }
                 if (null != track) {
                     val endTime = track.endTime ?: System.currentTimeMillis()
                     val durationInSeconds = endTime - track.startTime
@@ -275,7 +275,7 @@ class HomeFragmentPresenter(
             }
         }
 
-        updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS)
+        updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS or FLAG_START_TIMER)
     }
 
     private fun createReadTracksTask() =

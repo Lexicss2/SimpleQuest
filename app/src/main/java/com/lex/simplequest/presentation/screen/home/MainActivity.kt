@@ -10,9 +10,11 @@ import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.lex.simplequest.App
 import com.lex.simplequest.R
 import com.lex.simplequest.device.service.TrackLocationService
 import com.lex.simplequest.domain.locationmanager.LocationTracker
+import com.lex.simplequest.domain.settings.interactor.ReadSettingsInteractorImpl
 import com.lex.simplequest.presentation.base.BaseMvpActivity
 import com.lex.simplequest.presentation.base.ToolbarBackButtonOverride
 import com.lex.simplequest.presentation.screen.home.home.HomeFragment
@@ -50,8 +52,8 @@ class MainActivity(private val router: MainRouterImpl = MainRouterImpl()) :
     private lateinit var bottomNavigationView: BottomNavigationView
     private var isSettlingBottomNavigation = false
     private lateinit var serviceIntent: Intent
-    private var locationTracker: LocationTracker? = null
-    private var isTrackRecording: Boolean = false
+    //private var locationTracker: LocationTracker? = null
+    //private var isTrackRecording: Boolean = false
 
     private val bottomNavigationItemSelectedListener =
         BottomNavigationView.OnNavigationItemSelectedListener { menuItem ->
@@ -88,14 +90,16 @@ class MainActivity(private val router: MainRouterImpl = MainRouterImpl()) :
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             Log.i("qaz", "! Service Connected in Activity")
             val binder = service as TrackLocationService.TrackLocationBinder
-            locationTracker = binder.getService() as LocationTracker
-            isTrackRecording = true == locationTracker?.isRecording()
+//            locationTracker = binder.getService() as LocationTracker
+//            isTrackRecording = true == locationTracker?.isRecording()
+            presenter.serviceConnected(binder.getService() as LocationTracker)
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
             Log.e("qaz","Service Disconnected in Activity")
-            locationTracker = null
-            isTrackRecording = false
+//            locationTracker = null
+//            isTrackRecording = false
+            presenter.serviceDisconnected()
         }
     }
 
@@ -111,12 +115,13 @@ class MainActivity(private val router: MainRouterImpl = MainRouterImpl()) :
             router.showHome()
         }
 
-        serviceIntent = Intent(this, TrackLocationService::class.java)
-        val compName = startService(serviceIntent)
-        Log.i(
-            "qaz",
-            "Activity onCreate: ${if (compName != null) "startted" else "not started"}"
-        )
+        presenter.create()
+//        serviceIntent = Intent(this, TrackLocationService::class.java)
+//        val compName = startService(serviceIntent)
+//        Log.i(
+//            "qaz",
+//            "Activity onCreate: ${if (compName != null) "startted" else "not started"}"
+//        )
     }
 
     override fun onStart() {
@@ -127,29 +132,33 @@ class MainActivity(private val router: MainRouterImpl = MainRouterImpl()) :
     override fun onResume() {
         super.onResume()
 
-       val bond =  bindService(serviceIntent, serviceConnection, 0)
-        Log.d("qaz", "Activity onResume Try to bond service = $bond")
+//       val bond =  bindService(serviceIntent, serviceConnection, 0)
+//        Log.d("qaz", "Activity onResume Try to bond service = $bond")
+        presenter.resume()
     }
 
     override fun onPause() {
         super.onPause()
-        if (locationTracker == null) {
-            Log.d("qaz", "location tracker null")
-        }
-        isTrackRecording = true == locationTracker?.isRecording()
-        Log.d("qaz", "onPause, isRecording = $isTrackRecording")
-        unbindService(serviceConnection)
+
+        presenter.pause()
+//        if (locationTracker == null) {
+//            Log.d("qaz", "location tracker null")
+//        }
+//        isTrackRecording = true == locationTracker?.isRecording()
+//        Log.d("qaz", "onPause, isRecording = $isTrackRecording")
+//        unbindService(serviceConnection)
     }
 
     override fun onDestroy() {
+        presenter.destroy()
+//        Log.e("qaz", "Activity onDestroy")
+//        if (!isTrackRecording) {
+//            Log.d("qaz", "Service is not recording and can be stopped")
+//            stopService(serviceIntent)
+//        } else {
+//            Log.w("qaz", "Service is recording, so keep service alive")
+//        }
         super.onDestroy()
-        Log.e("qaz", "Activity onDestroy")
-        if (!isTrackRecording) {
-            Log.d("qaz", "Service is not recording and can be stopped")
-            stopService(serviceIntent)
-        } else {
-            Log.w("qaz", "Service is recording, so keep service alive")
-        }
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -200,6 +209,37 @@ class MainActivity(private val router: MainRouterImpl = MainRouterImpl()) :
             else View.GONE
     }
 
+    override fun startLocationTracker(): Any? {
+        serviceIntent = Intent(this, TrackLocationService::class.java)
+        val compName = startService(serviceIntent)
+        Log.i(
+            "qaz",
+            "Activity onCreate: ${if (compName != null) "startted" else "not started"}"
+        )
+
+        return compName
+    }
+
+    override fun bindLocationTracker(): Boolean {
+        val bond =  bindService(serviceIntent, serviceConnection, 0)
+        Log.d("qaz", "Activity onResume Try to bond service = $bond")
+        return bond
+    }
+
+    override fun unbindLocationTracker() {
+//        if (locationTracker == null) {
+//            Log.d("qaz", "location tracker null")
+//        }
+//        isTrackRecording = true == locationTracker?.isRecording()
+//        Log.d("qaz", "onPause, isRecording = $isTrackRecording")
+        unbindService(serviceConnection)
+    }
+
+    override fun stopLocationTracker() {
+        Log.w("qaz", "stopLocationTracker called from presenter")
+        stopService(serviceIntent)
+    }
+
     override fun createPresenterStateHolder(): PresenterStateHolder<MainActivityContract.Presenter.State> =
         VoidPresenterStateHolder()
 
@@ -207,5 +247,8 @@ class MainActivity(private val router: MainRouterImpl = MainRouterImpl()) :
         this
 
     override fun createPresenter(): MainActivityContract.Presenter =
-        MainActivityPresenter(this)
+        MainActivityPresenter(
+            //ReadSettingsInteractorImpl(App.instance.settingsRepository),
+            App.instance.logFactory,
+            this)
 }

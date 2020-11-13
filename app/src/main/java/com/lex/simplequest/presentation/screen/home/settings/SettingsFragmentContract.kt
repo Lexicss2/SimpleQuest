@@ -11,6 +11,7 @@ interface SettingsFragmentContract {
     }
 
     interface Presenter : BaseMvpLceContract.Presenter<Ui, Presenter.State> {
+        fun selectedTimePeriod(timePeriodMs: Long)
 
         fun accuracyClicked()
         interface State : BaseMvpLceContract.Presenter.State

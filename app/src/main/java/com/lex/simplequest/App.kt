@@ -37,7 +37,7 @@ class App : Application() {
 
     val locationManager: LocationManager by lazy {
         LocationManagerImpl(
-            this, /*locationRepository, */
+            this,
             permissionChecker
         )
     }

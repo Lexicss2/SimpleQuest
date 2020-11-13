@@ -17,6 +17,9 @@ import com.lex.simplequest.domain.locationmanager.model.Location
 import com.lex.simplequest.domain.model.Point
 import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.domain.repository.LocationRepository
+import com.lex.simplequest.domain.repository.SettingsRepository
+import com.lex.simplequest.domain.settings.interactor.ReadSettingsInteractor
+import com.lex.simplequest.domain.settings.interactor.ReadSettingsInteractorImpl
 import com.lex.simplequest.domain.track.interactor.*
 import com.lex.simplequest.presentation.screen.home.MainActivity
 import com.lex.simplequest.presentation.utils.asRxObservable
@@ -35,6 +38,7 @@ class TrackLocationService() : Service(), LocationTracker {
         private const val TASK_START_TRACK = "startTrack"
         private const val TASK_STOP_TRACK = "stopTrack"
         private const val TASK_ADD_POINT = "addPoint"
+        private const val TASK_READ_SETTINGS = "readSettings"
 
         private const val ONGOING_NOTIFICATION_ID = 1
         private const val NOTIFICATION_CHANNEL_ID = "trackLocationNotificationId"
@@ -42,6 +46,7 @@ class TrackLocationService() : Service(), LocationTracker {
 
     private lateinit var locationManager: LocationManager
     private lateinit var locationRepository: LocationRepository
+    private lateinit var settingsRepository: SettingsRepository
     private val binder = TrackLocationBinder()
 
     private var status: LocationTracker.Status = LocationTracker.Status.NONE
@@ -49,17 +54,33 @@ class TrackLocationService() : Service(), LocationTracker {
     private val taskStartTrack = createStartTrackTask()
     private val taskStopTrack = createStopTrackTask()
     private val taskAddPoint = createAddPointTask()
+    private val taskReadSettings = createReadSettingsTask()
 
     private val pointObservableValue = ObservableValue(Point(-1, -1, 0.0, 0.0, null, 0L))
 
     private val log = App.instance.logFactory.get(TAG)
 
-    private val startTrackInteractor: StartTrackInteractor =
+    private val _startTrackIneractor: StartTrackInteractor by lazy {
         StartTrackInteractorImpl(App.instance.locationRepository)
-    private val stopTrackInteractor: StopTrackInteractor =
+    }
+    private val _stopTrackInteractor: StopTrackInteractor by lazy {
         StopTrackInteractorImpl(App.instance.locationRepository)
-    private val addPointInteractor: AddPointInteractor =
+    }
+    private val _addPointInteractor: AddPointInteractor by lazy {
         AddPointInteractorImpl(App.instance.locationRepository)
+    }
+    private val _readSettingsInteractor: ReadSettingsInteractor by lazy {
+        ReadSettingsInteractorImpl(App.instance.settingsRepository)
+    }
+
+    override val startTrackInteractor: StartTrackInteractor
+        get() = _startTrackIneractor
+    override val stopTrackInteractor: StopTrackInteractor
+        get() = _stopTrackInteractor
+    override val addPointInteractor: AddPointInteractor
+        get() = _addPointInteractor
+    override val readSettingsInteractor: ReadSettingsInteractor
+        get() = _readSettingsInteractor
 
     private val locationListeners = CopyOnWriteArrayList<LocationTracker.Listener>()
     private var locationManagerCallback = object : LocationManager.Callback {
@@ -142,6 +163,7 @@ class TrackLocationService() : Service(), LocationTracker {
         )
         locationManager = App.instance.locationManager
         locationRepository = App.instance.locationRepository
+        settingsRepository = App.instance.settingsRepository
         return START_STICKY
     }
 
@@ -166,17 +188,21 @@ class TrackLocationService() : Service(), LocationTracker {
         stopRecording()
     }
 
-    override fun setup(lm: LocationManager, lr: LocationRepository) {
-        locationManager = lm
-        locationRepository = lr
-    }
-
     override fun connect(): Boolean =
         if (LocationTracker.Status.IDLE == status) {
-            locationManager.connect(locationManagerCallback)
-            changeStatus(LocationTracker.Status.CONNECTING)
-            true
+            if (taskReadSettings.isRunning()) {
+                taskReadSettings.stop()
+            }
+            changeStatus(LocationTracker.Status.RETRIEVING_CONFIG)
+            taskReadSettings.start(ReadSettingsInteractor.Param(), false)
         } else false
+
+
+//        if (LocationTracker.Status.IDLE == status) {
+//            locationManager.connect(null, locationManagerCallback)
+//            changeStatus(LocationTracker.Status.CONNECTING)
+//            true
+//        } else false
 
 
     override fun disconnect() =
@@ -208,7 +234,10 @@ class TrackLocationService() : Service(), LocationTracker {
                 }
 
             val channelId =
-                createNotificationChannel(NOTIFICATION_CHANNEL_ID, resources.getString(R.string.service_notification_channel_name))
+                createNotificationChannel(
+                    NOTIFICATION_CHANNEL_ID,
+                    resources.getString(R.string.service_notification_channel_name)
+                )
 
             val notification: Notification = Notification.Builder(this, channelId)
                 .setContentTitle(resources.getString(R.string.app_name))
@@ -221,15 +250,22 @@ class TrackLocationService() : Service(), LocationTracker {
         }
 
         if (status == LocationTracker.Status.IDLE) {
-            locationManager.connect(locationManagerCallback)
-            changeStatus(LocationTracker.Status.CONNECTING)
+            if (taskReadSettings.isRunning()) {
+                taskReadSettings.stop()
+            }
+            changeStatus(LocationTracker.Status.RETRIEVING_CONFIG)
+            taskReadSettings.start(ReadSettingsInteractor.Param(), true)
         }
-        taskStartTrack.start(
-            StartTrackInteractor.Param(
-                generateName(),
-                System.currentTimeMillis()
-            ), Unit
-        )
+//        if (status == LocationTracker.Status.IDLE) {
+//            locationManager.connect(null, locationManagerCallback)
+//            changeStatus(LocationTracker.Status.CONNECTING)
+//        }
+//        taskStartTrack.start(
+//            StartTrackInteractor.Param(
+//                generateName(),
+//                System.currentTimeMillis()
+//            ), Unit
+//        )
     }
 
     override fun stopRecording() {
@@ -288,7 +324,8 @@ class TrackLocationService() : Service(), LocationTracker {
         val message = "<<< Changing status from $status to $newStatus >>>"
         when (newStatus) {
             LocationTracker.Status.NONE -> Log.v(TAG, message)
-            LocationTracker.Status.IDLE -> Log.d(TAG, message)
+            LocationTracker.Status.IDLE -> Log.v(TAG, message)
+            LocationTracker.Status.RETRIEVING_CONFIG -> Log.d(TAG, message)
             LocationTracker.Status.CONNECTING -> Log.w(TAG, message)
             LocationTracker.Status.CONNECTED -> Log.i(TAG, message)
             LocationTracker.Status.RECORDING -> Log.e(TAG, message)
@@ -386,6 +423,42 @@ class TrackLocationService() : Service(), LocationTracker {
             },
             { error, _ ->
                 handleAddPointTask(error)
+            }
+        )
+
+    private fun handleReadSettings(result: ReadSettingsInteractor.Result?, error: Throwable?, recRequest: Boolean) {
+        val config = if (null != result) {
+            LocationManager.ConnectionConfig(result.timePeriod)
+        } else null
+
+        Log.d(TAG, "config = $config")
+        locationManager.connect(config, locationManagerCallback)
+        changeStatus(LocationTracker.Status.CONNECTING)
+
+        if (recRequest) {
+            taskStartTrack.start(
+                StartTrackInteractor.Param(
+                    generateName(),
+                    System.currentTimeMillis()
+                ), Unit
+            )
+        }
+    }
+
+    private fun createReadSettingsTask() =
+        SingleResultTask<ReadSettingsInteractor.Param, ReadSettingsInteractor.Result, Boolean>(
+            TASK_READ_SETTINGS,
+            { param, _ ->
+                readSettingsInteractor.asRxSingle(param)
+                    .observeOn(AndroidSchedulers.mainThread())
+            },
+            { result, rec ->
+                handleReadSettings(result, null, rec)
+
+            },
+            { error, rec ->
+                log.e(error, "Failed to read settings")
+                handleReadSettings(null, error, rec)
             }
         )
 }
