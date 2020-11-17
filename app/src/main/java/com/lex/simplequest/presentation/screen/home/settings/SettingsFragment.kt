@@ -19,9 +19,10 @@ import com.softeq.android.mvp.VoidPresenterStateHolder
 
 class SettingsFragment :
     BaseMvpLceFragment<SettingsFragmentContract.Ui, SettingsFragmentContract.Presenter.State, SettingsFragmentContract.Presenter>(),
-    SettingsFragmentContract.Ui, SelectAccuracyDialog.OnTimePeriodSelectedListener {
+    SettingsFragmentContract.Ui, SelectGpsAccuracyDialog.OnTimePeriodSelectedListener, SelectTrackSensitivityDialog.OnDistanceSelectedListener {
     companion object {
-        private const val DLG_SELECT_ACCURACY = "select_accuracy"
+        private const val DLG_SELECT_GPS_ACCURACY = "select_gps_accuracy"
+        private const val DLG_SELECT_TRACK_SENSITIVITY = "select_track_sensitivity"
 
         fun newInstance(): SettingsFragment =
             SettingsFragment().apply {
@@ -46,8 +47,11 @@ class SettingsFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewBinding.layoutContent.apply {
-            accuracyLayout.setOnClickListener {
-                presenter.accuracyClicked()
+            gpsAccuracyLayout.setOnClickListener {
+                presenter.gpsAccuracyClicked()
+            }
+            trackSensitivityLayout.setOnClickListener {
+                presenter.trackSensitivityClicked()
             }
         }
         super.onViewCreated(view, savedInstanceState)
@@ -76,24 +80,50 @@ class SettingsFragment :
             if (null != timePeriodMs) {
                 val seconds = (timePeriodMs / 1000L).toInt()
                 timePeriodTextView.text =
-                    String.format(resources.getString(R.string.settings_time_period), seconds)
+                    String.format(
+                        resources.getString(R.string.settings_gps_accuracy_value),
+                        seconds
+                    )
             }
         }
     }
 
-    override fun showAccuracyPopup(timePeriodMs: Long?, periods: Array<String>) {
-        if (!childFragmentManager.isDialogShown(DLG_SELECT_ACCURACY)) {
-            val dlg = SelectAccuracyDialog.newInstance(timePeriodMs, periods).apply {
+    override fun showDistance(distance: Long?) {
+        viewBinding.layoutContent.apply {
+            if (null != distance) {
+                trackSensitivityTextView.text =
+                    String.format(
+                        resources.getString(R.string.settings_track_record_sensitivity_value),
+                        distance
+                    )
+            }
+        }
+    }
+
+    override fun showGpsAccuracyPopup(timePeriodMs: Long?, periods: Array<String>) {
+        if (!childFragmentManager.isDialogShown(DLG_SELECT_GPS_ACCURACY)) {
+            val dlg = SelectGpsAccuracyDialog.newInstance(timePeriodMs, periods).apply {
                 //setTargetFragment(this@SettingsFragment, 1)
             }
 
-            childFragmentManager.showDialog(dlg, DLG_SELECT_ACCURACY)
+            childFragmentManager.showDialog(dlg, DLG_SELECT_GPS_ACCURACY)
         }
     }
 
     override fun onTimePeriodSelected(timePeriodMs: Long) {
         Log.d("qaz", "onTimePeriodSelected: $timePeriodMs")
         presenter.selectedTimePeriod(timePeriodMs)
+    }
+
+    override fun onDistanceSelected(distanceM: Long) {
+        presenter.selectDistance(distanceM)
+    }
+
+    override fun showTrackSensitivityPopup(distance: Long?, distances: Array<String>) {
+        if (!childFragmentManager.isDialogShown(DLG_SELECT_TRACK_SENSITIVITY)) {
+            val dlg = SelectTrackSensitivityDialog.newInstance(distance, distances)
+            childFragmentManager.showDialog(dlg, DLG_SELECT_TRACK_SENSITIVITY)
+        }
     }
 
     override fun getUi(): SettingsFragmentContract.Ui =

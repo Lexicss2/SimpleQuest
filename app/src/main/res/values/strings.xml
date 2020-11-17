@@ -22,6 +22,7 @@
 
     <!-- Service -->
     <string name="service_notification_channel_name">Track recording</string>
+    <string name="service_track_was_not_saved">Track was not saved</string>
 
     <!-- Home -->
     <string name="home_start_tracking">Start</string>
@@ -50,12 +51,30 @@
     <string name="tracks_no_tracks">No tracks</string>
 
     <!-- Settings -->
-    <string name="settings_gps_accuracy">GPS accuracy</string>
-    <string name="settings_time_period">Time period: %d s</string>
-    <string name="settings_track_record_sensitivity">Track record sensitivity</string>
-    <string name="settings_start_record_if">Start record if track has at least %d m</string>
+    <string name="settings_gps_accuracy_title">GPS accuracy</string>
+    <string name="settings_gps_accuracy_value">Time period: %d s</string>
+    <string name="settings_gps_accuracy_description">Please select the time period (in seconds) how often the location should be updated</string>
+    <string name="settings_gps_accuracy_hint">More higher value reduces battery consumption but reduces the track accuracy</string>
 
-    <string name="settings_accuracy_description">Please select the time period (in seconds) how often the location should be updated</string>
-    <string name="settings_accuracy_hint">More higher value reduces battery consumption but reduces the track accuracy</string>
+    <string name="settings_track_record_sensitivity_title">Track record sensitivity</string>
+    <string name="settings_track_record_sensitivity_value">Start record if track has at least %d m</string>
+    <string name="settings_track_record_sensitivity_description">Please select the minimal distance to keep the recorded track</string>
+    <string name="settings_track_record_sensitivity_hint">Track will not be recorded if the final track distance is less the this value</string>
+
+    <string name="settings_minimal_displacement_title">Minimal displacement</string>
+    <string name="settings_minimal_displacement_value">Minimal displacement is %d </string>
+    <string name="settings_minimal_displacement_description">Please select the smallest displacement in meters</string>
+    <string name="settings_minimal_displacement_hint">Location will not be updated until the distance from the last update is equals or higher this value</string>
+
+    <string name="settings_minimal_battery_level_title">Minimal battery level</string>
+    <string name="settings_minimal_battery_level_value">Minimal battery level %d %</string>
+    <string name="settings_minimal_battery_level_description">Please select the minimal battery level</string>
+    <string name="settings_minimal_battery_level_hint">When the battery level reaches this value the tracks recordings stops</string>
+
+    <string name="settings_about_title">About</string>
+    <string name="settings_about_value">Application description</string>
+    <string name="settings_about_description">Application version %s</string>
+
     <string name="settings_apply">Apply</string>
+
 </resources>

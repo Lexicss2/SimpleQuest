@@ -11,7 +11,7 @@ class SettingsRepositoryImpl(ctx: Context) : SettingsRepository {
         private const val PREF_TIME_PERIOD = "time_period"
         private const val PREF_RECORD_DISTANCE_SENSITIVITY = "record_distance_sensitivity"
         private const val DEFAULT_TIME_PERIOD_MS = 5000L
-        private const val DEFAULT_RECORD_DISTANCE_SENSITIVITY_M = 0L
+        private const val DEFAULT_RECORD_DISTANCE_SENSITIVITY_M = 10L
     }
 
     private val context = ctx

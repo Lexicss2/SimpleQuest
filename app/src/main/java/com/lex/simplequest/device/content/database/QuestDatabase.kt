@@ -49,6 +49,7 @@ class QuestDatabase(
 
     override fun onOpen(db: SQLiteDatabase?) {
         super.onOpen(db)
-        Log.d("qaz", "DB onOpen")
+        db?.execSQL("PRAGMA foreign_keys = ON;")
+        Log.d("qaz", "DB onOpen, but createdPoints TABLE = $SQL_CREATE_POINTS_TABLE")
     }
 }

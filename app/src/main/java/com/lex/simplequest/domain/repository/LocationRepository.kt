@@ -7,7 +7,7 @@ interface LocationRepository : Closeable {
     fun isLocationServicesEnabled(): Boolean
 
     fun startTrack(name: String, startTime: Long): Long
-    fun stopTrack(id: Long, endTime: Long): Boolean
+    fun stopTrack(id: Long, endTime: Long, minimalDistance: Long?): Boolean
     fun getTracks(spec: LocationQuerySpecification): List<Track>
     fun updateTrack(track: Track): Boolean
     fun deleteTrack(id: Long): Boolean

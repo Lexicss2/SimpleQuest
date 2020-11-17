@@ -5,8 +5,10 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Binder
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.lex.core.utils.ObservableValue
 import com.lex.simplequest.App
@@ -51,6 +53,7 @@ class TrackLocationService() : Service(), LocationTracker {
 
     private var status: LocationTracker.Status = LocationTracker.Status.NONE
     private var activeTrackId: Long? = null
+    private var configDistance: Long? = null
     private val taskStartTrack = createStartTrackTask()
     private val taskStopTrack = createStopTrackTask()
     private val taskAddPoint = createAddPointTask()
@@ -164,6 +167,7 @@ class TrackLocationService() : Service(), LocationTracker {
         locationManager = App.instance.locationManager
         locationRepository = App.instance.locationRepository
         settingsRepository = App.instance.settingsRepository
+
         return START_STICKY
     }
 
@@ -197,21 +201,13 @@ class TrackLocationService() : Service(), LocationTracker {
             taskReadSettings.start(ReadSettingsInteractor.Param(), false)
         } else false
 
-
-//        if (LocationTracker.Status.IDLE == status) {
-//            locationManager.connect(null, locationManagerCallback)
-//            changeStatus(LocationTracker.Status.CONNECTING)
-//            true
-//        } else false
-
-
     override fun disconnect() =
         if (LocationTracker.Status.CONNECTED == status) {  // Disconnect only for CONNECTED state, otherwise ignore, e.g. for RECORDING state
             locationManager.disconnect()
 
             activeTrackId?.let { trackId ->
                 taskStopTrack.start(
-                    StopTrackInteractor.Param(trackId, System.currentTimeMillis()),
+                    StopTrackInteractor.Param(trackId, System.currentTimeMillis(), configDistance),
                     Unit
                 )
             }
@@ -256,16 +252,6 @@ class TrackLocationService() : Service(), LocationTracker {
             changeStatus(LocationTracker.Status.RETRIEVING_CONFIG)
             taskReadSettings.start(ReadSettingsInteractor.Param(), true)
         }
-//        if (status == LocationTracker.Status.IDLE) {
-//            locationManager.connect(null, locationManagerCallback)
-//            changeStatus(LocationTracker.Status.CONNECTING)
-//        }
-//        taskStartTrack.start(
-//            StartTrackInteractor.Param(
-//                generateName(),
-//                System.currentTimeMillis()
-//            ), Unit
-//        )
     }
 
     override fun stopRecording() {
@@ -275,7 +261,7 @@ class TrackLocationService() : Service(), LocationTracker {
             locationManager.disconnect()
 
             taskStopTrack.start(
-                StopTrackInteractor.Param(trackId, System.currentTimeMillis()),
+                StopTrackInteractor.Param(trackId, System.currentTimeMillis(), configDistance),
                 Unit
             )
         }
@@ -378,12 +364,21 @@ class TrackLocationService() : Service(), LocationTracker {
         )
 
     private fun handleStopTrack(succeeded: Boolean?, error: Throwable?) {
-        if (null != error) {
+        if (null != succeeded) {
+            if (!succeeded) {
+                Toast.makeText(
+                    this@TrackLocationService,
+                    resources.getString(R.string.service_track_was_not_saved),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        } else if (null != error) {
             Log.e(TAG, "Failed to stopTrack")
-            activeTrackId = null
+
         } else {
             Log.i(TAG, "Stop track succeedded: $succeeded")
         }
+        activeTrackId = null
     }
 
     private fun createStopTrackTask() =
@@ -426,10 +421,18 @@ class TrackLocationService() : Service(), LocationTracker {
             }
         )
 
-    private fun handleReadSettings(result: ReadSettingsInteractor.Result?, error: Throwable?, recRequest: Boolean) {
+    private fun handleReadSettings(
+        result: ReadSettingsInteractor.Result?,
+        error: Throwable?,
+        recRequest: Boolean
+    ) {
         val config = if (null != result) {
             LocationManager.ConnectionConfig(result.timePeriod)
         } else null
+
+        if (null != result) {
+            configDistance = result.distance
+        }
 
         Log.d(TAG, "config = $config")
         locationManager.connect(config, locationManagerCallback)
@@ -443,6 +446,7 @@ class TrackLocationService() : Service(), LocationTracker {
                 ), Unit
             )
         }
+
     }
 
     private fun createReadSettingsTask() =

@@ -2,8 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#e0e077">
+    android:layout_height="match_parent">
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view"
@@ -18,7 +17,7 @@
             android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/accuracy_layout"
+                android:id="@+id/gps_accuracy_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
@@ -30,7 +29,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
                     android:layout_marginEnd="5dp"
-                    android:text="@string/settings_gps_accuracy" />
+                    android:text="@string/settings_gps_accuracy_title" />
 
                 <TextView
                     android:id="@+id/time_period_text_view"
@@ -61,7 +60,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
                     android:layout_marginEnd="5dp"
-                    android:text="@string/settings_track_record_sensitivity" />
+                    android:text="@string/settings_track_record_sensitivity_title" />
 
                 <TextView
                     android:id="@+id/track_sensitivity_text_view"

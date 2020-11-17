@@ -15,6 +15,9 @@ class WriteSettingsInteractorImpl(private val settingsRepository: SettingsReposi
                 if (null != param.timePeriod) {
                     settingsRepository.setTimePeriod(param.timePeriod)
                 }
+                if (null != param.distance) {
+                    settingsRepository.setRecordDistanceSensitivity(param.distance)
+                }
 
                 WriteSettingsInteractor.Result()
             }

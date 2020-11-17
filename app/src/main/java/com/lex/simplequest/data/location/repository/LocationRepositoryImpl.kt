@@ -16,6 +16,7 @@ import com.lex.simplequest.data.location.repository.queries.TrackByNameQuerySpec
 import com.lex.simplequest.device.content.provider.QuestContract
 import com.lex.simplequest.domain.model.Point
 import com.lex.simplequest.domain.model.Track
+import com.lex.simplequest.domain.model.distance
 import com.lex.simplequest.domain.repository.LocationRepository
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
@@ -98,37 +99,33 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
         return readTrack.id
     }
 
-    override fun stopTrack(id: Long, endTime: Long): Boolean {
+    override fun stopTrack(id: Long, endTime: Long, minimalDistance: Long?): Boolean {
         checkNotClosed()
         val spec = TrackByIdQuerySpecification(id)
         val readTrack = getTracks(spec).first()
-        val updatedTrack = readTrack.copy(endTime = endTime)
-        val updatedRows = context.contentResolver.update(
-            QuestContract.Tracks.CONTENT_URI,
-            updatedTrack.toContentValues(),
-            (spec as LocationQuerySpecificationImpl).getWhereClause(),
-            null
-        )
-        Log.d("qaz", "updatedRows = $updatedRows")
-        return updatedRows > 0
+        val trackDistance = readTrack.distance()
+        val keepTrack = null == minimalDistance || trackDistance >= minimalDistance
+        if (keepTrack) {
+            val updatedTrack = readTrack.copy(endTime = endTime)
+            val updatedRows = context.contentResolver.update(
+                QuestContract.Tracks.CONTENT_URI,
+                updatedTrack.toContentValues(),
+                (spec as LocationQuerySpecificationImpl).getWhereClause(),
+                null
+            )
+            Log.d("qaz", "updatedRows = $updatedRows")
+            return updatedRows > 0
+        } else {
+            // remove track
+            context.contentResolver.delete(
+                QuestContract.Tracks.CONTENT_URI,
+                (spec as LocationQuerySpecificationImpl).getWhereClause(),
+                null
+            )
+            Log.w("qaz", "track was no saved as it distance is $trackDistance rather low")
+            return false
+        }
     }
-
-//    override fun getTracks(spec: LocationRepository.LocationQuerySpecification): List<Track> {
-//        checkNotClosed()
-//        return context.contentResolver.query(
-//            QuestContract.Tracks.CONTENT_URI,
-//            null,
-//            (spec as LocationQuerySpecificationImpl).getWhereClause(),
-//            null,
-//            QuestContract.Tracks.COLUMN_START_TIME + " DESC"
-//        )?.use { cursor ->
-//            if (cursor.moveToFirst()) {
-//                handleTrackCursor(cursor)
-//            } else {
-//                emptyList()
-//            }
-//        } ?: emptyList()
-//    }
 
     override fun getTracks(spec: LocationRepository.LocationQuerySpecification): List<Track> {
         checkNotClosed()

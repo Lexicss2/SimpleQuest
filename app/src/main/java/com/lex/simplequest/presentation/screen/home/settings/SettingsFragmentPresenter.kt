@@ -2,12 +2,10 @@ package com.lex.simplequest.presentation.screen.home.settings
 
 import com.lex.core.log.LogFactory
 import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracker
-import com.lex.simplequest.domain.repository.SettingsRepository
 import com.lex.simplequest.domain.settings.interactor.ReadSettingsInteractor
 import com.lex.simplequest.domain.settings.interactor.WriteSettingsInteractor
 import com.lex.simplequest.presentation.base.BaseMvpPresenter
 import com.lex.simplequest.presentation.screen.home.MainRouter
-import com.lex.simplequest.presentation.screen.home.home.HomeFragmentPresenter
 import com.lex.simplequest.presentation.utils.asRxSingle
 import com.lex.simplequest.presentation.utils.tasks.SingleResultTask
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -27,13 +25,17 @@ class SettingsFragmentPresenter(
         private const val TAG = "SettingsFragmentPresenter"
         private const val TASK_READ_SETTINGS = "task_read_settings"
         private const val TASK_WRITE_SETTINGS = "task_write_settings"
-        private val PERIODS = arrayOf("1", "2", "5", "10", "30", "60", "120")
+        private val PERIODS = arrayOf("1", "2", "5", "10", "30", "60", "120") // in seconds
+        private val SENSITIVITY_DISTANCES =
+            arrayOf("0", "10", "50", "100", "500", "1000", "2000") // in meters
+        private val MIN_DURATIONS = arrayOf("0", "5", "10", "20", "50", "100", "200") // in meters
     }
 
     private val log = logFactory.get(TAG)
     private val taskReadSettings = createReadSettingsTask()
     private val taskWriteSettings = createWriteSettingsTask()
     private var timePeriod: Long? = null
+    private var distance: Long? = null
 
     override fun start() {
         super.start()
@@ -47,18 +49,26 @@ class SettingsFragmentPresenter(
         taskWriteSettings.stop()
     }
 
-    override fun accuracyClicked() {
-        ui.showAccuracyPopup(timePeriod, PERIODS)
+    override fun gpsAccuracyClicked() {
+        ui.showGpsAccuracyPopup(timePeriod, PERIODS)
     }
 
     override fun selectedTimePeriod(timePeriodMs: Long) {
         this.timePeriod = timePeriodMs
-        // set in repository
         if (!taskWriteSettings.isRunning()) {
-            taskWriteSettings.start(WriteSettingsInteractor.Param(timePeriod), Unit)
+            taskWriteSettings.start(WriteSettingsInteractor.Param(timePeriod, null), Unit)
         }
-        // set in LocationManager
-        // TODO: not finished
+    }
+
+    override fun trackSensitivityClicked() {
+        ui.showTrackSensitivityPopup(distance, SENSITIVITY_DISTANCES)
+    }
+
+    override fun selectDistance(distance: Long) {
+        this.distance = distance
+        if (!taskWriteSettings.isRunning()) {
+            taskWriteSettings.start(WriteSettingsInteractor.Param(null, distance), Unit)
+        }
     }
 
     override fun reload() {
@@ -69,12 +79,14 @@ class SettingsFragmentPresenter(
         if (isUiBinded) {
             ui.showProgress(taskReadSettings.isRunning())
             ui.showTimePeriod(timePeriod)
+            ui.showDistance(distance)
         }
     }
 
     private fun handleReadSettings(result: ReadSettingsInteractor.Result?, error: Throwable?) {
         if (null != result) {
             timePeriod = result.timePeriod
+            distance = result.distance
         } else if (null != error) {
             // show error
         }

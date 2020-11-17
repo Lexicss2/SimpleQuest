@@ -12,7 +12,7 @@ class StopTrackInteractorImpl(private val locationRepository: LocationRepository
     override fun createSingle(param: StopTrackInteractor.Param): Single<StopTrackInteractor.Result> =
         Single.just(true)
             .map {
-                val succeeded = locationRepository.stopTrack(param.id, param.endTime)
+                val succeeded = locationRepository.stopTrack(param.id, param.endTime, param.minimalDistance)
                 StopTrackInteractor.Result(succeeded)
             }
             .subscribeOn(Schedulers.io())

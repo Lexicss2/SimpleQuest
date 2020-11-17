@@ -5,5 +5,5 @@ import com.lex.simplequest.domain.interactor.SingleResultInteractor
 interface ReadSettingsInteractor :
     SingleResultInteractor<ReadSettingsInteractor.Param, ReadSettingsInteractor.Result> {
     class Param
-    data class Result(val timePeriod: Long)
+    data class Result(val timePeriod: Long, val distance: Long)
 }

@@ -14,7 +14,8 @@ class ReadSettingsInteractorImpl(private val settingsRepository: SettingsReposit
         Single.just(param)
             .map {
                 val timePeriod = settingsRepository.getTimePeriod()
-                ReadSettingsInteractor.Result(timePeriod)
+                val distance = settingsRepository.getRecordDistanceSensitivity()
+                ReadSettingsInteractor.Result(timePeriod, distance)
             }
             .subscribeOn(Schedulers.io())
 }

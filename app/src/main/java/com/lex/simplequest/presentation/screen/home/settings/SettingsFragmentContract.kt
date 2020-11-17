@@ -7,13 +7,17 @@ interface SettingsFragmentContract {
     interface Ui : BaseMvpLceContract.Ui {
         fun showProgress(show: Boolean)
         fun showTimePeriod(timePeriodMs: Long?)
-        fun showAccuracyPopup(timePeriodMs: Long?, periods: Array<String>)
+        fun showDistance(distance: Long?)
+        fun showGpsAccuracyPopup(timePeriodMs: Long?, periods: Array<String>)
+        fun showTrackSensitivityPopup(distance: Long?, distances: Array<String>)
     }
 
     interface Presenter : BaseMvpLceContract.Presenter<Ui, Presenter.State> {
         fun selectedTimePeriod(timePeriodMs: Long)
+        fun gpsAccuracyClicked()
+        fun selectDistance(distance: Long)
+        fun trackSensitivityClicked()
 
-        fun accuracyClicked()
         interface State : BaseMvpLceContract.Presenter.State
     }
 }
