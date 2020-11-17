@@ -1,6 +1,7 @@
 package com.lex.simplequest.presentation.screen.home.settings
 
 import com.lex.core.log.LogFactory
+import com.lex.simplequest.Config
 import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracker
 import com.lex.simplequest.domain.settings.interactor.ReadSettingsInteractor
 import com.lex.simplequest.domain.settings.interactor.WriteSettingsInteractor
@@ -25,9 +26,9 @@ class SettingsFragmentPresenter(
         private const val TAG = "SettingsFragmentPresenter"
         private const val TASK_READ_SETTINGS = "task_read_settings"
         private const val TASK_WRITE_SETTINGS = "task_write_settings"
-        private val PERIODS = arrayOf("1", "2", "5", "10", "30", "60", "120") // in seconds
-        private val SENSITIVITY_DISTANCES =
-            arrayOf("0", "10", "50", "100", "500", "1000", "2000") // in meters
+//        private val PERIODS = arrayOf("1", "2", "5", "10", "30", "60", "120") // in seconds
+//        private val SENSITIVITY_DISTANCES =
+//            arrayOf("0", "10", "50", "100", "500", "1000", "2000") // in meters
         private val MIN_DURATIONS = arrayOf("0", "5", "10", "20", "50", "100", "200") // in meters
     }
 
@@ -50,7 +51,7 @@ class SettingsFragmentPresenter(
     }
 
     override fun gpsAccuracyClicked() {
-        ui.showGpsAccuracyPopup(timePeriod, PERIODS)
+        ui.showGpsAccuracyPopup(timePeriod, Config.GPS_ACCURACY_TIME_PERIODS_S)
     }
 
     override fun selectedTimePeriod(timePeriodMs: Long) {
@@ -61,7 +62,7 @@ class SettingsFragmentPresenter(
     }
 
     override fun trackSensitivityClicked() {
-        ui.showTrackSensitivityPopup(distance, SENSITIVITY_DISTANCES)
+        ui.showTrackSensitivityPopup(distance, Config.MINIMAL_TRACK_DISTANCES_M)
     }
 
     override fun selectDistance(distance: Long) {
