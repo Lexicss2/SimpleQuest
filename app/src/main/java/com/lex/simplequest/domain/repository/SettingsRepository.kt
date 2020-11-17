@@ -5,4 +5,8 @@ interface SettingsRepository {
     fun setTimePeriod(value: Long)
     fun getRecordDistanceSensitivity(): Long
     fun setRecordDistanceSensitivity(value: Long)
+    fun getMinimalDisplacement(): Long
+    fun setMinimalDisplacement(value: Long)
+    fun getMinimalBatteryLevel(): Int
+    fun setMinimalBatteryLevel(value: Int)
 }

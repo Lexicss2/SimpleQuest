@@ -17,6 +17,7 @@ interface LocationManager {
     }
 
     data class ConnectionConfig(
-        val timePeriodMs: Long
+        val timePeriodMs: Long,
+        val displacement: Long
     )
 }

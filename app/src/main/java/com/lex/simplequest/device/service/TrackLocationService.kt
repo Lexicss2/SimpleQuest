@@ -1,11 +1,14 @@
 package com.lex.simplequest.device.service
 
 import android.app.*
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
+import android.os.BatteryManager
 import android.os.Binder
 import android.os.Build
-import android.os.Handler
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
@@ -54,6 +57,7 @@ class TrackLocationService() : Service(), LocationTracker {
     private var status: LocationTracker.Status = LocationTracker.Status.NONE
     private var activeTrackId: Long? = null
     private var configDistance: Long? = null
+    private var configBatteryLevel: Int? = null
     private val taskStartTrack = createStartTrackTask()
     private val taskStopTrack = createStopTrackTask()
     private val taskAddPoint = createAddPointTask()
@@ -153,10 +157,27 @@ class TrackLocationService() : Service(), LocationTracker {
         }
     }
 
+    private val batteryInfoReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
+            Log.v(TAG, "battery level changed to $level")
+
+            if (LocationTracker.Status.RECORDING == status ) {
+                configBatteryLevel?.let { configgedLevel ->
+                    if (level < configgedLevel) {
+                        Log.w(TAG, "Recording is stopped because of low battery level")
+                        stopRecording()
+                    }
+                }
+            }
+        }
+    }
+
     override fun onCreate() {
         Log.i(TAG, "LT onCreate --------")
         super.onCreate()
         changeStatus(LocationTracker.Status.IDLE)
+        registerReceiver(batteryInfoReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -184,6 +205,7 @@ class TrackLocationService() : Service(), LocationTracker {
     override fun onDestroy() {
         Log.e(TAG, "LT onDestroy ---------")
         super.onDestroy()
+        unregisterReceiver(batteryInfoReceiver)
         changeStatus(LocationTracker.Status.NONE)
         locationListeners.clear()
         taskStartTrack.stop()
@@ -427,11 +449,12 @@ class TrackLocationService() : Service(), LocationTracker {
         recRequest: Boolean
     ) {
         val config = if (null != result) {
-            LocationManager.ConnectionConfig(result.timePeriod)
+            LocationManager.ConnectionConfig(result.timePeriod, result.displacement)
         } else null
 
         if (null != result) {
             configDistance = result.distance
+            configBatteryLevel = result.batteryLevel
         }
 
         Log.d(TAG, "config = $config")

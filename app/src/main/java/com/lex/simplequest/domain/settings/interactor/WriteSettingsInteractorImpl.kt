@@ -18,6 +18,12 @@ class WriteSettingsInteractorImpl(private val settingsRepository: SettingsReposi
                 if (null != param.distance) {
                     settingsRepository.setRecordDistanceSensitivity(param.distance)
                 }
+                if (null != param.displacement) {
+                    settingsRepository.setMinimalDisplacement(param.displacement)
+                }
+                if (null != param.batteryLevel) {
+                    settingsRepository.setMinimalBatteryLevel(param.batteryLevel)
+                }
 
                 WriteSettingsInteractor.Result()
             }

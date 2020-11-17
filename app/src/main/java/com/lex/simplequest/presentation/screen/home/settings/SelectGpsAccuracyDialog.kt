@@ -10,12 +10,11 @@ import com.lex.simplequest.Config
 import com.lex.simplequest.R
 import com.lex.simplequest.databinding.DialogSelectGpsAccuracyBinding
 import com.lex.simplequest.presentation.base.BaseDialogFragment
-import java.lang.IllegalStateException
 
 class SelectGpsAccuracyDialog : BaseDialogFragment() {
     companion object {
         private const val ARG_TIME_PERIOD_MS = "time_period_ms"
-        private const val ARG_TIME_PERIOD_LIST = "time_periods_list"
+        private const val ARG_TIME_PERIODS_LIST = "time_periods_list"
 
         fun newInstance(
             timePeriod: Long?,
@@ -26,7 +25,7 @@ class SelectGpsAccuracyDialog : BaseDialogFragment() {
                     if (null != timePeriod) {
                         putLong(ARG_TIME_PERIOD_MS, timePeriod)
                     }
-                    putStringArray(ARG_TIME_PERIOD_LIST, timePeriodsArray)
+                    putStringArray(ARG_TIME_PERIODS_LIST, timePeriodsArray)
                 }
             }
     }
@@ -48,7 +47,7 @@ class SelectGpsAccuracyDialog : BaseDialogFragment() {
             }
         }
 
-        val array = arguments!!.getStringArray(ARG_TIME_PERIOD_LIST)!!
+        val array = arguments!!.getStringArray(ARG_TIME_PERIODS_LIST)!!
         val timePeriod =
             if (arguments!!.containsKey(ARG_TIME_PERIOD_MS)) arguments!!.getLong(ARG_TIME_PERIOD_MS) / 1000L
             else Config.DEFAULT_GPS_ACCURACY_TIME_PERIOD_MS / 1000L
@@ -79,10 +78,6 @@ class SelectGpsAccuracyDialog : BaseDialogFragment() {
         super.onDestroyView()
         _viewBinding = null
     }
-
-//    fun selectValueIndex(index: Int) {
-//        viewBinding.periodsPicker.value = index
-//    }
 
     interface OnTimePeriodSelectedListener {
         fun onTimePeriodSelected(timePeriodMs: Long)

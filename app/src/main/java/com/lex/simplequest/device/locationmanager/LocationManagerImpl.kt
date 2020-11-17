@@ -10,6 +10,7 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.*
+import com.lex.simplequest.Config
 import com.lex.simplequest.domain.exception.LocationConnectionFailedException
 import com.lex.simplequest.domain.exception.PermissionDeniedException
 import com.lex.simplequest.domain.locationmanager.LocationManager
@@ -25,9 +26,7 @@ class LocationManagerImpl(
 
     companion object {
         private const val PLAY_SERVICES_RESOLUTION_REQUEST = 9000
-        private const val DEFAULT_UPDATE_INTERVAL = 5000L
         private const val FASTEST_INTERVAL = 5000L
-        private const val SMALLEST_DISPLACEMENT = 5.0f
     }
 
     private val context = ctx
@@ -35,7 +34,6 @@ class LocationManagerImpl(
     private var locationRequest: LocationRequest? = null
 
     private var locationManagerCallback: LocationManager.Callback? = null
-    //private var timePeriodMs: Long = DEFAULT_UPDATE_INTERVAL
     private var connectionConfig: LocationManager.ConnectionConfig? = null
 
     private val connectionCallbacks = object : GoogleApiClient.ConnectionCallbacks {
@@ -47,12 +45,13 @@ class LocationManagerImpl(
                 throw PermissionDeniedException("Location permissions was not granted")
             }
             val config = connectionConfig
-            val timeInterval = config?.timePeriodMs ?: DEFAULT_UPDATE_INTERVAL
+            val timeInterval = config?.timePeriodMs ?: Config.DEFAULT_GPS_ACCURACY_TIME_PERIOD_MS
+            val displacement = config?.displacement ?: Config.DEFAULT_MINIMAL_DISPLACEMENT
             locationRequest = LocationRequest().apply {
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
                 interval = timeInterval
                 fastestInterval = min(timeInterval, FASTEST_INTERVAL)
-                smallestDisplacement = SMALLEST_DISPLACEMENT
+                smallestDisplacement = displacement.toFloat()
             }
 
             val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)

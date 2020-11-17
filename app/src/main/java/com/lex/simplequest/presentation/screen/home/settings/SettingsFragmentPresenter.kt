@@ -26,10 +26,6 @@ class SettingsFragmentPresenter(
         private const val TAG = "SettingsFragmentPresenter"
         private const val TASK_READ_SETTINGS = "task_read_settings"
         private const val TASK_WRITE_SETTINGS = "task_write_settings"
-//        private val PERIODS = arrayOf("1", "2", "5", "10", "30", "60", "120") // in seconds
-//        private val SENSITIVITY_DISTANCES =
-//            arrayOf("0", "10", "50", "100", "500", "1000", "2000") // in meters
-        private val MIN_DURATIONS = arrayOf("0", "5", "10", "20", "50", "100", "200") // in meters
     }
 
     private val log = logFactory.get(TAG)
@@ -37,6 +33,8 @@ class SettingsFragmentPresenter(
     private val taskWriteSettings = createWriteSettingsTask()
     private var timePeriod: Long? = null
     private var distance: Long? = null
+    private var displacement: Long? = null
+    private var batteryLevel: Int? = null
 
     override fun start() {
         super.start()
@@ -51,24 +49,53 @@ class SettingsFragmentPresenter(
     }
 
     override fun gpsAccuracyClicked() {
-        ui.showGpsAccuracyPopup(timePeriod, Config.GPS_ACCURACY_TIME_PERIODS_S)
+        ui.showGpsAccuracyPopup(timePeriod, Config.AVAILABLE_GPS_ACCURACY_TIME_PERIODS_S)
+    }
+
+    override fun trackSensitivityClicked() {
+        ui.showTrackSensitivityPopup(distance, Config.AVAILABLE_TRACK_DISTANCES_M)
+    }
+
+    override fun displacementClicked() {
+        ui.showDisplacementPopup(displacement, Config.AVAILABLE_DISPLACEMENTS_M)
+    }
+
+    override fun batteryLevelClicked() {
+        ui.showBatteryLevelPopup(batteryLevel, Config.AVAILABLE_BATTERY_LEVELS)
+    }
+
+    override fun aboutClicked() {
+        ui.showAboutPopup()
     }
 
     override fun selectedTimePeriod(timePeriodMs: Long) {
         this.timePeriod = timePeriodMs
         if (!taskWriteSettings.isRunning()) {
-            taskWriteSettings.start(WriteSettingsInteractor.Param(timePeriod, null), Unit)
+            taskWriteSettings.start(WriteSettingsInteractor.Param(timePeriod, null, null, null), Unit)
         }
-    }
-
-    override fun trackSensitivityClicked() {
-        ui.showTrackSensitivityPopup(distance, Config.MINIMAL_TRACK_DISTANCES_M)
+        updateUi(0)
     }
 
     override fun selectDistance(distance: Long) {
         this.distance = distance
         if (!taskWriteSettings.isRunning()) {
-            taskWriteSettings.start(WriteSettingsInteractor.Param(null, distance), Unit)
+            taskWriteSettings.start(WriteSettingsInteractor.Param(null, distance, null, null), Unit)
+        }
+        updateUi(0)
+    }
+
+    override fun selectDisplacement(displacement: Long) {
+        this.displacement = displacement
+        if (!taskWriteSettings.isRunning()) {
+            taskWriteSettings.start(WriteSettingsInteractor.Param(null, null, displacement, null), Unit)
+        }
+        updateUi(0)
+    }
+
+    override fun selectBatteryLevel(batteryLevel: Int) {
+        this.batteryLevel = batteryLevel
+        if (!taskWriteSettings.isRunning()) {
+            taskWriteSettings.start(WriteSettingsInteractor.Param(null, null, null, batteryLevel), Unit)
         }
     }
 
@@ -81,6 +108,8 @@ class SettingsFragmentPresenter(
             ui.showProgress(taskReadSettings.isRunning())
             ui.showTimePeriod(timePeriod)
             ui.showDistance(distance)
+            ui.showDisplacement(displacement)
+            ui.showBatteryLevel(batteryLevel)
         }
     }
 
@@ -88,6 +117,8 @@ class SettingsFragmentPresenter(
         if (null != result) {
             timePeriod = result.timePeriod
             distance = result.distance
+            displacement = result.displacement
+            batteryLevel = result.batteryLevel
         } else if (null != error) {
             // show error
         }

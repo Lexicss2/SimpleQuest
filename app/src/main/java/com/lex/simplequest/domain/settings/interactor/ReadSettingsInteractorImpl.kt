@@ -15,7 +15,9 @@ class ReadSettingsInteractorImpl(private val settingsRepository: SettingsReposit
             .map {
                 val timePeriod = settingsRepository.getTimePeriod()
                 val distance = settingsRepository.getRecordDistanceSensitivity()
-                ReadSettingsInteractor.Result(timePeriod, distance)
+                val displacement = settingsRepository.getMinimalDisplacement()
+                val batteryLevel = settingsRepository.getMinimalBatteryLevel()
+                ReadSettingsInteractor.Result(timePeriod, distance, displacement, batteryLevel)
             }
             .subscribeOn(Schedulers.io())
 }

@@ -1,7 +1,6 @@
 package com.lex.simplequest.presentation.screen.home.settings
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,10 +18,16 @@ import com.softeq.android.mvp.VoidPresenterStateHolder
 
 class SettingsFragment :
     BaseMvpLceFragment<SettingsFragmentContract.Ui, SettingsFragmentContract.Presenter.State, SettingsFragmentContract.Presenter>(),
-    SettingsFragmentContract.Ui, SelectGpsAccuracyDialog.OnTimePeriodSelectedListener, SelectTrackSensitivityDialog.OnDistanceSelectedListener {
+    SettingsFragmentContract.Ui, SelectGpsAccuracyDialog.OnTimePeriodSelectedListener,
+    SelectTrackSensitivityDialog.OnDistanceSelectedListener,
+    SelectMinimalDisplacementDialog.OnMinimalDisplacementSelectedListener,
+    SelectBatteryLevelDialog.OnBatteryLevelSelectedListener {
     companion object {
         private const val DLG_SELECT_GPS_ACCURACY = "select_gps_accuracy"
         private const val DLG_SELECT_TRACK_SENSITIVITY = "select_track_sensitivity"
+        private const val DLG_SELECT_DISPLACEMENT = "select_displacement"
+        private const val DLG_SELECT_BATTERY_LEVEL = "select_battery_level"
+        private const val DLG_ABOUT = "about"
 
         fun newInstance(): SettingsFragment =
             SettingsFragment().apply {
@@ -52,6 +57,15 @@ class SettingsFragment :
             }
             trackSensitivityLayout.setOnClickListener {
                 presenter.trackSensitivityClicked()
+            }
+            displacementLayout.setOnClickListener {
+                presenter.displacementClicked()
+            }
+            batteryLevelLayout.setOnClickListener {
+                presenter.batteryLevelClicked()
+            }
+            aboutLayout.setOnClickListener {
+                presenter.aboutClicked()
             }
         }
         super.onViewCreated(view, savedInstanceState)
@@ -100,18 +114,31 @@ class SettingsFragment :
         }
     }
 
-    override fun showGpsAccuracyPopup(timePeriodMs: Long?, periods: Array<String>) {
-        if (!childFragmentManager.isDialogShown(DLG_SELECT_GPS_ACCURACY)) {
-            val dlg = SelectGpsAccuracyDialog.newInstance(timePeriodMs, periods).apply {
-                //setTargetFragment(this@SettingsFragment, 1)
+    override fun showDisplacement(displacement: Long?) {
+        viewBinding.layoutContent.apply {
+            if (null != displacement) {
+                displacementTextView.text =
+                    String.format(
+                        resources.getString(R.string.settings_minimal_displacement_value),
+                        displacement
+                    )
             }
+        }
+    }
 
-            childFragmentManager.showDialog(dlg, DLG_SELECT_GPS_ACCURACY)
+    override fun showBatteryLevel(batteryLevel: Int?) {
+        viewBinding.layoutContent.apply {
+            if (null != batteryLevel) {
+                batteryLevelTextView.text =
+                    String.format(
+                        resources.getString(R.string.settings_minimal_battery_level_value),
+                        batteryLevel
+                    )
+            }
         }
     }
 
     override fun onTimePeriodSelected(timePeriodMs: Long) {
-        Log.d("qaz", "onTimePeriodSelected: $timePeriodMs")
         presenter.selectedTimePeriod(timePeriodMs)
     }
 
@@ -119,10 +146,46 @@ class SettingsFragment :
         presenter.selectDistance(distanceM)
     }
 
-    override fun showTrackSensitivityPopup(distance: Long?, distances: Array<String>) {
+    override fun onMinimalDisplacementSelected(minimalDisplacement: Long) {
+        presenter.selectDisplacement(minimalDisplacement)
+    }
+
+    override fun onBatteryLevelSelected(batteryLevelPc: Int) {
+        presenter.selectBatteryLevel(batteryLevelPc)
+    }
+
+    override fun showGpsAccuracyPopup(timePeriodMs: Long?, availablePeriods: Array<String>) {
+        if (!childFragmentManager.isDialogShown(DLG_SELECT_GPS_ACCURACY)) {
+            val dlg = SelectGpsAccuracyDialog.newInstance(timePeriodMs, availablePeriods)
+            childFragmentManager.showDialog(dlg, DLG_SELECT_GPS_ACCURACY)
+        }
+    }
+
+    override fun showTrackSensitivityPopup(distance: Long?, availableDistances: Array<String>) {
         if (!childFragmentManager.isDialogShown(DLG_SELECT_TRACK_SENSITIVITY)) {
-            val dlg = SelectTrackSensitivityDialog.newInstance(distance, distances)
+            val dlg = SelectTrackSensitivityDialog.newInstance(distance, availableDistances)
             childFragmentManager.showDialog(dlg, DLG_SELECT_TRACK_SENSITIVITY)
+        }
+    }
+
+    override fun showDisplacementPopup(displacement: Long?, availableDisplacements: Array<String>) {
+        if (!childFragmentManager.isDialogShown(DLG_SELECT_DISPLACEMENT)) {
+            val dlg = SelectMinimalDisplacementDialog.newInstance(displacement, availableDisplacements)
+            childFragmentManager.showDialog(dlg, DLG_SELECT_DISPLACEMENT)
+        }
+    }
+
+    override fun showBatteryLevelPopup(batteryLevel: Int?, availableBatteryLevels: Array<String>) {
+        if (!childFragmentManager.isDialogShown(DLG_SELECT_BATTERY_LEVEL)) {
+            val dlg = SelectBatteryLevelDialog.newInstance(batteryLevel, availableBatteryLevels)
+            childFragmentManager.showDialog(dlg, DLG_SELECT_BATTERY_LEVEL)
+        }
+    }
+
+    override fun showAboutPopup() {
+        if (!childFragmentManager.isDialogShown(DLG_ABOUT)) {
+            val dlg = AboutDialog.newInstance()
+            childFragmentManager.showDialog(dlg, DLG_ABOUT)
         }
     }
 

@@ -11,6 +11,8 @@ class SettingsRepositoryImpl(ctx: Context) : SettingsRepository {
         private const val PREF_SETTINGS_FILE = "common_settings"
         private const val PREF_TIME_PERIOD = "time_period"
         private const val PREF_RECORD_DISTANCE_SENSITIVITY = "record_distance_sensitivity"
+        private const val PREF_MINIMAL_DISPLACEMENT = "minimal_displacement"
+        private const val PREF_MINIMAL_BATTERY_LEVEL = "minimal_battery_level"
     }
 
     private val context = ctx
@@ -33,6 +35,24 @@ class SettingsRepositoryImpl(ctx: Context) : SettingsRepository {
     override fun setRecordDistanceSensitivity(value: Long) {
         prefs.edit()
             .putLong(PREF_RECORD_DISTANCE_SENSITIVITY, value)
+            .apply()
+    }
+
+    override fun getMinimalDisplacement(): Long =
+        prefs.getLong(PREF_MINIMAL_DISPLACEMENT, Config.DEFAULT_MINIMAL_DISPLACEMENT)
+
+    override fun setMinimalDisplacement(value: Long) {
+        prefs.edit()
+            .putLong(PREF_MINIMAL_DISPLACEMENT, value)
+            .apply()
+    }
+
+    override fun getMinimalBatteryLevel(): Int =
+        prefs.getInt(PREF_MINIMAL_BATTERY_LEVEL, Config.DEFAULT_BATTERY_LEVEL_PC)
+
+    override fun setMinimalBatteryLevel(value: Int) {
+        prefs.edit()
+            .putInt(PREF_MINIMAL_BATTERY_LEVEL, value)
             .apply()
     }
 }
