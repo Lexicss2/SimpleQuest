@@ -12,7 +12,7 @@ interface LocationTracker {
     fun disconnect(): Boolean
     fun isConnecting(): Boolean
     fun isConnected(): Boolean
-    fun startRecording()// connect and start recording
+    fun startRecording(listener: StartRecordResultListener?)// connect and start recording
     fun stopRecording() // stop recording and disconnect
     fun isRecording(): Boolean
     fun getLastTrack(): Track?
@@ -32,6 +32,11 @@ interface LocationTracker {
         fun onLocationUpdated(location: Location)
         fun onStatusUpdated(status: Status)
         fun onLocationAvailable(isAvailable: Boolean)
+    }
+
+    interface StartRecordResultListener {
+        fun onRecordStartSuccess(trackId: Long)
+        fun onRecordStartFailed(throwable: Throwable)
     }
 
     enum class Status {

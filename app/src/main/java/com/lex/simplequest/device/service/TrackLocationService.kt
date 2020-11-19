@@ -32,6 +32,7 @@ import com.lex.simplequest.presentation.utils.asRxSingle
 import com.lex.simplequest.presentation.utils.tasks.MultiResultTask
 import com.lex.simplequest.presentation.utils.tasks.SingleResultTask
 import io.reactivex.android.schedulers.AndroidSchedulers
+import java.lang.IllegalStateException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
@@ -58,6 +59,7 @@ class TrackLocationService() : Service(), LocationTracker {
     private var activeTrackId: Long? = null
     private var configDistance: Long? = null
     private var configBatteryLevel: Int? = null
+    private var startRecordResultListener: LocationTracker.StartRecordResultListener? = null
     private val taskStartTrack = createStartTrackTask()
     private val taskStopTrack = createStopTrackTask()
     private val taskAddPoint = createAddPointTask()
@@ -244,7 +246,9 @@ class TrackLocationService() : Service(), LocationTracker {
     override fun isConnected(): Boolean =
         LocationTracker.Status.CONNECTED == status || LocationTracker.Status.RECORDING == status
 
-    override fun startRecording() {
+    override fun startRecording(listener: LocationTracker.StartRecordResultListener?) {
+        startRecordResultListener = listener
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val pendingIntent: PendingIntent =
                 Intent(this, MainActivity::class.java).let { notificationIntent ->
@@ -273,6 +277,8 @@ class TrackLocationService() : Service(), LocationTracker {
             }
             changeStatus(LocationTracker.Status.RETRIEVING_CONFIG)
             taskReadSettings.start(ReadSettingsInteractor.Param(), true)
+        } else {
+            startRecordResultListener?.onRecordStartFailed(IllegalStateException("Recording already started, status = $status"))
         }
     }
 
@@ -361,12 +367,15 @@ class TrackLocationService() : Service(), LocationTracker {
         if (null != trackId) {
             Log.i(TAG, "track inserted successfully, id = $trackId")
             activeTrackId = trackId
+            startRecordResultListener?.onRecordStartSuccess(trackId)
         } else if (null != error) {
             Log.e(TAG, "error inserting track: ${error.localizedMessage}")
             if (LocationTracker.Status.RECORDING == status) {
                 changeStatus(LocationTracker.Status.CONNECTED)
             }
+            startRecordResultListener?.onRecordStartFailed(error)
         }
+        startRecordResultListener = null
     }
 
     private fun createStartTrackTask() =
