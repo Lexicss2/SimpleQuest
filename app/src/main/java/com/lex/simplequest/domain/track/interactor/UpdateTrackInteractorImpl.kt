@@ -1,11 +1,9 @@
 package com.lex.simplequest.domain.track.interactor
 
-import com.lex.simplequest.data.location.repository.queries.TrackByIdQuerySpecification
 import com.lex.simplequest.domain.interactor.RxSingleResultInteractor
 import com.lex.simplequest.domain.repository.LocationRepository
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import java.lang.IllegalStateException
 
 class UpdateTrackInteractorImpl(
     private val locationRepository: LocationRepository

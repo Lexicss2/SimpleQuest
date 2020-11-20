@@ -1,27 +1,46 @@
 package com.lex.simplequest.presentation.screen.home.tracks
 
+import android.Manifest
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.DialogFragment
 import com.lex.simplequest.App
 import com.lex.simplequest.R
 import com.lex.simplequest.databinding.FragmentTrackDetailsBinding
+import com.lex.simplequest.device.permission.repository.PermissionCheckerImpl
+import com.lex.simplequest.domain.model.Track
+import com.lex.simplequest.domain.model.toGpxFile
+import com.lex.simplequest.domain.permission.repository.PermissionChecker
+import com.lex.simplequest.domain.track.interactor.DeleteTrackInteractorImpl
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractorImpl
 import com.lex.simplequest.domain.track.interactor.UpdateTrackInteractorImpl
 import com.lex.simplequest.presentation.base.BaseMvpFragment
+import com.lex.simplequest.presentation.dialog.DialogFragmentClickListener
+import com.lex.simplequest.presentation.dialog.SimpleDialogFragment
 import com.lex.simplequest.presentation.screen.home.MainRouter
+import com.lex.simplequest.presentation.utils.isDialogShown
+import com.lex.simplequest.presentation.utils.showDialog
 import com.softeq.android.mvp.PresenterStateHolder
 
 class TrackDetailsFragment :
     BaseMvpFragment<TrackDetailsFragmentContract.Ui, TrackDetailsFragmentContract.Presenter.State, TrackDetailsFragmentContract.Presenter>(),
-    TrackDetailsFragmentContract.Ui {
+    TrackDetailsFragmentContract.Ui, DialogFragmentClickListener {
 
     companion object {
         private const val ARG_TRACK_ID = "track_id"
         private const val NO_VALUE = "???"
+        private const val DLG_DELETE = "delete"
+
+        private const val REQUEST_CODE_EXTERNAL_STORAGE_PERMISSIONS = 1002
 
         fun newInstance(trackId: Long): TrackDetailsFragment =
             TrackDetailsFragment().apply {
@@ -41,7 +60,7 @@ class TrackDetailsFragment :
         }
 
         override fun onTextChanged(s: CharSequence, p1: Int, p2: Int, p3: Int) {
-            val text = s.toString().trim().replace("\n","")
+            val text = s.toString().trim().replace("\n", "")
             presenter.nameChanged(text)
         }
 
@@ -59,7 +78,11 @@ class TrackDetailsFragment :
         .root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        viewBinding.trackNameEditText.addTextChangedListener(nameChangeListener)
+        viewBinding.apply {
+            trackNameEditText.addTextChangedListener(nameChangeListener)
+            shareButton.setOnClickListener { presenter.shareClicked() }
+            deleteButton.setOnClickListener { presenter.deleteClicked() }
+        }
         super.onViewCreated(view, savedInstanceState)
     }
 
@@ -95,18 +118,97 @@ class TrackDetailsFragment :
     }
 
     override fun setDistance(distance: String?) {
-        val text = if (null != distance) String.format(resources.getString(R.string.track_details_distance), distance) else NO_VALUE
+        val text = if (null != distance) String.format(
+            resources.getString(R.string.track_details_distance),
+            distance
+        ) else NO_VALUE
         viewBinding.distanceTextView.text = text
     }
 
     override fun setSpeed(speed: String?) {
-        val text = if (null != speed) String.format(resources.getString(R.string.track_details_speed), speed) else NO_VALUE
+        val text = if (null != speed) String.format(
+            resources.getString(R.string.track_details_speed),
+            speed
+        ) else NO_VALUE
         viewBinding.speedTextView.text = text
     }
 
     override fun setDuration(duration: String?) {
-        val text = if (null != duration) String.format(resources.getString(R.string.track_details_duration), duration) else NO_VALUE
+        val text = if (null != duration) String.format(
+            resources.getString(R.string.track_details_duration),
+            duration
+        ) else NO_VALUE
         viewBinding.durationTextView.text = text
+    }
+
+    override fun shareTrack(track: Track) {
+        val gpxFile = track.toGpxFile(context!!)
+        Log.d("qaz", "File len: ${gpxFile.length()}")
+        if (gpxFile.exists()) {
+            val intentShareFile = Intent(Intent.ACTION_SEND)
+            intentShareFile.type = "vnd.android.cursor.dir/email"
+            val path = Uri.fromFile(gpxFile)
+            intentShareFile.putExtra(
+                Intent.EXTRA_STREAM,
+                path
+            )
+            intentShareFile.putExtra(Intent.EXTRA_SUBJECT, "Sharing file...")
+            intentShareFile.putExtra(Intent.EXTRA_TEXT, "Sharing file text")
+            startActivity(Intent.createChooser(intentShareFile, "Share file"))
+        } else {
+            // error
+            Log.w("qaz", "file not exists")
+        }
+    }
+
+    override fun showDeletePopup() {
+        if (!childFragmentManager.isDialogShown(DLG_DELETE)) {
+            val dlg = SimpleDialogFragment.newInstance(
+                context!!.getString(R.string.track_details_delete_title),
+                context!!.getString(R.string.track_details_delete_description),
+                context!!.getString(R.string.ok),
+                context!!.getString(R.string.cancel)
+            )
+            childFragmentManager.showDialog(dlg, DLG_DELETE)
+        }
+    }
+
+    override fun requestPermissions(permissions: Set<PermissionChecker.Permission>) {
+        requestPermissions(
+            arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ), REQUEST_CODE_EXTERNAL_STORAGE_PERMISSIONS
+        )
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (REQUEST_CODE_EXTERNAL_STORAGE_PERMISSIONS == requestCode) {
+            if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                presenter.permissionsGranted()
+            }
+        }
+    }
+
+    override fun onDialogFragmentClick(
+        dialogFragment: DialogFragment,
+        dialog: DialogInterface,
+        which: Int
+    ) {
+        when (dialogFragment.tag) {
+            DLG_DELETE -> {
+                when (which) {
+                    DialogInterface.BUTTON_POSITIVE -> {
+                        presenter.deleteConfirmed()
+                    }
+                }
+            }
+        }
     }
 
     override fun getUi(): TrackDetailsFragmentContract.Ui =
@@ -118,6 +220,8 @@ class TrackDetailsFragment :
             args.getLong(ARG_TRACK_ID),
             ReadTracksInteractorImpl(App.instance.locationRepository),
             UpdateTrackInteractorImpl(App.instance.locationRepository),
+            DeleteTrackInteractorImpl(App.instance.locationRepository),
+            PermissionCheckerImpl(context!!),
             App.instance.logFactory,
             getTarget(MainRouter::class.java)!!
         )

@@ -8,6 +8,8 @@ interface PermissionChecker {
     enum class Permission {
         ACCESS_COARSE_LOCATION,
         ACCESS_FINE_LOCATION,
-        CALL_PHONE
+        CALL_PHONE,
+        READ_EXTERNAL_STORAGE,
+        WRITE_EXTERNAL_STORAGE
     }
 }

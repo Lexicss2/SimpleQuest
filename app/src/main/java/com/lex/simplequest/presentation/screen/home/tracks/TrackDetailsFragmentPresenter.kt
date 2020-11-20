@@ -8,6 +8,8 @@ import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.domain.model.averageSpeed
 import com.lex.simplequest.domain.model.distance
 import com.lex.simplequest.domain.model.duration
+import com.lex.simplequest.domain.permission.repository.PermissionChecker
+import com.lex.simplequest.domain.track.interactor.DeleteTrackInteractor
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractor
 import com.lex.simplequest.domain.track.interactor.UpdateTrackInteractor
 import com.lex.simplequest.presentation.base.BaseMvpPresenter
@@ -26,6 +28,8 @@ class TrackDetailsFragmentPresenter(
     private val trackId: Long,
     private val readTracksInteractor: ReadTracksInteractor,
     private val updateTrackInteractor: UpdateTrackInteractor,
+    private val deleteTrackInteractor: DeleteTrackInteractor,
+    private val permissionChecker: PermissionChecker,
     logFactory: LogFactory,
     router: MainRouter
 ) : BaseMvpPresenter<TrackDetailsFragmentContract.Ui, TrackDetailsFragmentContract.Presenter.State, MainRouter>(
@@ -36,7 +40,8 @@ class TrackDetailsFragmentPresenter(
     companion object {
         private const val TAG = "TrackDetailsFragmentPresenter"
         private const val TASK_READ_TRACK = "taskReadTrack"
-        private const val TASK_UPDATE_TRACK = "taskReadTrack"
+        private const val TASK_UPDATE_TRACK = "taskUpdateTrack"
+        private const val TASK_DELETE_TRACK = "taskDeleteTrack"
     }
 
     private val log = logFactory.get(TAG)
@@ -45,7 +50,8 @@ class TrackDetailsFragmentPresenter(
     private var track: Track? = null
     private val nameToUpdate: BehaviorSubject<String> = BehaviorSubject.create()
     private val taskUpdateTrackWhenChanged =
-        createUpdatTrackWhenChangedTask(nameToUpdate as Observable<String>)
+        createUpdateTrackWhenChangedTask(nameToUpdate as Observable<String>)
+    private val taskDeleteTrack = createDeleteTrackTask()
 
     override fun start() {
         super.start()
@@ -57,6 +63,7 @@ class TrackDetailsFragmentPresenter(
         super.stop()
         taskReadTrack.stop()
         taskUpdateTrackWhenChanged.stop()
+        taskDeleteTrack.stop()
     }
 
     override fun nameChanged(name: String) {
@@ -70,20 +77,41 @@ class TrackDetailsFragmentPresenter(
     }
 
     override fun shareClicked() {
-        TODO("Not yet implemented")
+        track?.let {
+            val permissionsSet = setOf(
+                PermissionChecker.Permission.READ_EXTERNAL_STORAGE,
+                PermissionChecker.Permission.WRITE_EXTERNAL_STORAGE
+            )
+            if (permissionChecker.checkAllPermissionGranted(permissionsSet)
+            ) {
+                ui.shareTrack(it)
+            } else {
+                ui.requestPermissions(permissionsSet)
+            }
+        }
+    }
+
+    override fun permissionsGranted() {
+        track?.let {
+            ui.shareTrack(it)
+        }
     }
 
     override fun deleteClicked() {
-        TODO("Not yet implemented")
+        ui.showDeletePopup()
     }
 
     override fun deleteConfirmed() {
-        TODO("Not yet implemented")
+        track?.let {
+            if (!taskDeleteTrack.isRunning()) {
+                taskDeleteTrack.start(DeleteTrackInteractor.Param(it.id), Unit)
+            }
+        }
     }
 
     private fun updateUi() {
         if (isUiBinded) {
-            ui.showProgress(taskReadTrack.isRunning() /*|| taskUpdateTrack.isRunning()*/)
+            ui.showProgress(taskReadTrack.isRunning() || taskDeleteTrack.isRunning())
             ui.setName(track?.name)
             track?.distance()?.let { d ->
                 if (d >= Config.METERS_IN_KILOMETER) {
@@ -108,7 +136,8 @@ class TrackDetailsFragmentPresenter(
         if (null != track) {
             // ui.setTrack(track)
             this.track = track
-            taskUpdateTrackWhenChanged.start(track, Unit)
+            val param = UpdateTrackInteractor.Param(track)
+            taskUpdateTrackWhenChanged.start(param, Unit)
         } else if (null != error) {
             // handle
         }
@@ -141,16 +170,15 @@ class TrackDetailsFragmentPresenter(
         updateUi()
     }
 
-    private fun createUpdatTrackWhenChangedTask(textObservable: Observable<String>) =
-        MultiResultTask<Track, UpdateTrackInteractor.Result, Unit>(
+    private fun createUpdateTrackWhenChangedTask(textObservable: Observable<String>) =
+        MultiResultTask<UpdateTrackInteractor.Param, UpdateTrackInteractor.Result, Unit>(
             TASK_UPDATE_TRACK,
-            { track, _ ->
+            { param, _ ->
                 textObservable.debounce(500L, TimeUnit.MILLISECONDS)
                     .subscribeOn(Schedulers.io())
                     .switchMap { name ->
-                        val updatedTrack = track.copy(name = name)
-                        val param = UpdateTrackInteractor.Param(updatedTrack)
-                        updateTrackInteractor.asRxSingle(param)
+                        val updatedParam = param.copy(track = param.track.copy(name = name))
+                        updateTrackInteractor.asRxSingle(updatedParam)
                             .observeOn(AndroidSchedulers.mainThread())
                             .toObservable()
                     }
@@ -162,6 +190,33 @@ class TrackDetailsFragmentPresenter(
             { error, _ ->
                 Log.e("qaz", "error: $error")
                 handleChange(null, error)
+            }
+        )
+
+    private fun handleDeleteTrack(succeeded: Boolean?, error: Throwable?) {
+        if (null != succeeded) {
+            if (succeeded) {
+                router.goBack()
+            }
+        } else if (null != error) {
+            // show error
+
+        }
+    }
+
+    private fun createDeleteTrackTask() =
+        SingleResultTask<DeleteTrackInteractor.Param, DeleteTrackInteractor.Result, Unit>(
+            TASK_DELETE_TRACK,
+            { param, _ ->
+                deleteTrackInteractor.asRxSingle(param)
+                    .observeOn(AndroidSchedulers.mainThread())
+            },
+            { result, _ ->
+                handleDeleteTrack(result.succeeded, null)
+            },
+            { error, _ ->
+                log.e(error, "Faild to read track $trackId")
+                handleDeleteTrack(null, error)
             }
         )
 }

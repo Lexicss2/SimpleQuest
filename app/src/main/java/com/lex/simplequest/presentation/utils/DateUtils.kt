@@ -93,6 +93,7 @@ fun Long.toStringDurations(): Pair<String, String> {
     val secondsStr = seconds.toString().padStart(2, '0')
     return Pair(minutesStr, secondsStr)
 }
+
 fun Long.toSingleStringDurations(): String {
     var time = this.toInt()
     val hours = time / 3_600_000
@@ -105,5 +106,12 @@ fun Long.toSingleStringDurations(): String {
     }"
     val secondsStr = seconds.toString().padStart(2, '0')
     return "$minutesStr:$secondsStr"
+}
+
+fun Long.toDateString(): String {
+    val date = Date(this)
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+    val timeFormat = SimpleDateFormat("HH:mm:ss", Locale.US)
+    return "${dateFormat.format(date)}T${timeFormat.format(date)}Z"
 }
 

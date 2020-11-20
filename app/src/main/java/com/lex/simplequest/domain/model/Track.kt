@@ -1,7 +1,13 @@
 package com.lex.simplequest.domain.model
 
+import android.content.Context
 import android.location.Location
+import android.os.Environment
 import com.lex.simplequest.Config
+import com.lex.simplequest.presentation.utils.toDateString
+import java.io.File
+import java.io.FileOutputStream
+import java.io.FileWriter
 
 data class Track(
     val id: Long,
@@ -60,4 +66,38 @@ fun Track.averageSpeed(): Float =
             averageSpeed / (points.size - 1)
         }
     }
+
+fun Track.toGpxFile(context: Context): File {
+    val outputDir = context.externalCacheDir
+    val outputFile = File.createTempFile(this.name, ".gpx", outputDir)
+    val fileWriter = FileWriter(outputFile)
+    val t = this
+    fileWriter.use { writer ->
+        writer.apply {
+            write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+            write("<gpx>\n")
+            write("<time>" + t.startTime.toDateString() + "</time>\n")
+            write("<trk>\n")
+            write("<trkseg>\n")
+
+            t.points.forEach { pt ->
+                val openTrkpt = "<trkpt lat=\"${String.format("%.7f", pt.latitude)}\" lon=\"${
+                    String.format(
+                        "%.7f",
+                        pt.longitude
+                    )
+                }\">\n"
+                val time = "<time>${pt.timestamp.toDateString()}</time>\n"
+                val closeTrkpt = "</trkpt>\n"
+                writer.write("$openTrkpt$time$closeTrkpt")
+            }
+
+            write("</trkseg>")
+            write("</trk>")
+            write("</gpx>")
+        }
+    }
+
+    return outputFile
+}
 

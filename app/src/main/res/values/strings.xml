@@ -8,7 +8,7 @@
     <string name="init_location_services_disabled_message">IPIC needs to access your location to find the nearest theater. Please turn on Location Services in your device settings.</string>
 
     <string name="ok">Ok</string>
-
+    <string name="cancel">Cancel</string>
     <string name="go_to_settings">Go to Settings</string>
     <string name="no_thanks">No thanks</string>
 
@@ -78,7 +78,6 @@
     <string name="settings_apply">Apply</string>
 
     <!-- Track details -->
-
     <string name="track_details_name">Track name</string>
     <string name="track_details_statistics">Statistics</string>
     <string name="track_details_share">Share</string>
@@ -86,5 +85,8 @@
     <string name="track_details_distance">distance %s</string>
     <string name="track_details_speed">speed %s</string>
     <string name="track_details_duration">duration %s</string>
+
+    <string name="track_details_delete_title">Delete track</string>
+    <string name="track_details_delete_description">Do you really want to delete this track?</string>
 
 </resources>
