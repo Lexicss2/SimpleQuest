@@ -77,4 +77,14 @@
 
     <string name="settings_apply">Apply</string>
 
+    <!-- Track details -->
+
+    <string name="track_details_name">Track name</string>
+    <string name="track_details_statistics">Statistics</string>
+    <string name="track_details_share">Share</string>
+    <string name="track_details_delete">Delete track</string>
+    <string name="track_details_distance">distance %s</string>
+    <string name="track_details_speed">speed %s</string>
+    <string name="track_details_duration">duration %s</string>
+
 </resources>

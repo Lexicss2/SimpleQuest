@@ -31,8 +31,8 @@ class TrackViewFragment :
         private const val INITIAL_ZOOM = 12.0f
         private const val TARGET_ZOOM = 18.0f
         private const val ZOOM_DURATION_MS = 2000
-        private const val BOUND_WIDTH = 300
-        private const val BOUND_HEIGHT = 300
+        private const val BOUND_WIDTH = 100
+        private const val BOUND_HEIGHT = 100
         private const val BOUND_PADDING = 5
 
         fun newInstance(trackId: Long): TrackViewFragment =

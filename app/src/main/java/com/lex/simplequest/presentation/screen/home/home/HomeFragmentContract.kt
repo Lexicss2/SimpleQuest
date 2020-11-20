@@ -15,7 +15,7 @@ interface HomeFragmentContract {
         fun setLocationAvailableStatus(isAvailable: Boolean?)
         fun setLocationSuspendedStatus(reason: Int?)
         fun setError(error: Throwable?)
-        fun setTrackerStatus(status: LocationTracker.Status?)
+        fun setTrackerStatus(status: LocationTracker.Status?, tag: String?)
     }
 
     interface Presenter : BaseMvpLceContract.Presenter<Ui, Presenter.State> {

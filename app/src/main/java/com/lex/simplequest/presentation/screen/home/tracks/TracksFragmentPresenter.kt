@@ -46,7 +46,7 @@ class TracksFragmentPresenter(
     }
 
     override fun trackInfoClicked(track: Track) {
-        // Implement
+        router.showTrackDetails(track.id)
     }
 
     private fun handleReadTracks(tracks: List<Track>?, error: Throwable?) {

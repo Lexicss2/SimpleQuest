@@ -8,4 +8,5 @@ interface MainRouter : Router {
     fun showTracks()
     fun showSettings()
     fun showTrackView(trackId: Long)
+    fun showTrackDetails(trackId: Long)
 }

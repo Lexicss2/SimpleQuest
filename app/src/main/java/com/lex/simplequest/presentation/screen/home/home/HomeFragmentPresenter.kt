@@ -1,7 +1,10 @@
 package com.lex.simplequest.presentation.screen.home.home
 
+import android.os.Debug
 import android.util.Log
 import com.lex.core.log.LogFactory
+import com.lex.simplequest.BuildConfig
+import com.lex.simplequest.Config
 import com.lex.simplequest.data.location.repository.queries.LatestTrackQuerySpecification
 import com.lex.simplequest.data.location.repository.queries.TrackByIdQuerySpecification
 import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracker
@@ -45,7 +48,6 @@ class HomeFragmentPresenter(
         private const val FLAG_SETUP_UI =
             FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS or FLAG_SET_LOCATION_AVAILABILITY_STATUS or
                     FLAG_SET_LOCATION_SUSPENDED_STATUS or FLAG_SET_ERROR_STATUS
-        private const val METERS_IN_KILOMETER = 1000.0f
     }
 
     private val log = logFactory.get(TAG)
@@ -208,7 +210,7 @@ class HomeFragmentPresenter(
                     taskTimer.stop()
                 }
 
-                ui.showLastTrackName(track?.name ?: " ", tracker.isRecording())
+                ui.showLastTrackName(track?.name, tracker.isRecording())
 
                 if (null != track) {
                     val duration = track.duration()
@@ -224,9 +226,9 @@ class HomeFragmentPresenter(
                     val format: String
                     var summaryDistance = originDistance + additionalDistance
                     val withBoldStyle: Boolean
-                    if (summaryDistance >= METERS_IN_KILOMETER) {
+                    if (summaryDistance >= Config.METERS_IN_KILOMETER) {
                         format = "%.2f km"
-                        summaryDistance /= METERS_IN_KILOMETER
+                        summaryDistance /= Config.METERS_IN_KILOMETER
                         withBoldStyle = true
                     } else {
                         format = "%.2f m"
@@ -251,12 +253,16 @@ class HomeFragmentPresenter(
 
                 ui.setButtonStyleRecording(status)
             }
-            ui.setTrackerStatus(tracker.getStatus())
+            if (BuildConfig.DEBUG) {
+                ui.setTrackerStatus(tracker.getStatus(), "points newRecorded = ${newRecordedLocations.size}")
+            }
         } else {
             if (0 != (flags and FLAG_SET_BUTTON_STATUS)) {
                 ui.setButtonStyleRecording(RecordButtonType.STOPPED)
             }
-            ui.setTrackerStatus(null)
+            if (BuildConfig.DEBUG) {
+                ui.setTrackerStatus(null, "point, newRecorded = ${newRecordedLocations.size}")
+            }
         }
 
         if (0 != (flags and FLAG_SET_LOCATION_AVAILABILITY_STATUS)) {

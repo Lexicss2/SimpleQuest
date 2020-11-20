@@ -1,5 +1,6 @@
 package com.lex.simplequest.data.location.repository
 
+import android.content.ContentValues
 import android.content.Context
 import android.database.ContentObserver
 import android.database.Cursor
@@ -141,7 +142,17 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
     }
 
     override fun updateTrack(track: Track): Boolean {
-        TODO("Not yet implemented")
+        checkNotClosed()
+        val cv = ContentValues().apply {
+            put(QuestContract.Tracks.COLUMN_NAME, track.name)
+        }
+        val rowsUpdated = context.contentResolver.update(
+            QuestContract.Tracks.CONTENT_URI,
+            cv,
+            TrackByIdQuerySpecification(track.id).getWhereClause(), null
+        )
+
+        return rowsUpdated > 0
     }
 
     override fun deleteTrack(id: Long): Boolean {

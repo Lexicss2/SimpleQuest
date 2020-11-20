@@ -23,4 +23,6 @@ object Config {
         arrayOf("0", "5", "10", "20", "30", "40", "50")
 
     const val DEFAULT_BATTERY_LEVEL_PC = 5
+
+    const val METERS_IN_KILOMETER = 1000.0f
 }

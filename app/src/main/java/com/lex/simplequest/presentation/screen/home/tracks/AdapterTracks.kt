@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.lex.simplequest.Config
 import com.lex.simplequest.R
 import com.lex.simplequest.databinding.ItemTrackBinding
 import com.lex.simplequest.domain.model.Track
@@ -14,10 +15,6 @@ import com.lex.simplequest.presentation.utils.toStringDuration
 
 class AdapterTracks(private val context: Context, private val clickListener: ItemClickListener) :
     RecyclerView.Adapter<AdapterTracks.TracksViewHolder>() {
-
-    companion object {
-        private const val METERS_IN_KILOMETER = 1000.0f
-    }
 
     private var items: List<Track> = listOf()
 
@@ -53,9 +50,9 @@ class AdapterTracks(private val context: Context, private val clickListener: Ite
                 val duration = track.duration()
                 val format: String
                 var distance = track.distance()
-                if (distance >= METERS_IN_KILOMETER) {
+                if (distance >= Config.METERS_IN_KILOMETER) {
                     format = "%s, %.2f km"
-                    distance /= METERS_IN_KILOMETER
+                    distance /= Config.METERS_IN_KILOMETER
                 } else {
                     format = "%s, %.2f m"
                 }
@@ -69,9 +66,6 @@ class AdapterTracks(private val context: Context, private val clickListener: Ite
                     trackNameView.setTextAppearance(R.style.AppTheme_Text_Small)
                     trackTimeDistanceView.setTextAppearance(R.style.AppTheme_Text_ExtraSmall)
                 }
-//                trackInfoButton.setOnClickListener {
-//                    clickListener.onInfoClicked(track)
-//                }
                 infoView.setOnClickListener {
                     clickListener.onInfoClicked(track)
                 }

@@ -1,5 +1,6 @@
 package com.lex.simplequest.presentation.screen.home.home
 
+import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -253,8 +254,9 @@ class HomeFragment :
         }
     }
 
-    override fun setTrackerStatus(status: LocationTracker.Status?) {
-        viewBinding.layoutContent.trackerStatusTextView.text = status.toString()
+    @SuppressLint("SetTextI18n")
+    override fun setTrackerStatus(status: LocationTracker.Status?, tag: String?) {
+        viewBinding.layoutContent.trackerStatusTextView.text = status.toString() + " " + tag
     }
 
     override fun getUi(): HomeFragmentContract.Ui =

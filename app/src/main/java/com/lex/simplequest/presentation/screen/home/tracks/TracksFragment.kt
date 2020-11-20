@@ -64,6 +64,11 @@ class TracksFragment :
         super.onViewCreated(view, savedInstanceState)
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _viewBinding = null
+    }
+
     override fun setTracks(items: List<Track>) {
         viewBinding.apply {
             adapterTracks?.set(items)
