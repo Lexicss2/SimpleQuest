@@ -217,11 +217,14 @@ class HomeFragmentPresenter(
                     val (minutes, seconds) = duration.toStringDurations()
                     ui.showLastTrackDuration(minutes, seconds)
                     val originDistance = track.distance()
-                    val originLocation = if (track.points.isNotEmpty()) Location(
-                        track.points[0].latitude,
-                        track.points[0].longitude,
-                        track.points[0].altitude
-                    ) else null
+                    val originLocation = if (track.points.isNotEmpty()) {
+                        val last = track.points.last()
+                        Location(
+                            last.latitude,
+                            last.longitude,
+                            last.altitude
+                        )
+                    } else null
                     val additionalDistance = newRecordedLocations.additionalDistance(originLocation)
                     val format: String
                     var summaryDistance = originDistance + additionalDistance
@@ -254,7 +257,10 @@ class HomeFragmentPresenter(
                 ui.setButtonStyleRecording(status)
             }
             if (BuildConfig.DEBUG) {
-                ui.setTrackerStatus(tracker.getStatus(), "points newRecorded = ${newRecordedLocations.size}")
+                ui.setTrackerStatus(
+                    tracker.getStatus(),
+                    "points newRecorded = ${newRecordedLocations.size}"
+                )
             }
         } else {
             if (0 != (flags and FLAG_SET_BUTTON_STATUS)) {
