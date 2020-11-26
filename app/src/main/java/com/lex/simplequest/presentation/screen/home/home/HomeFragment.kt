@@ -28,6 +28,8 @@ class HomeFragment :
     HomeFragmentContract.Ui {
 
     companion object {
+        private const val NO_DATA = "--"
+
         fun newInstance(): HomeFragment =
             HomeFragment().apply {
                 arguments = Bundle().apply {
@@ -97,7 +99,7 @@ class HomeFragment :
         _viewBinding = null
     }
 
-    override fun setButtonStyleRecording(recordButtonType: RecordButtonType) {
+    override fun setButtonStyleRecording(recordButtonType: RecordButtonType?) {
         viewBinding.layoutContent.apply {
             when (recordButtonType) {
                 RecordButtonType.STOPPED -> {
@@ -173,6 +175,19 @@ class HomeFragment :
                         )
                     }
                 }
+
+                null -> {
+                    startStopButton.apply {
+                        setBackgroundColor(
+                            resources.getColor(
+                                R.color.colorBgGray,
+                                null
+                            )
+                        )
+                        isEnabled = false
+                    }
+                    pauseResumeButton.visibility = View.GONE
+                }
             }
         }
     }
@@ -199,18 +214,18 @@ class HomeFragment :
         }
     }
 
-    override fun showLastTrackDuration(minutes: String, seconds: String) {
+    override fun showLastTrackDuration(minutes: String?, seconds: String?) {
         Log.d("qaz", "min = $minutes, seconds = $seconds")
         viewBinding.layoutContent.apply {
-            minutesDurationTextView.text = minutes
-            secondsDurationTextView.text = seconds
+            minutesDurationTextView.text = minutes ?: NO_DATA
+            secondsDurationTextView.text = seconds ?: NO_DATA
         }
     }
 
     override fun showLastTrackDistance(distance: String?, withBoldStyle: Boolean) {
         viewBinding.layoutContent.lastTrackDistanceView.apply {
             setTypeface(typeface, if (withBoldStyle) Typeface.BOLD else Typeface.NORMAL)
-            text = distance ?: "---"
+            text = distance ?: NO_DATA
         }
     }
 

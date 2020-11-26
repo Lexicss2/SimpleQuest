@@ -1,7 +1,6 @@
 package com.lex.simplequest.domain.locationmanager
 
 import com.lex.simplequest.domain.locationmanager.model.Location
-import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.domain.settings.interactor.ReadSettingsInteractor
 import com.lex.simplequest.domain.track.interactor.AddCheckPointInteractor
 import com.lex.simplequest.domain.track.interactor.AddPointInteractor
@@ -13,7 +12,7 @@ interface LocationTracker {
     fun disconnect(): Boolean
     fun isConnecting(): Boolean
     fun isConnected(): Boolean
-    fun startRecording(listener: StartRecordResultListener?)// connect and start recording
+    fun startRecording()// connect and start recording
     fun stopRecording() // stop recording and disconnect
     fun pauseOrResume()
     fun isRecording(): Boolean
@@ -22,6 +21,7 @@ interface LocationTracker {
     fun removeListener(listener: Listener)
     fun getStatus(): Status
 
+    var recordingEventsListener: LocationTracker.RecordingEventsListener?
     abstract val startTrackInteractor: StartTrackInteractor
     abstract val stopTrackInteractor: StopTrackInteractor
     abstract val addPointInteractor: AddPointInteractor
@@ -37,9 +37,13 @@ interface LocationTracker {
         fun onLocationAvailable(isAvailable: Boolean)
     }
 
-    interface StartRecordResultListener {
-        fun onRecordStartSuccess(trackId: Long)
-        fun onRecordStartFailed(throwable: Throwable)
+    interface RecordingEventsListener {
+        fun onRecordStartSucceeded(trackId: Long)
+        fun onRecordStartFailed(error: Throwable)
+        fun onRecordStopSucceeded(success: Boolean)
+        fun onRecordStopFailed(error: Throwable)
+        fun onPauseResumeSucceeded(succeeded: Boolean)
+        fun onPauseResumeFailed(error: Throwable)
     }
 
     enum class Status {

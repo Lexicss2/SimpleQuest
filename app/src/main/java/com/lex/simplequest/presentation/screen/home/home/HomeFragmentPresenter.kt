@@ -36,14 +36,12 @@ class HomeFragmentPresenter(
         private const val TASK_TIMER = "taskTimer"
 
         private const val FLAG_SET_TRACK_INFO = 0x0001
-        private const val FLAG_SET_BUTTON_STATUS = 0x0002
-        private const val FLAG_SET_LOCATION_AVAILABILITY_STATUS = 0x0004
-        private const val FLAG_SET_LOCATION_SUSPENDED_STATUS = 0x0008
-        private const val FLAG_SET_ERROR_STATUS = 0x0010
-        private const val FLAG_START_TIMER = 0x0020
+        private const val FLAG_SET_DISTANCE = 0x0002
+        private const val FLAG_SET_DURATION = 0x0004
+        private const val FLAG_SET_BUTTON_STATUS = 0x0008
+        private const val FLAG_SET_LOCATION_ERROR_DATA = 0x0010
         private const val FLAG_SETUP_UI =
-            FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS or FLAG_SET_LOCATION_AVAILABILITY_STATUS or
-                    FLAG_SET_LOCATION_SUSPENDED_STATUS or FLAG_SET_ERROR_STATUS
+            FLAG_SET_TRACK_INFO or FLAG_SET_DISTANCE or FLAG_SET_DURATION or FLAG_SET_BUTTON_STATUS or FLAG_SET_LOCATION_ERROR_DATA
     }
 
     private val log = logFactory.get(TAG)
@@ -55,24 +53,25 @@ class HomeFragmentPresenter(
     private var isLocationAvailable: Boolean? = null
     private var locationSuspendedReason: Int? = null
     private val newRecordedLocations = mutableListOf<Location>()
+    private var timerValue: Long? = null
 
     private val trackingListener = object : LocationTracker.Listener {
 
         override fun onLocationManagerConnected() {
             Log.d(TAG, "1.onLocationManger Connected")
-            updateUi(FLAG_SETUP_UI)
+            updateUi(FLAG_SET_LOCATION_ERROR_DATA)
         }
 
         override fun onLocationMangerConnectionSuspended(reason: Int) {
             Log.d(TAG, "2.onLocationManger Suspended")
             locationSuspendedReason = reason
-            updateUi(FLAG_SET_LOCATION_SUSPENDED_STATUS)
+            updateUi(FLAG_SET_LOCATION_ERROR_DATA)
         }
 
         override fun onLocationMangerConnectionFailed(error: Throwable) {
             Log.d(TAG, "3.onLocationManger Failed")
             this@HomeFragmentPresenter.error = error
-            updateUi(FLAG_SET_ERROR_STATUS)
+            updateUi(FLAG_SET_LOCATION_ERROR_DATA)
         }
 
         override fun onLocationUpdated(location: Location) {
@@ -80,28 +79,24 @@ class HomeFragmentPresenter(
             if (true == connectedLocationTracker?.isRecording()) {
                 newRecordedLocations.add(location)
             }
-            updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS)
+            updateUi(FLAG_SET_DISTANCE)
         }
 
         override fun onStatusUpdated(status: LocationTracker.Status) {
             Log.d(TAG, "5.onStatus Updated: $status")
-            if (status == LocationTracker.Status.RECORDING || status == LocationTracker.Status.PAUSED) {
-                updateUi(FLAG_SETUP_UI or FLAG_START_TIMER)
-            } else {
-                updateUi(FLAG_SETUP_UI)
-            }
+            updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS)
         }
 
         override fun onLocationAvailable(isAvailable: Boolean) {
-            Log.d(TAG, "onLocationAvailable")
+            Log.d(TAG, "6. onLocationAvailable")
             isLocationAvailable = isAvailable
-            updateUi(FLAG_SET_LOCATION_AVAILABILITY_STATUS)
+            updateUi(FLAG_SET_LOCATION_ERROR_DATA)
         }
     }
 
-    private val startRecordResultListener = object : LocationTracker.StartRecordResultListener {
-        override fun onRecordStartSuccess(trackId: Long) {
-            Log.i(TAG, "record started, tracId: $trackId")
+    private val startStopRecordResultListener = object : LocationTracker.RecordingEventsListener {
+        override fun onRecordStartSucceeded(trackId: Long) {
+            Log.i(TAG, "I record started, trackId: $trackId")
             if (taskReadTracks.isRunning()) {
                 taskReadTracks.stop()
             }
@@ -112,9 +107,32 @@ class HomeFragmentPresenter(
         }
 
         override fun onRecordStartFailed(throwable: Throwable) {
-            Log.e(TAG, "record start failed: ${throwable.localizedMessage}")
+            Log.e(TAG, "II record start failed: ${throwable.localizedMessage}")
             this@HomeFragmentPresenter.error = throwable
-            updateUi(FLAG_SET_ERROR_STATUS)
+            updateUi(FLAG_SET_LOCATION_ERROR_DATA)
+        }
+
+        override fun onRecordStopSucceeded(success: Boolean) {
+            Log.d(TAG, "III record stopped Succedded: $success")
+            if (taskReadTracks.isRunning()) {
+                taskReadTracks.stop()
+            }
+            taskReadTracks.start(ReadTracksInteractor.Param(LatestTrackQuerySpecification()), Unit)
+        }
+
+        override fun onRecordStopFailed(throwable: Throwable) {
+            Log.e(TAG, "IV Failed to stop record: ${throwable.localizedMessage}")
+        }
+
+        override fun onPauseResumeSucceeded(succeeded: Boolean) {
+            Log.d(TAG, "V record Paused or Resumed")
+            if (!taskReadTracks.isRunning()) {
+                taskReadTracks.start(ReadTracksInteractor.Param(LatestTrackQuerySpecification()), Unit)
+            }
+        }
+
+        override fun onPauseResumeFailed(error: Throwable) {
+            Log.e(TAG, "VI record Paused or Resumed failed: $error")
         }
     }
 
@@ -145,48 +163,51 @@ class HomeFragmentPresenter(
         super.stop()
         taskReadTracks.stop()
         taskTimer.stop()
+
+//        connectedLocationTracker?.removeListener(trackingListener)
+//        connectedLocationTracker?.startStopRecordResultListener = null
+//        connectedLocationTracker = null
     }
 
     override fun startStopClicked() {
         connectedLocationTracker?.let { tracker ->
             if (tracker.isRecording()) {
                 Log.d(TAG, "STOP recording")
-                taskTimer.stop()
+                //taskTimer.stop()
                 tracker.stopRecording()
             } else {
                 Log.e(TAG, "START recording")
-                tracker.startRecording(startRecordResultListener)
+                tracker.startRecording()
                 lastTrack = null
             }
-        }
-        if (!taskReadTracks.isRunning()) {
-            taskReadTracks.start(ReadTracksInteractor.Param(LatestTrackQuerySpecification()), Unit)
         }
         updateUi(FLAG_SET_BUTTON_STATUS)
     }
 
     override fun pauseResumeClicked() {
         connectedLocationTracker?.pauseOrResume()
-        if (!taskReadTracks.isRunning()) {
-            taskReadTracks.start(ReadTracksInteractor.Param(LatestTrackQuerySpecification()), Unit)
-        }
+//        if (!taskReadTracks.isRunning()) {
+//            taskReadTracks.start(ReadTracksInteractor.Param(LatestTrackQuerySpecification()), Unit)
+//        }
         updateUi(FLAG_SET_BUTTON_STATUS)
     }
 
     override fun locationTrackerServiceConnected(locationTracker: LocationTracker) {
         connectedLocationTracker = locationTracker
         connectedLocationTracker?.addListener(trackingListener)
+        connectedLocationTracker?.recordingEventsListener = startStopRecordResultListener
         Log.i(TAG, "location tracker connected in presenter")
 
-        updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS)
+        updateUi(FLAG_SET_BUTTON_STATUS or FLAG_SET_LOCATION_ERROR_DATA)
     }
 
     override fun locationTrackerServiceDisconnected() {
         connectedLocationTracker?.removeListener(trackingListener)
+        connectedLocationTracker?.recordingEventsListener = null
         connectedLocationTracker = null
         Log.i(TAG, "location tracker disconnected in presenter")
-        taskTimer.stop()
-        updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS)
+        //taskTimer.stop()
+        updateUi(FLAG_SET_LOCATION_ERROR_DATA)
     }
 
     override fun isLoading(): Boolean =
@@ -196,39 +217,43 @@ class HomeFragmentPresenter(
 
     }
 
-    fun updateUi(flags: Int) {
+    private fun handleTimerAction(tracker: LocationTracker?, track: Track?) {
+        if (null != tracker) {
+            val isRecordingNow = tracker.isRecording() && !tracker.isRecordingPaused()
+            Log.v(TAG, "isRecNow = $isRecordingNow, track assigned = ${null != track}, timer running = ${taskTimer.isRunning()}")
+            if (isRecordingNow && null != track && !taskTimer.isRunning()) {
+                val started = taskTimer.start(track.startTime + track.pausedDuration(), Unit) // TODO: Fix it
+                Log.w(TAG, "Timer started $started, isRunning = ${taskTimer.isRunning()}")
+            } else if (!isRecordingNow && taskTimer.isRunning()) {
+                val stopped = taskTimer.stop()
+                Log.i(TAG, "Timer stopped: $stopped")
+            }
+        }
+    }
+
+    private fun updateUi(flags: Int) {
         Log.d(
             TAG,
-            "updateUi, connectedLocationTracker, recording: ${connectedLocationTracker?.isRecording()} flags: $flags"
+            "updateUi, connectedLocationTracker, tracker status: ${connectedLocationTracker?.getStatus()} flags: $flags, track assigned = ${null != lastTrack}"
         )
         super.updateUi()
 
-        val tracker = connectedLocationTracker
-        if (null != tracker) {
-            ui.showProgress(false)
+        if (isUiBinded) {
+            val tracker = connectedLocationTracker
+            val track = lastTrack
+            ui.showProgress(taskReadTracks.isRunning())
+            handleTimerAction(tracker, track)
+
 
             if (0 != (flags and FLAG_SET_TRACK_INFO)) {
-                val track = lastTrack
-                val shouldStartTimer = (0 != (flags and FLAG_START_TIMER))
-                if (tracker.isRecording() && !tracker.isRecordingPaused() && !taskTimer.isRunning() && track != null && shouldStartTimer) {
-                    Log.w(TAG, "timer started, for track is = ${track.name}")
-                    taskTimer.start(track.startTime + track.pausedDuration(), Unit)
-                } else if ((!tracker.isRecording() || tracker.isRecordingPaused()) && taskTimer.isRunning()) {
-                    taskTimer.stop()
-                }
+                ui.showLastTrackName(track?.name, tracker?.isRecording() ?: false)
+                // show speed when needed
+            }
 
-                ui.showLastTrackName(track?.name, tracker.isRecording())
-
+            if (0 != (flags and FLAG_SET_DISTANCE)) {
                 if (null != track) {
-
-                    if (!taskTimer.isRunning()) {  // TODO: Temporary hack, fix it
-                        val duration = track.movingDuration()
-                        val (minutes, seconds) = duration.toStringDurations()
-                        ui.showLastTrackDuration(minutes, seconds)
-                    }
-
-                    val originDistance = track.movingDistance()
-                    val originLocation = if (track.points.isNotEmpty()) {
+                    val originDistance = track.movingDistance() // Already recorded distance
+                    val lastLocation = if (track.points.isNotEmpty()) {
                         val last = track.points.last()
                         Location(
                             last.latitude,
@@ -236,7 +261,8 @@ class HomeFragmentPresenter(
                             last.altitude
                         )
                     } else null
-                    val additionalDistance = newRecordedLocations.additionalDistance(originLocation)
+                    val additionalDistance =
+                        newRecordedLocations.additionalDistance(lastLocation) // Not yet recorded distance
                     val format: String
                     var summaryDistance = originDistance + additionalDistance
                     val withBoldStyle: Boolean
@@ -248,52 +274,63 @@ class HomeFragmentPresenter(
                         format = "%.2f m"
                         withBoldStyle = false
                     }
-
                     ui.showLastTrackDistance(String.format(format, summaryDistance), withBoldStyle)
+                } else {
+                    ui.showLastTrackDistance(null, false)
+                }
+            }
+
+            if (0 != (flags and FLAG_SET_DURATION)) {
+                if (null != track) {
+                    val isNowRecording = null != tracker && tracker.isRecording() && !tracker.isRecordingPaused()
+
+                val dur_tm = if (null != timerValue) timerValue!!.toStringDurations() else null
+                val dur_tr = track.movingDuration(true).toStringDurations()
+
+                Log.v(TAG, "timerValue = ${dur_tm}, trackValue = ${dur_tr}")
+
+                    val duration = if (isNowRecording) timerValue!! else track.movingDuration(true)
+                    val (minutes, seconds) = duration.toStringDurations()
+                    ui.showLastTrackDuration(minutes, seconds)
+                } else {
+                    ui.showLastTrackDuration(null, null)
                 }
             }
 
             if (0 != (flags and FLAG_SET_BUTTON_STATUS)) {
-                val status: RecordButtonType =
-                    when {
-                        tracker.isRecording() -> {
-                            if (tracker.isRecordingPaused()) RecordButtonType.PAUSED
-                            else RecordButtonType.RECORDING
+                if (null != tracker) {
+                    val status: RecordButtonType =
+                        when {
+                            tracker.isRecording() -> {
+                                if (tracker.isRecordingPaused()) RecordButtonType.PAUSED
+                                else RecordButtonType.RECORDING
+                            }
+                            tracker.isConnecting() -> {
+                                RecordButtonType.GOING_TO_RECORD
+                            }
+                            else -> RecordButtonType.STOPPED
                         }
-                        tracker.isConnecting() -> {
-                            RecordButtonType.GOING_TO_RECORD
-                        }
-                        else -> RecordButtonType.STOPPED
-                    }
+                    ui.setButtonStyleRecording(status)
+                } else {
+                    ui.setButtonStyleRecording(null)
+                }
 
-                ui.setButtonStyleRecording(status)
+                if (BuildConfig.DEBUG) {
+                    ui.setTrackerStatus(
+                        tracker?.getStatus(),
+                        "point, newRecorded = ${newRecordedLocations.size}"
+                    )
+                }
             }
-            if (BuildConfig.DEBUG) {
-                ui.setTrackerStatus(
-                    tracker.getStatus(),
-                    "points newRecorded = ${newRecordedLocations.size}"
-                )
+
+            if (0 != (flags and FLAG_SET_LOCATION_ERROR_DATA)) {
+                ui.setLocationAvailableStatus(isLocationAvailable)
+                ui.setLocationSuspendedStatus(locationSuspendedReason)
+                ui.setError(error)
             }
-        } else {
-            if (0 != (flags and FLAG_SET_BUTTON_STATUS)) {
-                ui.setButtonStyleRecording(RecordButtonType.STOPPED)
-            }
-            if (BuildConfig.DEBUG) {
-                ui.setTrackerStatus(null, "point, newRecorded = ${newRecordedLocations.size}")
-            }
+
         }
 
-        if (0 != (flags and FLAG_SET_LOCATION_AVAILABILITY_STATUS)) {
-            ui.setLocationAvailableStatus(isLocationAvailable)
-        }
-
-        if (0 != (flags and FLAG_SET_LOCATION_SUSPENDED_STATUS)) {
-            ui.setLocationSuspendedStatus(locationSuspendedReason)
-        }
-
-        if (0 != (flags and FLAG_SET_ERROR_STATUS)) {
-            ui.setError(error)
-        }
     }
 
     private fun handleReadTracks(tracks: List<Track>?, error: Throwable?) {
@@ -301,9 +338,11 @@ class HomeFragmentPresenter(
             val lastTrack = if (tracks.isNotEmpty()) tracks.last() else null
             this.lastTrack = lastTrack
             newRecordedLocations.clear()
+            Log.w(TAG, "Update by handleReadTracks = and track Moving duration is =" +
+                    " ${lastTrack?.movingDuration(true)?.toStringDurations()}, full = ${lastTrack?.fullDuration(true)?.toStringDurations()}")
         } else if (null != error) {
             this.error = error
-            updateUi(FLAG_SET_ERROR_STATUS)
+            updateUi(FLAG_SET_LOCATION_ERROR_DATA)
         }
 
         val tracker = connectedLocationTracker
@@ -314,7 +353,7 @@ class HomeFragmentPresenter(
             }
         }
 
-        updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS or FLAG_START_TIMER)
+        updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_DISTANCE or FLAG_SET_DURATION)
     }
 
     private fun createReadTracksTask() =
@@ -334,14 +373,15 @@ class HomeFragmentPresenter(
         )
 
     private fun updateTimer(timer: Long) {
-        val (minutes, seconds) = timer.toStringDurations()
-        ui.showLastTrackDuration(minutes, seconds)
+        timerValue = timer
+        updateUi(FLAG_SET_DURATION)
     }
 
     private fun createTimerTask() =
         MultiResultTask<Long, Long, Unit>(
             TASK_TIMER,
             { origin, _ ->
+                Log.d(TAG, "run timer observable")
                 Observable.interval(500, TimeUnit.MILLISECONDS)
                     .map {
                         System.currentTimeMillis() - origin
@@ -352,6 +392,7 @@ class HomeFragmentPresenter(
                 updateTimer(timer)
             },
             { error, _ ->
+                Log.e(TAG, "timer failed - ${error.localizedMessage}")
                 log.e(error, "Timer failed")
             }
         )

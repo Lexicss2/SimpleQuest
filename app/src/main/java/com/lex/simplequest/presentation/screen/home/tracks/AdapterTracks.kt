@@ -48,14 +48,15 @@ class AdapterTracks(private val context: Context, private val clickListener: Ite
                 val format: String
                 var distance = track.movingDistance()
                 if (distance >= Config.METERS_IN_KILOMETER) {
-                    format = "%s, %.2f km, ${track.checkPoints.size} / ${track.points.size}"
+                    // TODO: Restore 2nd dist
+                    format = "%s, %.2f  %.2f km, ${track.checkPoints.size} / ${track.points.size}"
                     distance /= Config.METERS_IN_KILOMETER
                 } else {
-                    format = "%s, %.2f m, ${track.checkPoints.size} / ${track.points.size}"
+                    format = "%s, %.2f  %.2f m, ${track.checkPoints.size} / ${track.points.size}"
                 }
 
                 trackTimeDistanceView.text =
-                    String.format(format, duration.toStringDuration(), distance)
+                    String.format(format, duration.toStringDuration(), distance, track.fullDistance())
                 if (null == track.endTime) {
                     trackNameView.setTextAppearance(R.style.AppTheme_Text_Small_Red)
                     trackTimeDistanceView.setTextAppearance(R.style.AppTheme_Text_ExtraSmall_Red)
