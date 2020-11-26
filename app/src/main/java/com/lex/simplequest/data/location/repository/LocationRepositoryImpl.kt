@@ -3,11 +3,9 @@ package com.lex.simplequest.data.location.repository
 import android.content.ContentValues
 import android.content.Context
 import android.database.ContentObserver
-import android.database.Cursor
 import android.location.LocationManager
 import android.net.Uri
 import android.util.Log
-import androidx.core.database.getDoubleOrNull
 import com.lex.core.utils.MainThreadHandler
 import com.lex.core.utils.ignoreErrors
 import com.lex.simplequest.data.location.repository.queries.AllTracksQuerySpecification
@@ -15,9 +13,10 @@ import com.lex.simplequest.data.location.repository.queries.LatestTrackQuerySpec
 import com.lex.simplequest.data.location.repository.queries.TrackByIdQuerySpecification
 import com.lex.simplequest.data.location.repository.queries.TrackByNameQuerySpecification
 import com.lex.simplequest.device.content.provider.QuestContract
+import com.lex.simplequest.domain.model.CheckPoint
 import com.lex.simplequest.domain.model.Point
 import com.lex.simplequest.domain.model.Track
-import com.lex.simplequest.domain.model.distance
+import com.lex.simplequest.domain.model.fullDistance
 import com.lex.simplequest.domain.repository.LocationRepository
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
@@ -104,7 +103,7 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
         checkNotClosed()
         val spec = TrackByIdQuerySpecification(id)
         val readTrack = getTracks(spec).first()
-        val trackDistance = readTrack.distance()
+        val trackDistance = readTrack.fullDistance()
         val keepTrack = null == minimalDistance || trackDistance >= minimalDistance
         if (keepTrack) {
             val updatedTrack = readTrack.copy(endTime = endTime)
@@ -166,16 +165,18 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
         return rowsCount > 0
     }
 
-    override fun addPoint(
-        trackId: Long,
-        latitude: Double,
-        longitude: Double,
-        altitude: Double?
-    ) {
+    override fun addPoint(point: Point) {
         checkNotClosed()
-        val point = Point(-1, trackId, latitude, longitude, altitude, System.currentTimeMillis())
         context.contentResolver.insert(QuestContract.Points.CONTENT_URI, point.toContentValues())
         // Not necessary to read the inserted point
+    }
+
+    override fun addCheckPoint(checkPoint: CheckPoint) {
+        checkNotClosed()
+        context.contentResolver.insert(
+            QuestContract.CheckPoints.CONTENT_URI,
+            checkPoint.toContentValue()
+        )
     }
 
     override fun getQuerySpecificationFactory(): LocationRepository.LocationQuerySpecificationFactory {

@@ -1,5 +1,7 @@
 package com.lex.simplequest.domain.repository
 
+import com.lex.simplequest.domain.model.CheckPoint
+import com.lex.simplequest.domain.model.Point
 import com.lex.simplequest.domain.model.Track
 import java.io.Closeable
 
@@ -11,7 +13,8 @@ interface LocationRepository : Closeable {
     fun getTracks(spec: LocationQuerySpecification): List<Track>
     fun updateTrack(track: Track): Boolean
     fun deleteTrack(id: Long): Boolean
-    fun addPoint(trackId: Long, latitude: Double, longitude: Double, altitude: Double?)
+    fun addPoint(point: Point)
+    fun addCheckPoint(checkPoint: CheckPoint)
 
     fun getQuerySpecificationFactory(): LocationQuerySpecificationFactory
 

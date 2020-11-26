@@ -6,8 +6,8 @@ import com.lex.simplequest.Config
 import com.lex.simplequest.data.location.repository.queries.TrackByIdQuerySpecification
 import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.domain.model.averageSpeed
-import com.lex.simplequest.domain.model.distance
-import com.lex.simplequest.domain.model.duration
+import com.lex.simplequest.domain.model.fullDistance
+import com.lex.simplequest.domain.model.fullDuration
 import com.lex.simplequest.domain.permission.repository.PermissionChecker
 import com.lex.simplequest.domain.track.interactor.DeleteTrackInteractor
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractor
@@ -113,7 +113,7 @@ class TrackDetailsFragmentPresenter(
         if (isUiBinded) {
             ui.showProgress(taskReadTrack.isRunning() || taskDeleteTrack.isRunning())
             ui.setName(track?.name)
-            track?.distance()?.let { d ->
+            track?.fullDistance()?.let { d ->
                 if (d >= Config.METERS_IN_KILOMETER) {
                     ui.setDistance(String.format("%.2f km", d / Config.METERS_IN_KILOMETER))
                 } else {
@@ -125,7 +125,7 @@ class TrackDetailsFragmentPresenter(
                 ui.setSpeed(String.format("%.2f km/h", v))
             } ?: ui.setSpeed(null)
 
-            track?.duration()?.let { t ->
+            track?.fullDuration()?.let { t ->
                 val durationStr = t.toSingleStringDurations()
                 ui.setDuration(durationStr)
             } ?: ui.setDuration(null)

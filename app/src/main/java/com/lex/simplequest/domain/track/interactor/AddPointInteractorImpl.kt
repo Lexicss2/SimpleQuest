@@ -15,12 +15,7 @@ class AddPointInteractorImpl(
             .observeOn(Schedulers.io())
             .map { point ->
                 if (point.trackId != -1L) {
-                    locationRepository.addPoint(
-                        point.trackId,
-                        point.latitude,
-                        point.longitude,
-                        point.altitude
-                    )
+                    locationRepository.addPoint(point)
                 } else {
                     Log.w("qaz", "Skip cause it is default")
                 }

@@ -1,6 +1,5 @@
 package com.lex.simplequest.presentation.screen.home.home
 
-import android.os.Debug
 import android.util.Log
 import com.lex.core.log.LogFactory
 import com.lex.simplequest.BuildConfig
@@ -10,10 +9,7 @@ import com.lex.simplequest.data.location.repository.queries.TrackByIdQuerySpecif
 import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracker
 import com.lex.simplequest.domain.locationmanager.LocationTracker
 import com.lex.simplequest.domain.locationmanager.model.Location
-import com.lex.simplequest.domain.model.Point
-import com.lex.simplequest.domain.model.Track
-import com.lex.simplequest.domain.model.distance
-import com.lex.simplequest.domain.model.duration
+import com.lex.simplequest.domain.model.*
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractor
 import com.lex.simplequest.presentation.base.BaseMvpLcePresenter
 import com.lex.simplequest.presentation.screen.home.MainRouter
@@ -89,7 +85,7 @@ class HomeFragmentPresenter(
 
         override fun onStatusUpdated(status: LocationTracker.Status) {
             Log.d(TAG, "5.onStatus Updated: $status")
-            if (status == LocationTracker.Status.RECORDING) {
+            if (status == LocationTracker.Status.RECORDING || status == LocationTracker.Status.PAUSED) {
                 updateUi(FLAG_SETUP_UI or FLAG_START_TIMER)
             } else {
                 updateUi(FLAG_SETUP_UI)
@@ -163,6 +159,17 @@ class HomeFragmentPresenter(
                 lastTrack = null
             }
         }
+        if (!taskReadTracks.isRunning()) {
+            taskReadTracks.start(ReadTracksInteractor.Param(LatestTrackQuerySpecification()), Unit)
+        }
+        updateUi(FLAG_SET_BUTTON_STATUS)
+    }
+
+    override fun pauseResumeClicked() {
+        connectedLocationTracker?.pauseOrResume()
+        if (!taskReadTracks.isRunning()) {
+            taskReadTracks.start(ReadTracksInteractor.Param(LatestTrackQuerySpecification()), Unit)
+        }
         updateUi(FLAG_SET_BUTTON_STATUS)
     }
 
@@ -203,20 +210,24 @@ class HomeFragmentPresenter(
             if (0 != (flags and FLAG_SET_TRACK_INFO)) {
                 val track = lastTrack
                 val shouldStartTimer = (0 != (flags and FLAG_START_TIMER))
-                if (tracker.isRecording() && !taskTimer.isRunning() && track != null && shouldStartTimer) {
+                if (tracker.isRecording() && !tracker.isRecordingPaused() && !taskTimer.isRunning() && track != null && shouldStartTimer) {
                     Log.w(TAG, "timer started, for track is = ${track.name}")
-                    taskTimer.start(track.startTime, Unit)
-                } else if (!tracker.isRecording() && taskTimer.isRunning()) {
+                    taskTimer.start(track.startTime + track.pausedDuration(), Unit)
+                } else if ((!tracker.isRecording() || tracker.isRecordingPaused()) && taskTimer.isRunning()) {
                     taskTimer.stop()
                 }
 
                 ui.showLastTrackName(track?.name, tracker.isRecording())
 
                 if (null != track) {
-                    val duration = track.duration()
-                    val (minutes, seconds) = duration.toStringDurations()
-                    ui.showLastTrackDuration(minutes, seconds)
-                    val originDistance = track.distance()
+
+                    if (!taskTimer.isRunning()) {  // TODO: Temporary hack, fix it
+                        val duration = track.movingDuration()
+                        val (minutes, seconds) = duration.toStringDurations()
+                        ui.showLastTrackDuration(minutes, seconds)
+                    }
+
+                    val originDistance = track.movingDistance()
                     val originLocation = if (track.points.isNotEmpty()) {
                         val last = track.points.last()
                         Location(
@@ -246,7 +257,8 @@ class HomeFragmentPresenter(
                 val status: RecordButtonType =
                     when {
                         tracker.isRecording() -> {
-                            RecordButtonType.RECORDING
+                            if (tracker.isRecordingPaused()) RecordButtonType.PAUSED
+                            else RecordButtonType.RECORDING
                         }
                         tracker.isConnecting() -> {
                             RecordButtonType.GOING_TO_RECORD

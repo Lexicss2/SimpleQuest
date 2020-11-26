@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.Typeface
-import android.location.Location
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
@@ -19,14 +18,10 @@ import com.lex.simplequest.R
 import com.lex.simplequest.databinding.FragmentHomeBinding
 import com.lex.simplequest.device.service.TrackLocationService
 import com.lex.simplequest.domain.locationmanager.LocationTracker
-import com.lex.simplequest.domain.model.Track
-import com.lex.simplequest.domain.model.distance
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractorImpl
 import com.lex.simplequest.presentation.base.BaseMvpLceFragment
 import com.lex.simplequest.presentation.screen.home.MainRouter
 import com.softeq.android.mvp.PresenterStateHolder
-import java.text.SimpleDateFormat
-import java.util.*
 
 class HomeFragment :
     BaseMvpLceFragment<HomeFragmentContract.Ui, HomeFragmentContract.Presenter.State, HomeFragmentContract.Presenter>(),
@@ -72,6 +67,9 @@ class HomeFragment :
             startStopButton.setOnClickListener {
                 presenter.startStopClicked()
             }
+            pauseResumeButton.setOnClickListener {
+                presenter.pauseResumeClicked()
+            }
         }
 
         super.onViewCreated(view, savedInstanceState)
@@ -113,6 +111,7 @@ class HomeFragment :
                         )
                         isEnabled = true
                     }
+                    pauseResumeButton.visibility = View.GONE
                 }
 
                 RecordButtonType.GOING_TO_RECORD -> {
@@ -126,6 +125,7 @@ class HomeFragment :
                         )
                         isEnabled = false
                     }
+                    pauseResumeButton.visibility = View.GONE
                 }
 
                 RecordButtonType.RECORDING -> {
@@ -139,27 +139,43 @@ class HomeFragment :
                         )
                         isEnabled = true
                     }
+                    pauseResumeButton.visibility = View.VISIBLE
+                    pauseResumeButton.apply {
+                        text = resources.getString(R.string.home_pause_tracking)
+                        setBackgroundColor(
+                            resources.getColor(
+                                R.color.colorBgPauseButton,
+                                null
+                            )
+                        )
+                    }
+                }
+
+                RecordButtonType.PAUSED -> {
+                    startStopButton.apply {
+                        text = getString(R.string.home_stop_tracking)
+                        setBackgroundColor(
+                            resources.getColor(
+                                R.color.colorBgStopButton,
+                                null
+                            )
+                        )
+                        isEnabled = true
+                    }
+                    pauseResumeButton.visibility = View.VISIBLE
+                    pauseResumeButton.apply {
+                        text = resources.getString(R.string.home_resume_tracking)
+                        setBackgroundColor(
+                            resources.getColor(
+                                R.color.colorBgPauseButton,
+                                null
+                            )
+                        )
+                    }
                 }
             }
         }
     }
-
-//    override fun showLastTrackName(track: Track?, isRecording: Boolean) {
-//        viewBinding.layoutContent.apply {
-//            if (track != null) {
-//                lastTrackNameView.text = track.name
-//                lastTrackDistanceView.text = String.format("%.2f m", track.distance())
-//            } else {
-//                lastTrackNameView.text = resources.getString(R.string.home_no_tracks)
-//                lastTrackDistanceView.text = "---"
-//            }
-//
-//            lastTrackCaption.text =
-//                if (isRecording) resources.getString(R.string.home_is_recording) else resources.getString(
-//                    R.string.home_last_track_name
-//                )
-//        }
-//    }
 
     override fun showLastTrackName(trackName: String?, isRecording: Boolean) {
         viewBinding.layoutContent.apply {
@@ -184,6 +200,7 @@ class HomeFragment :
     }
 
     override fun showLastTrackDuration(minutes: String, seconds: String) {
+        Log.d("qaz", "min = $minutes, seconds = $seconds")
         viewBinding.layoutContent.apply {
             minutesDurationTextView.text = minutes
             secondsDurationTextView.text = seconds

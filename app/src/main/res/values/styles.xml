@@ -67,6 +67,16 @@
         <item name="android:background">@color/colorBgStopButton</item>
     </style>
 
+    <style name="AppTheme.Button.Base.Pause" parent="AppTheme.Button.Base">
+        <item name="android:text">@string/home_pause_tracking</item>
+        <item name="android:background">@color/colorBgPauseButton</item>
+    </style>
+
+    <style name="AppTheme.Button.Base.Resume" parent="AppTheme.Button.Base">
+        <item name="android:text">@string/home_pause_tracking</item>
+        <item name="android:background">@color/colorBgResumeButton</item>
+    </style>
+
     <style name="AppTheme.Text.ExtraSmall" parent="">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/colorSimpleBlack</item>

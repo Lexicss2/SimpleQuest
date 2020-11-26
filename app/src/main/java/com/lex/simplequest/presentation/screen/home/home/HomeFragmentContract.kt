@@ -20,6 +20,7 @@ interface HomeFragmentContract {
 
     interface Presenter : BaseMvpLceContract.Presenter<Ui, Presenter.State> {
         fun startStopClicked()
+        fun pauseResumeClicked()
         fun locationTrackerServiceConnected(locationTracker: LocationTracker)
         fun locationTrackerServiceDisconnected()
 

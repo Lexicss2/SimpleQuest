@@ -31,4 +31,14 @@ public interface QuestContract {
         String COLUMN_ALTITUDE = "altitude";
         String COLUMN_TIMESTAMP = "timestamp";
     }
+
+    interface CheckPoints extends  BaseEntityColumns {
+        String TABLE_NAME = "check_points";
+        Uri CONTENT_URI = Uri.withAppendedPath(QuestContract.CONTENT_URI, TABLE_NAME);
+
+        String COLUMN_TRACK_ID = "track_id";
+        String COLUMN_TYPE = "type";
+        String COLUMN_TIMESTAMP = "timestamp";
+        String COLUMN_TAG = "tag";
+    }
 }

@@ -1,6 +1,5 @@
 package com.lex.simplequest.domain.locationmanager
 
-import android.graphics.Bitmap
 import com.lex.simplequest.domain.locationmanager.model.Location
 
 interface LocationManager {

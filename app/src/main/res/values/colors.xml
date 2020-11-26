@@ -9,6 +9,8 @@
     <color name="colorButtonText">#111111</color>
     <color name="colorBgStartButton">#90f890</color>
     <color name="colorBgStopButton">#f89090</color>
+    <color name="colorBgPauseButton">#f8f890</color>
+    <color name="colorBgResumeButton">#90f890</color>
 
     <color name="colorSimpleBlack">#181818</color>
     <color name="colorDarkBlue">#484880</color>

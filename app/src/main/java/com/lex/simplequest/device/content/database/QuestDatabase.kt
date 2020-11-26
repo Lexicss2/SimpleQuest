@@ -15,7 +15,7 @@ class QuestDatabase(
 
     companion object {
         private const val DATABASE_NAME = "quest.db"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2
 
         private const val SQL_CREATE_TRACKS_TABLE =
             "CREATE TABLE ${QuestContract.Tracks.TABLE_NAME} (" +
@@ -33,6 +33,17 @@ class QuestDatabase(
                     "${QuestContract.Points.COLUMN_ALTITUDE} REAL DEFAULT NULL, " +
                     "${QuestContract.Points.COLUMN_TIMESTAMP} REAL NOT NULL," +
                     "FOREIGN KEY (${QuestContract.Points.COLUMN_TRACK_ID}) REFERENCES ${QuestContract.Tracks.TABLE_NAME} (${QuestContract.Tracks.COLUMN_ID}) ON DELETE CASCADE ON UPDATE CASCADE);"
+
+        private const val SQL_CREATE_CHECK_POINTS_TABLE =
+            "CREATE TABLE ${QuestContract.CheckPoints.TABLE_NAME} (" +
+                    "${QuestContract.CheckPoints.COLUMN_ID} INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "${QuestContract.CheckPoints.COLUMN_TRACK_ID} INTEGER NOT NULL, " +
+                    "${QuestContract.CheckPoints.COLUMN_TYPE} INTEGER NOT NULL, " +
+                    "${QuestContract.CheckPoints.COLUMN_TIMESTAMP} REAL NOT NULL, " +
+                    "${QuestContract.CheckPoints.COLUMN_TAG} TEXT, " +
+                    "FOREIGN KEY (${QuestContract.CheckPoints.COLUMN_TRACK_ID}) REFERENCES ${QuestContract.Tracks.TABLE_NAME} (${QuestContract.Tracks.COLUMN_ID}) ON DELETE CASCADE ON UPDATE CASCADE);"
+
+        private const val SWITCH_ON_FOREIGN_KEY = "PRAGMA foreign_keys = ON;"
     }
 
     constructor(ctx: Context) : this(ctx, DATABASE_NAME, null, DATABASE_VERSION)
@@ -41,15 +52,20 @@ class QuestDatabase(
         Log.i("qaz", "DB onCreate")
         db.execSQL(SQL_CREATE_TRACKS_TABLE)
         db.execSQL(SQL_CREATE_POINTS_TABLE)
+        db.execSQL(SQL_CREATE_CHECK_POINTS_TABLE)
     }
 
-    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        // do nothing yet
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        when(newVersion) {
+            2 -> {
+                db.execSQL(SQL_CREATE_CHECK_POINTS_TABLE)
+            }
+        }
     }
 
-    override fun onOpen(db: SQLiteDatabase?) {
+    override fun onOpen(db: SQLiteDatabase) {
         super.onOpen(db)
-        db?.execSQL("PRAGMA foreign_keys = ON;")
+        db.execSQL(SWITCH_ON_FOREIGN_KEY)
         Log.d("qaz", "DB onOpen, but createdPoints TABLE = $SQL_CREATE_POINTS_TABLE")
     }
 }

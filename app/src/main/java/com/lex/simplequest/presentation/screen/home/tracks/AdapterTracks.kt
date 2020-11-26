@@ -1,16 +1,13 @@
 package com.lex.simplequest.presentation.screen.home.tracks
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.lex.simplequest.Config
 import com.lex.simplequest.R
 import com.lex.simplequest.databinding.ItemTrackBinding
-import com.lex.simplequest.domain.model.Track
-import com.lex.simplequest.domain.model.distance
-import com.lex.simplequest.domain.model.duration
+import com.lex.simplequest.domain.model.*
 import com.lex.simplequest.presentation.utils.toStringDuration
 
 class AdapterTracks(private val context: Context, private val clickListener: ItemClickListener) :
@@ -47,14 +44,14 @@ class AdapterTracks(private val context: Context, private val clickListener: Ite
                     clickListener.onTrackClicked(track)
                 }
                 trackNameView.text = track.name
-                val duration = track.duration()
+                val duration = track.movingDuration()
                 val format: String
-                var distance = track.distance()
+                var distance = track.movingDistance()
                 if (distance >= Config.METERS_IN_KILOMETER) {
-                    format = "%s, %.2f km"
+                    format = "%s, %.2f km, ${track.checkPoints.size} / ${track.points.size}"
                     distance /= Config.METERS_IN_KILOMETER
                 } else {
-                    format = "%s, %.2f m"
+                    format = "%s, %.2f m, ${track.checkPoints.size} / ${track.points.size}"
                 }
 
                 trackTimeDistanceView.text =

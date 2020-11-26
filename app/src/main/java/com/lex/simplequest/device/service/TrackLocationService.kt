@@ -19,6 +19,7 @@ import com.lex.simplequest.R
 import com.lex.simplequest.domain.locationmanager.LocationManager
 import com.lex.simplequest.domain.locationmanager.LocationTracker
 import com.lex.simplequest.domain.locationmanager.model.Location
+import com.lex.simplequest.domain.model.CheckPoint
 import com.lex.simplequest.domain.model.Point
 import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.domain.repository.LocationRepository
@@ -45,6 +46,7 @@ class TrackLocationService() : Service(), LocationTracker {
         private const val TASK_STOP_TRACK = "stopTrack"
         private const val TASK_ADD_POINT = "addPoint"
         private const val TASK_READ_SETTINGS = "readSettings"
+        private const val TASK_ADD_CHECK_POINT = "addCheckPoint"
 
         private const val ONGOING_NOTIFICATION_ID = 1
         private const val NOTIFICATION_CHANNEL_ID = "trackLocationNotificationId"
@@ -57,13 +59,15 @@ class TrackLocationService() : Service(), LocationTracker {
 
     private var status: LocationTracker.Status = LocationTracker.Status.NONE
     private var activeTrackId: Long? = null
-    private var configDistance: Long? = null
-    private var configBatteryLevel: Int? = null
+    private var trackerConfig: LocationTracker.TrackerConfig? = null
+    private var connectionConfig: LocationManager.ConnectionConfig? = null
+
     private var startRecordResultListener: LocationTracker.StartRecordResultListener? = null
     private val taskStartTrack = createStartTrackTask()
     private val taskStopTrack = createStopTrackTask()
     private val taskAddPoint = createAddPointTask()
     private val taskReadSettings = createReadSettingsTask()
+    private val taskAddCheckPoint = createAddCheckPointTask()
 
     private val pointObservableValue = ObservableValue(Point(-1, -1, 0.0, 0.0, null, 0L))
 
@@ -81,6 +85,9 @@ class TrackLocationService() : Service(), LocationTracker {
     private val _readSettingsInteractor: ReadSettingsInteractor by lazy {
         ReadSettingsInteractorImpl(App.instance.settingsRepository)
     }
+    private val _addCheckPointInteractor: AddCheckPointInteractor by lazy {
+        AddCheckPointInteractorImpl(App.instance.locationRepository)
+    }
 
     override val startTrackInteractor: StartTrackInteractor
         get() = _startTrackIneractor
@@ -90,6 +97,8 @@ class TrackLocationService() : Service(), LocationTracker {
         get() = _addPointInteractor
     override val readSettingsInteractor: ReadSettingsInteractor
         get() = _readSettingsInteractor
+    override val addCheckPointInteractor: AddCheckPointInteractor
+        get() = _addCheckPointInteractor
 
     private val locationListeners = CopyOnWriteArrayList<LocationTracker.Listener>()
     private var locationManagerCallback = object : LocationManager.Callback {
@@ -164,9 +173,16 @@ class TrackLocationService() : Service(), LocationTracker {
             val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
             Log.v(TAG, "battery level changed to $level")
 
-            if (LocationTracker.Status.RECORDING == status ) {
-                configBatteryLevel?.let { configgedLevel ->
-                    if (level < configgedLevel) {
+            if (LocationTracker.Status.RECORDING == status) {
+//                configBatteryLevel?.let { configgedLevel ->
+//                    if (level < configgedLevel) {
+//                        Log.w(TAG, "Recording is stopped because of low battery level")
+//                        stopRecording()
+//                    }
+//                }
+
+                trackerConfig?.let { config ->
+                    if (level < config.batteryLevelPc) {
                         Log.w(TAG, "Recording is stopped because of low battery level")
                         stopRecording()
                     }
@@ -231,7 +247,11 @@ class TrackLocationService() : Service(), LocationTracker {
 
             activeTrackId?.let { trackId ->
                 taskStopTrack.start(
-                    StopTrackInteractor.Param(trackId, System.currentTimeMillis(), configDistance),
+                    StopTrackInteractor.Param(
+                        trackId,
+                        System.currentTimeMillis(),
+                        trackerConfig?.distanceM
+                    ),
                     Unit
                 )
             }
@@ -289,7 +309,11 @@ class TrackLocationService() : Service(), LocationTracker {
             locationManager.disconnect()
 
             taskStopTrack.start(
-                StopTrackInteractor.Param(trackId, System.currentTimeMillis(), configDistance),
+                StopTrackInteractor.Param(
+                    trackId,
+                    System.currentTimeMillis(),
+                    trackerConfig?.distanceM
+                ),
                 Unit
             )
         }
@@ -303,12 +327,42 @@ class TrackLocationService() : Service(), LocationTracker {
         }
     }
 
-    override fun isRecording(): Boolean =
-        LocationTracker.Status.RECORDING == status
+    override fun pauseOrResume() {
+        val trackId = activeTrackId!!
+        when (status) {
+            LocationTracker.Status.RECORDING -> {
+                // disconnect location manager
+                // run AddCheckPointInteractor
+                // changeStatus to PAUSED
 
-    override fun getLastTrack(): Track? {
-        return null
+                val pausePoint = CheckPoint(-1, trackId, CheckPoint.Type.PAUSE, System.currentTimeMillis(), null)
+                taskAddCheckPoint.start(AddCheckPointInteractor.Param(pausePoint), Unit)
+                locationManager.disconnect()
+                changeStatus(LocationTracker.Status.PAUSED)
+            }
+            LocationTracker.Status.PAUSED -> {
+                // connect LocationManager
+                // run AddCheckPointInteractor
+                // changeStatus to RECORDING
+
+                changeStatus(LocationTracker.Status.RECORDING)
+                locationManager.connect(connectionConfig, locationManagerCallback)
+                val resumePoint = CheckPoint(-1, trackId, CheckPoint.Type.RESUME, System.currentTimeMillis(), null)
+                taskAddCheckPoint.start(AddCheckPointInteractor.Param(resumePoint), Unit)
+            }
+            else -> {
+                // do nothing
+            }
+        }
+
+
     }
+
+    override fun isRecording(): Boolean =
+        LocationTracker.Status.RECORDING == status || LocationTracker.Status.PAUSED == status
+
+    override fun isRecordingPaused(): Boolean =
+        LocationTracker.Status.PAUSED == status
 
     override fun addListener(listener: LocationTracker.Listener) {
         if (!locationListeners.contains(listener)) {
@@ -343,6 +397,7 @@ class TrackLocationService() : Service(), LocationTracker {
             LocationTracker.Status.CONNECTING -> Log.w(TAG, message)
             LocationTracker.Status.CONNECTED -> Log.i(TAG, message)
             LocationTracker.Status.RECORDING -> Log.e(TAG, message)
+            LocationTracker.Status.PAUSED -> Log.w(TAG, message)
         }
         status = newStatus
         locationListeners.forEach {
@@ -457,17 +512,15 @@ class TrackLocationService() : Service(), LocationTracker {
         error: Throwable?,
         recRequest: Boolean
     ) {
-        val config = if (null != result) {
+        // TODO: Check and handle error case
+
+        connectionConfig = if (null != result) {
+            trackerConfig = LocationTracker.TrackerConfig(result.distance, result.batteryLevel)
             LocationManager.ConnectionConfig(result.timePeriod, result.displacement)
         } else null
 
-        if (null != result) {
-            configDistance = result.distance
-            configBatteryLevel = result.batteryLevel
-        }
-
-        Log.d(TAG, "config = $config")
-        locationManager.connect(config, locationManagerCallback)
+        Log.d(TAG, "config = $connectionConfig")
+        locationManager.connect(connectionConfig, locationManagerCallback)
         changeStatus(LocationTracker.Status.CONNECTING)
 
         if (recRequest) {
@@ -497,4 +550,25 @@ class TrackLocationService() : Service(), LocationTracker {
                 handleReadSettings(null, error, rec)
             }
         )
+
+    private fun handleAddCheckPoint(error: Throwable?) {
+        // Handle?
+    }
+
+    private fun createAddCheckPointTask() =
+        SingleResultTask<AddCheckPointInteractor.Param, Unit, Unit>(
+            TASK_ADD_CHECK_POINT,
+            { param, _ ->
+                addCheckPointInteractor.asRxSingle(param)
+                    .observeOn(AndroidSchedulers.mainThread())
+            },
+            { _, _ ->
+                handleAddCheckPoint(null)
+            },
+            { error, _ ->
+                log.e(error, "Failed to add checkpoint")
+                handleAddCheckPoint(error)
+            }
+        )
+
 }

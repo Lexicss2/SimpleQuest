@@ -2,11 +2,9 @@ package com.lex.simplequest.domain.model
 
 import android.content.Context
 import android.location.Location
-import android.os.Environment
 import com.lex.simplequest.Config
 import com.lex.simplequest.presentation.utils.toDateString
 import java.io.File
-import java.io.FileOutputStream
 import java.io.FileWriter
 
 data class Track(
@@ -14,13 +12,75 @@ data class Track(
     val name: String,
     val startTime: Long,
     val endTime: Long? = null,
-    val points: List<Point> = emptyList()
+    val points: List<Point> = emptyList(),
+    val checkPoints: List<CheckPoint> = emptyList()
 )
 
-fun Track.duration(): Long =
+// Get points between pauses in track
+fun Track.pathes(): List<List<Point>> = if (checkPoints.isNotEmpty()) {
+    val pathesList = mutableListOf<List<Point>>()
+    var pointsIndex = 0
+    var startTime = this.startTime
+    var endTime: Long = this.endTime ?: points.last().timestamp
+
+    val subPointsList = mutableListOf<Point>()
+    checkPoints.forEach { checkPoint ->
+        when (checkPoint.type) {
+            CheckPoint.Type.PAUSE -> {
+                endTime = checkPoint.timestamp
+                var point = points[pointsIndex]
+                while (point.timestamp < endTime && pointsIndex < points.size - 1) {
+                    pointsIndex++
+                    point = points[pointsIndex]
+                    if (point.timestamp >= startTime) {
+                        subPointsList.add(point)
+                    }
+                }
+
+                pathesList.add(subPointsList)
+                subPointsList.clear()
+            }
+
+            CheckPoint.Type.RESUME -> {
+                startTime = checkPoint.timestamp
+            }
+        }
+    }
+
+    for (i in pointsIndex until points.size) {
+        val point = points[pointsIndex]
+        if (point.timestamp >= startTime) {
+            subPointsList.add(point)
+        }
+    }
+    pathesList.add(subPointsList)
+
+    pathesList.toList()
+} else listOf(points)
+
+fun Track.fullDuration(): Long =
     if (null != endTime) endTime - startTime else if (points.isNotEmpty()) points[points.lastIndex].timestamp - startTime else 0L
 
-fun Track.distance(): Float =
+fun Track.pausedDuration(): Long = if (checkPoints.isNotEmpty()) {
+    var duration = 0L
+    var startPause = startTime
+    checkPoints.forEach { checkPoint ->
+        when (checkPoint.type) {
+            CheckPoint.Type.PAUSE -> {
+                startPause = checkPoint.timestamp
+            }
+            CheckPoint.Type.RESUME -> {
+                duration += (checkPoint.timestamp - startPause)
+            }
+        }
+    }
+    duration
+} else 0L
+
+fun Track.movingDuration(): Long =
+    fullDuration() - pausedDuration()
+
+fun Track.fullDistance(): Float =
     if (points.size > 1) {
         val results = FloatArray(3)
         var distanceInMeters = .0f
@@ -39,6 +99,19 @@ fun Track.distance(): Float =
 
         distanceInMeters
     } else .0f
+
+fun Track.movingDistance(): Float = if (checkPoints.isNotEmpty()) {
+    var distance = .0f
+    pathes().forEach { path ->
+        if (path.isNotEmpty()) {
+            val firstPoint = path.first()
+            val lastPoint = path.last()
+
+            distance += firstPoint.distanceTo(lastPoint)
+        }
+    }
+    distance
+} else fullDistance()
 
 fun Track.averageSpeed(): Float =
     when (points.size) {

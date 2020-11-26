@@ -17,6 +17,7 @@ class QuestProvider() : ContentProvider() {
         private const val TAG = "QuestProvider"
         private const val TRACKS_CODE = 1
         private const val POINTS_CODE = 2
+        private const val CHECK_POINTS_CODE = 3
 
         private val URI_MATCHER = UriMatcher(UriMatcher.NO_MATCH)
     }
@@ -27,6 +28,7 @@ class QuestProvider() : ContentProvider() {
         URI_MATCHER.apply {
             addURI(QuestContract.AUTHORITY, QuestContract.Tracks.TABLE_NAME, TRACKS_CODE)
             addURI(QuestContract.AUTHORITY, QuestContract.Points.TABLE_NAME, POINTS_CODE)
+            addURI(QuestContract.AUTHORITY, QuestContract.CheckPoints.TABLE_NAME, CHECK_POINTS_CODE)
         }
     }
 
@@ -55,6 +57,15 @@ class QuestProvider() : ContentProvider() {
                         QuestContract.Points.TABLE_NAME,
                         QuestContract.Points.COLUMN_ID,
                         Arrays.asList(QuestContract.Points.COLUMN_ID),
+                        values
+                    )
+                }
+                CHECK_POINTS_CODE -> {
+                    insertOrUpdateUniqueRow(
+                        db,
+                        QuestContract.CheckPoints.TABLE_NAME,
+                        QuestContract.CheckPoints.COLUMN_ID,
+                        Arrays.asList(QuestContract.CheckPoints.COLUMN_ID),
                         values
                     )
                 }
@@ -89,6 +100,9 @@ class QuestProvider() : ContentProvider() {
             POINTS_CODE -> {
                 QuestContract.Points.TABLE_NAME
             }
+            CHECK_POINTS_CODE -> {
+                QuestContract.CheckPoints.TABLE_NAME
+            }
             else -> throw IllegalArgumentException("Unsupported URI $uri")
         }
 
@@ -105,7 +119,7 @@ class QuestProvider() : ContentProvider() {
         selectionArgs: Array<String>?
     ): Int {
         val db = database.writableDatabase;
-        var updateCount = 0
+        val updateCount: Int
         try {
             db.beginTransaction()
             when (URI_MATCHER.match(uri)) {
@@ -117,6 +131,16 @@ class QuestProvider() : ContentProvider() {
                 POINTS_CODE -> {
                     updateCount =
                         db.update(QuestContract.Points.TABLE_NAME, values, selection, selectionArgs)
+                    db.setTransactionSuccessful()
+                }
+                CHECK_POINTS_CODE -> {
+                    updateCount =
+                        db.update(
+                            QuestContract.CheckPoints.TABLE_NAME,
+                            values,
+                            selection,
+                            selectionArgs
+                        )
                     db.setTransactionSuccessful()
                 }
                 else -> throw IllegalArgumentException("Unsupported URI $uri")
@@ -135,7 +159,7 @@ class QuestProvider() : ContentProvider() {
 
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
         val db = database.writableDatabase;
-        var deleteCount = 0
+        val deleteCount: Int
         try {
             db.beginTransaction()
             when (URI_MATCHER.match(uri)) {
@@ -147,6 +171,11 @@ class QuestProvider() : ContentProvider() {
                 POINTS_CODE -> {
                     deleteCount =
                         db.delete(QuestContract.Points.TABLE_NAME, selection, selectionArgs)
+                    db.setTransactionSuccessful()
+                }
+                POINTS_CODE -> {
+                    deleteCount =
+                        db.delete(QuestContract.CheckPoints.TABLE_NAME, selection, selectionArgs)
                     db.setTransactionSuccessful()
                 }
                 else -> throw IllegalArgumentException("Unsupported URI $uri")
