@@ -127,7 +127,10 @@ class HomeFragmentPresenter(
         override fun onPauseResumeSucceeded(succeeded: Boolean) {
             Log.d(TAG, "V record Paused or Resumed")
             if (!taskReadTracks.isRunning()) {
-                taskReadTracks.start(ReadTracksInteractor.Param(LatestTrackQuerySpecification()), Unit)
+                taskReadTracks.start(
+                    ReadTracksInteractor.Param(LatestTrackQuerySpecification()),
+                    Unit
+                )
             }
         }
 
@@ -220,9 +223,13 @@ class HomeFragmentPresenter(
     private fun handleTimerAction(tracker: LocationTracker?, track: Track?) {
         if (null != tracker) {
             val isRecordingNow = tracker.isRecording() && !tracker.isRecordingPaused()
-            Log.v(TAG, "isRecNow = $isRecordingNow, track assigned = ${null != track}, timer running = ${taskTimer.isRunning()}")
+            Log.v(
+                TAG,
+                "isRecNow = $isRecordingNow, track assigned = ${null != track}, timer running = ${taskTimer.isRunning()}"
+            )
             if (isRecordingNow && null != track && !taskTimer.isRunning()) {
-                val started = taskTimer.start(track.startTime + track.pausedDuration(), Unit) // TODO: Fix it
+                val started =
+                    taskTimer.start(track.startTime + track.pausedDuration(), Unit) // TODO: Fix it
                 Log.w(TAG, "Timer started $started, isRunning = ${taskTimer.isRunning()}")
             } else if (!isRecordingNow && taskTimer.isRunning()) {
                 val stopped = taskTimer.stop()
@@ -282,14 +289,16 @@ class HomeFragmentPresenter(
 
             if (0 != (flags and FLAG_SET_DURATION)) {
                 if (null != track) {
-                    val isNowRecording = null != tracker && tracker.isRecording() && !tracker.isRecordingPaused()
+                    val isNowRecording =
+                        null != tracker && tracker.isRecording() && !tracker.isRecordingPaused()
 
-                val dur_tm = if (null != timerValue) timerValue!!.toStringDurations() else null
-                val dur_tr = track.movingDuration(true).toStringDurations()
+                    val isPaused = tracker?.isRecordingPaused() ?: false
+                    val dur_tm = if (null != timerValue) timerValue!!.toStringDurations() else null
+                    val dur_tr = track.movingDuration(!isPaused).toStringDurations()
 
-                Log.v(TAG, "timerValue = ${dur_tm}, trackValue = ${dur_tr}")
+                    Log.v(TAG, "timerValue = ${dur_tm}, trackValue = ${dur_tr}")
 
-                    val duration = if (isNowRecording) timerValue!! else track.movingDuration(true)
+                    val duration = if (isNowRecording) timerValue!! else track.movingDuration(!isPaused)
                     val (minutes, seconds) = duration.toStringDurations()
                     ui.showLastTrackDuration(minutes, seconds)
                 } else {
@@ -338,8 +347,13 @@ class HomeFragmentPresenter(
             val lastTrack = if (tracks.isNotEmpty()) tracks.last() else null
             this.lastTrack = lastTrack
             newRecordedLocations.clear()
-            Log.w(TAG, "Update by handleReadTracks = and track Moving duration is =" +
-                    " ${lastTrack?.movingDuration(true)?.toStringDurations()}, full = ${lastTrack?.fullDuration(true)?.toStringDurations()}")
+            val isPaused = connectedLocationTracker?.isRecordingPaused() ?: false
+            Log.w(
+                TAG, "Update by handleReadTracks = and track Moving duration is =" +
+                        " ${
+                            lastTrack?.movingDuration(!isPaused)?.toStringDurations()
+                        }, full = ${lastTrack?.fullDuration(!isPaused)?.toStringDurations()}"
+            )
         } else if (null != error) {
             this.error = error
             updateUi(FLAG_SET_LOCATION_ERROR_DATA)
