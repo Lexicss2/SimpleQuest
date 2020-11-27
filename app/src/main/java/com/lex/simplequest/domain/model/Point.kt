@@ -12,6 +12,9 @@ data class Point(
     val timestamp: Long
 )
 
+fun Point.toLatLng() =
+    LatLng(this.latitude, this.longitude)
+
 fun List<Point>.toLatLngs() =
     this.map {
         LatLng(it.latitude, it.longitude)

@@ -29,6 +29,9 @@ import com.lex.simplequest.domain.model.toLatLngs
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractorImpl
 import com.lex.simplequest.presentation.base.BaseMvpFragment
 import com.lex.simplequest.presentation.screen.home.MainRouter
+import com.lex.simplequest.presentation.utils.canBeDrawn
+import com.lex.simplequest.presentation.utils.toLatLngBounds
+import com.lex.simplequest.presentation.utils.toPolylineOptions
 import com.softeq.android.mvp.PresenterStateHolder
 
 class MapFragment :
@@ -54,7 +57,7 @@ class MapFragment :
     private lateinit var indicatorTextView: TextView
     private var startMarker: Marker? = null
     private var finishMarker: Marker? = null
-    private var currentPolyline: Polyline? = null
+    private val currentPolylines: MutableList<Polyline> = mutableListOf()
 
     private val connection = object : ServiceConnection {
 
@@ -86,10 +89,6 @@ class MapFragment :
         indicatorTextView = view.findViewById(R.id.indicator_text_view)
         super.onViewCreated(view, savedInstanceState)
     }
-
-    // Draw path on Map
-    //https://stackoverflow.com/questions/2176397/drawing-a-line-path-on-google-maps
-
 
     override fun onResume() {
         super.onResume()
@@ -157,28 +156,22 @@ class MapFragment :
         }
     }
 
+
     override fun showTrack(track: Track?, isRecording: Boolean, shouldMoveCamera: Boolean) {
         googleMap?.let { map ->
-            currentPolyline?.remove()
-            currentPolyline = null
+            currentPolylines.forEach { polyline ->
+                polyline.remove()
+            }
+            currentPolylines.clear()
 
             if (null != track) {
-                val points = track.points.toLatLngs()
-                val color = if (isRecording) Color.RED else Color.BLUE
-                val polylineOptions = PolylineOptions()
-                    .width(TRACK_WIDTH)
-                    .color(color)
-                    .geodesic(true)
-                    .addAll(points)
+                val polylineOptionsList = track.toPolylineOptions(isRecording, TRACK_WIDTH)
+                val polyLines = polylineOptionsList.map { options ->
+                    map.addPolyline(options)
+                }
 
-                val polyline = map.addPolyline(polylineOptions)
-
-                if (shouldMoveCamera && polyline.points.size > 1) {
-                    val boundsBuilder = LatLngBounds.Builder()
-                    polyline.points.forEach {
-                        boundsBuilder.include(it)
-                    }
-                    val bounds = boundsBuilder.build()
+                if (shouldMoveCamera && polyLines.canBeDrawn()) {
+                    val bounds = polyLines.toLatLngBounds()
                     val cameraUpdate = CameraUpdateFactory.newLatLngBounds(
                         bounds,
                         BOUND_WIDTH,
@@ -187,8 +180,7 @@ class MapFragment :
                     )
                     map.moveCamera(cameraUpdate)
                 }
-
-                currentPolyline = polyline
+                currentPolylines.addAll(polyLines)
 
                 trackNameTextView.apply {
                     if (isRecording) {
