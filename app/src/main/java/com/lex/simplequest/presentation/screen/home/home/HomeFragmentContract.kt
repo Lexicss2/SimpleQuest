@@ -1,7 +1,6 @@
 package com.lex.simplequest.presentation.screen.home.home
 
 import com.lex.simplequest.domain.locationmanager.LocationTracker
-import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.presentation.base.BaseMvpLceContract
 
 interface HomeFragmentContract {

@@ -55,7 +55,7 @@ class TracksFragmentPresenter(
         if (null != tracks) {
             this.tracks = tracks
         } else if (null != error) {
-            // handle
+            ui.showError(error)
         }
 
         updateUi()

@@ -166,17 +166,12 @@ class HomeFragmentPresenter(
         super.stop()
         taskReadTracks.stop()
         taskTimer.stop()
-
-//        connectedLocationTracker?.removeListener(trackingListener)
-//        connectedLocationTracker?.startStopRecordResultListener = null
-//        connectedLocationTracker = null
     }
 
     override fun startStopClicked() {
         connectedLocationTracker?.let { tracker ->
             if (tracker.isRecording()) {
                 Log.d(TAG, "STOP recording")
-                //taskTimer.stop()
                 tracker.stopRecording()
             } else {
                 Log.e(TAG, "START recording")
@@ -189,9 +184,6 @@ class HomeFragmentPresenter(
 
     override fun pauseResumeClicked() {
         connectedLocationTracker?.pauseOrResume()
-//        if (!taskReadTracks.isRunning()) {
-//            taskReadTracks.start(ReadTracksInteractor.Param(LatestTrackQuerySpecification()), Unit)
-//        }
         updateUi(FLAG_SET_BUTTON_STATUS)
     }
 
@@ -199,7 +191,7 @@ class HomeFragmentPresenter(
         connectedLocationTracker = locationTracker
         connectedLocationTracker?.addListener(trackingListener)
         connectedLocationTracker?.recordingEventsListener = startStopRecordResultListener
-        Log.i(TAG, "location tracker connected in presenter")
+        Log.d(TAG, "location tracker connected in presenter")
 
         updateUi(FLAG_SET_BUTTON_STATUS or FLAG_SET_LOCATION_ERROR_DATA)
     }
@@ -208,8 +200,7 @@ class HomeFragmentPresenter(
         connectedLocationTracker?.removeListener(trackingListener)
         connectedLocationTracker?.recordingEventsListener = null
         connectedLocationTracker = null
-        Log.i(TAG, "location tracker disconnected in presenter")
-        //taskTimer.stop()
+        Log.d(TAG, "location tracker disconnected in presenter")
         updateUi(FLAG_SET_LOCATION_ERROR_DATA)
     }
 
@@ -239,10 +230,6 @@ class HomeFragmentPresenter(
     }
 
     private fun updateUi(flags: Int) {
-        Log.d(
-            TAG,
-            "updateUi, connectedLocationTracker, tracker status: ${connectedLocationTracker?.getStatus()} flags: $flags, track assigned = ${null != lastTrack}"
-        )
         super.updateUi()
 
         if (isUiBinded) {
@@ -337,9 +324,7 @@ class HomeFragmentPresenter(
                 ui.setLocationSuspendedStatus(locationSuspendedReason)
                 ui.setError(error)
             }
-
         }
-
     }
 
     private fun handleReadTracks(tracks: List<Track>?, error: Throwable?) {

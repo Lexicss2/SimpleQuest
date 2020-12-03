@@ -8,7 +8,6 @@ import android.content.ServiceConnection
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,13 +44,11 @@ class HomeFragment :
     private val connection = object : ServiceConnection {
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            Log.i("qaz", "on service Connected")
             val binder = service as TrackLocationService.TrackLocationBinder
             presenter.locationTrackerServiceConnected(binder.getService() as LocationTracker)
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            Log.e("qaz", "on service disconnected")
             presenter.locationTrackerServiceDisconnected()
         }
     }
@@ -79,16 +76,13 @@ class HomeFragment :
 
     override fun onResume() {
         super.onResume()
-        Log.d("qaz", "Fragment onResume, bind to Service")
         Intent(activity, TrackLocationService::class.java).also { intent ->
-            val bond = activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
-            Log.d("qaz", "bond = $bond")
+            activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
         }
     }
 
     override fun onPause() {
         super.onPause()
-        Log.w("qaz", "Fragment onPause, unbind to Service")
         activity?.unbindService(connection)
         presenter.locationTrackerServiceDisconnected() // Should be called because ServiceConnection.OnServiceDisconnected is not called
     }
@@ -212,7 +206,6 @@ class HomeFragment :
     }
 
     override fun showLastTrackDuration(minutes: String?, seconds: String?) {
-        Log.d("qaz", "min = $minutes, seconds = $seconds")
         viewBinding.layoutContent.apply {
             minutesDurationTextView.text = minutes ?: NO_DATA
             secondsDurationTextView.text = seconds ?: NO_DATA

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lex.simplequest.App
@@ -118,6 +119,10 @@ class TracksFragment :
         viewBinding.apply {
             progressBar.visibility = if (show) View.VISIBLE else View.GONE
         }
+    }
+
+    override fun showError(error: Throwable) {
+        Toast.makeText(context, error.localizedMessage, Toast.LENGTH_SHORT).show()
     }
 
     override fun getUi(): TracksFragmentContract.Ui =

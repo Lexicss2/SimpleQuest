@@ -8,6 +8,7 @@ interface TracksFragmentContract {
         fun setTracks(items: List<Track>)
         fun showNoContent()
         fun showProgress(show: Boolean)
+        fun showError(error: Throwable)
     }
 
     interface Presenter : BaseMvpContract.Presenter<Ui, Presenter.State> {

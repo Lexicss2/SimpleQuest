@@ -58,13 +58,11 @@ class MapFragmentPresenter(
             when {
                 0 == count % 10 && true == connectedLocationTracker?.isRecording() -> {
                     if (!taskReadTracks.isRunning()) {
-                        Log.w("qaz", "Force update track")
                         taskReadTracks.start(ReadTracksInteractor.Param(LatestTrackQuerySpecification()), Unit)
                     }
                 }
 
                 0 == count % 5 -> {
-                    Log.i("qaz", "update")
                     updateUi(0)
                 }
             }
@@ -136,11 +134,11 @@ class MapFragmentPresenter(
 
         when {
             isRecording && null != track -> {
-                Log.d("qaz", "Case 1")
                 if (track.points.isNotEmpty()) {
                     val firstPoint = track.points.first()
                     val startLocation =
                         Location(firstPoint.latitude, firstPoint.longitude, firstPoint.altitude)
+
                     if (1 == track.points.size) {
                         ui.showStartMarker(null)
                         ui.showFinishMarker(startLocation, isRecording = true, shouldMoveCamera = !wasCameraMoved)
@@ -152,6 +150,7 @@ class MapFragmentPresenter(
                         ui.showFinishMarker(lastLocation, isRecording = true, shouldMoveCamera = false)
                         ui.showTrack(track, isRecording = true, shouldMoveCamera = !wasCameraMoved)
                     }
+
                     if (!wasCameraMoved) {
                         wasCameraMoved = true
                     }
@@ -163,7 +162,6 @@ class MapFragmentPresenter(
             }
 
             null != track -> {
-                Log.d("qaz", "Case 2")
                 if (track.points.isNotEmpty()) {
                     val firstPoint = track.points.first()
                     val startLocation =
@@ -190,7 +188,6 @@ class MapFragmentPresenter(
             }
 
             null != location -> {
-                Log.d("qaz", "Case 3")
                 ui.showStartMarker(null)
                 ui.showFinishMarker(location, isRecording = false, shouldMoveCamera = !wasCameraMoved)
                 ui.showTrack(null)
@@ -200,7 +197,7 @@ class MapFragmentPresenter(
             }
 
             else -> {
-                Log.d("qaz", "Case 4, do nothing")
+                // do nothing
             }
         }
     }

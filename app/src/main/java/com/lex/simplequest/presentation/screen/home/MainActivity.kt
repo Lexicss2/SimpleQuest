@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -51,6 +50,7 @@ class MainActivity(private val router: MainRouterImpl = MainRouterImpl()) :
     private var isSettlingBottomNavigation = false
     private lateinit var serviceIntent: Intent
     private var _bottomBarHeightListener: BottomBarHeightListener? = null
+
     var bottomBarHeightListener: BottomBarHeightListener?
     get() = _bottomBarHeightListener
     set(value) {
@@ -90,13 +90,11 @@ class MainActivity(private val router: MainRouterImpl = MainRouterImpl()) :
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            Log.i("qaz", "! Service Connected in Activity")
             val binder = service as TrackLocationService.TrackLocationBinder
             presenter.serviceConnected(binder.getService() as LocationTracker)
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            Log.e("qaz", "Service Disconnected in Activity")
             presenter.serviceDisconnected()
         }
     }
@@ -142,10 +140,6 @@ class MainActivity(private val router: MainRouterImpl = MainRouterImpl()) :
     override fun onDestroy() {
         presenter.destroy()
         super.onDestroy()
-    }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
     }
 
     override fun onFragmentBackStackChanged() {
@@ -194,32 +188,20 @@ class MainActivity(private val router: MainRouterImpl = MainRouterImpl()) :
 
     override fun startLocationTracker(): Any? {
         serviceIntent = Intent(this, TrackLocationService::class.java)
-        val compName = startService(serviceIntent)
-        Log.i(
-            "qaz",
-            "Activity onCreate: ${if (compName != null) "startted" else "not started"}"
-        )
-
-        return compName
+        return startService(serviceIntent)
     }
 
-    override fun bindLocationTracker(): Boolean {
-        val bond = bindService(serviceIntent, serviceConnection, 0)
-        Log.d("qaz", "Activity onResume Try to bond service = $bond")
-        return bond
-    }
+    override fun bindLocationTracker(): Boolean =
+        bindService(serviceIntent, serviceConnection, 0)
+
 
     override fun unbindLocationTracker() {
         unbindService(serviceConnection)
     }
 
     override fun stopLocationTracker() {
-        Log.w("qaz", "stopLocationTracker called from presenter")
         stopService(serviceIntent)
     }
-
-    override fun createPresenterStateHolder(): PresenterStateHolder<MainActivityContract.Presenter.State> =
-        VoidPresenterStateHolder()
 
     override fun getUi(): MainActivityContract.Ui =
         this
@@ -229,6 +211,9 @@ class MainActivity(private val router: MainRouterImpl = MainRouterImpl()) :
             App.instance.logFactory,
             this
         )
+
+    override fun createPresenterStateHolder(): PresenterStateHolder<MainActivityContract.Presenter.State> =
+        VoidPresenterStateHolder()
 
     interface BottomBarHeightListener {
         fun onBottomBarHeightChanged(height: Int)

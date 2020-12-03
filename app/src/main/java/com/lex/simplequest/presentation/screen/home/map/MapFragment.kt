@@ -1,14 +1,11 @@
 package com.lex.simplequest.presentation.screen.home.map
 
-import android.app.job.JobScheduler
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.graphics.Color
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,7 +23,6 @@ import com.lex.simplequest.device.service.TrackLocationService
 import com.lex.simplequest.domain.locationmanager.LocationTracker
 import com.lex.simplequest.domain.locationmanager.model.Location
 import com.lex.simplequest.domain.model.Track
-import com.lex.simplequest.domain.model.toLatLngs
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractorImpl
 import com.lex.simplequest.presentation.base.BaseMvpFragment
 import com.lex.simplequest.presentation.screen.home.MainRouter
@@ -70,8 +66,6 @@ class MapFragment :
         override fun onServiceDisconnected(name: ComponentName?) {
             presenter.locationTrackerServiceDisconnected()
         }
-
-
     }
 
     override fun onCreateView(
@@ -91,14 +85,12 @@ class MapFragment :
         trackNameTextView = view.findViewById(R.id.track_name_text_view)
         indicatorTextView = view.findViewById(R.id.indicator_text_view)
         super.onViewCreated(view, savedInstanceState)
-
-
     }
 
     override fun onResume() {
         super.onResume()
         Intent(activity, TrackLocationService::class.java).also { intent ->
-            val bond = activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+            activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
         }
     }
 
@@ -109,9 +101,7 @@ class MapFragment :
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-        Log.i("qaz", "MAP IS READY")
         this.googleMap = googleMap
-
         presenter.mapReady()
     }
 
@@ -215,13 +205,7 @@ class MapFragment :
     private fun initGoogleMap() {
         if (null == googleMap) {
             val googleMap = childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
-            if (null == googleMap) {
-                Log.e("qaz", "Failed to Initialize GoogleMap")
-                return
-            }
-
-            Log.i("qaz", "Map initialized ok!")
-            googleMap.getMapAsync(this)
+            googleMap?.getMapAsync(this)
         }
     }
 
