@@ -193,18 +193,15 @@ class HomeFragment :
     }
 
     override fun showLastTrackName(trackName: String?, isRecording: Boolean) {
+        val caption = trackName ?: resources.getString(R.string.home_no_tracks)
         viewBinding.layoutContent.apply {
-            if (trackName != null) {
-                lastTrackNameView.text = trackName
-            } else {
-                lastTrackNameView.text = resources.getString(R.string.home_no_tracks)
-            }
-
+            lastTrackNameView.text = caption
             lastTrackCaption.text =
                 if (isRecording) resources.getString(R.string.home_is_recording) else resources.getString(
                     R.string.home_last_track_name
                 )
         }
+        toolbarInfo.setTitle(caption)
     }
 
     override fun showProgress(show: Boolean) {

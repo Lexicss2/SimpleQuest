@@ -10,6 +10,7 @@ import com.lex.simplequest.databinding.FragmentSettingsBinding
 import com.lex.simplequest.domain.settings.interactor.ReadSettingsInteractorImpl
 import com.lex.simplequest.domain.settings.interactor.WriteSettingsInteractorImpl
 import com.lex.simplequest.presentation.base.BaseMvpLceFragment
+import com.lex.simplequest.presentation.screen.home.MainActivity
 import com.lex.simplequest.presentation.screen.home.MainRouter
 import com.lex.simplequest.presentation.utils.isDialogShown
 import com.lex.simplequest.presentation.utils.showDialog
@@ -41,6 +42,18 @@ class SettingsFragment :
     private val viewBinding: FragmentSettingsBinding
         get() = _viewBinding!!
 
+    private val bottomBarHeightChangeListener = object : MainActivity.BottomBarHeightListener {
+        override fun onBottomBarHeightChanged(height: Int) {
+            if (viewBinding.layoutContent.scrollView.layoutParams is ViewGroup.MarginLayoutParams) {
+                val lp =
+                    viewBinding.layoutContent.scrollView.layoutParams as ViewGroup.MarginLayoutParams
+                if (lp.bottomMargin != height) {
+                    lp.bottomMargin = height
+                    viewBinding.layoutContent.scrollView.layoutParams = lp
+                }
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -68,7 +81,22 @@ class SettingsFragment :
                 presenter.aboutClicked()
             }
         }
+        toolbarInfo.setTitle(resources.getString(R.string.settings_title))
         super.onViewCreated(view, savedInstanceState)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (activity is MainActivity) {
+            (activity as MainActivity).bottomBarHeightListener = bottomBarHeightChangeListener
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (activity is MainActivity) {
+            (activity as MainActivity).bottomBarHeightListener = null
+        }
     }
 
     override fun onDestroyView() {
@@ -170,7 +198,8 @@ class SettingsFragment :
 
     override fun showDisplacementPopup(displacement: Long?, availableDisplacements: Array<String>) {
         if (!childFragmentManager.isDialogShown(DLG_SELECT_DISPLACEMENT)) {
-            val dlg = SelectMinimalDisplacementDialog.newInstance(displacement, availableDisplacements)
+            val dlg =
+                SelectMinimalDisplacementDialog.newInstance(displacement, availableDisplacements)
             childFragmentManager.showDialog(dlg, DLG_SELECT_DISPLACEMENT)
         }
     }

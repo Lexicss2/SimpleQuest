@@ -1,5 +1,6 @@
 package com.lex.simplequest.presentation.screen.home.map
 
+import android.app.job.JobScheduler
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -69,6 +70,8 @@ class MapFragment :
         override fun onServiceDisconnected(name: ComponentName?) {
             presenter.locationTrackerServiceDisconnected()
         }
+
+
     }
 
     override fun onCreateView(
@@ -88,6 +91,8 @@ class MapFragment :
         trackNameTextView = view.findViewById(R.id.track_name_text_view)
         indicatorTextView = view.findViewById(R.id.indicator_text_view)
         super.onViewCreated(view, savedInstanceState)
+
+
     }
 
     override fun onResume() {

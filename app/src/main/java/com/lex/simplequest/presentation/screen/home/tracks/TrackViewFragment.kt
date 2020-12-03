@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toolbar
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -82,6 +83,8 @@ class TrackViewFragment :
         } else {
             savedTracks = listOf(track)
         }
+
+        toolbarInfo.setTitle(track.name)
     }
 
     private fun showMarker(map: GoogleMap, latLng: LatLng, title: String, color: Float): Marker =

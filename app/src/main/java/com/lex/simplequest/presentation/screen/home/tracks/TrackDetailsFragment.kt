@@ -104,9 +104,9 @@ class TrackDetailsFragment :
     }
 
     override fun setName(trackName: String?) {
+        val value = trackName ?: NO_VALUE
         viewBinding.trackNameEditText.apply {
             removeTextChangedListener(nameChangeListener)
-            val value = trackName ?: NO_VALUE
             var customSelectionStart = selectionStart
             var customSelectionEnd = selectionEnd
             setText(value)
@@ -115,6 +115,8 @@ class TrackDetailsFragment :
             setSelection(customSelectionStart, customSelectionEnd)
             addTextChangedListener(nameChangeListener)
         }
+
+        toolbarInfo.setTitle(value)
     }
 
     override fun setDistance(distance: String?) {

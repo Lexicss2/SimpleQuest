@@ -5,6 +5,7 @@
     <color name="colorAccent">#03DAC5</color>
 
     <color name="colorBgDefault">#c0c0c0</color>
+    <color name="colorBgToolbar">#b0b0b0</color>
     <color name="colorBgGray">#909090</color>
     <color name="colorButtonText">#111111</color>
     <color name="colorBgStartButton">#90f890</color>

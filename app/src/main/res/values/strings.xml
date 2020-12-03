@@ -51,8 +51,10 @@
     <string name="tracks_start">Start</string>
     <string name="tracks_finish">Finish</string>
     <string name="tracks_no_tracks">No tracks</string>
+    <string name="tracks_title">%d tracks</string>
 
     <!-- Settings -->
+    <string name="settings_title">Settings</string>
     <string name="settings_gps_accuracy_title">GPS accuracy</string>
     <string name="settings_gps_accuracy_value">Time period: %d s</string>
     <string name="settings_gps_accuracy_description">Please select the time period (in seconds) how often the location should be updated</string>

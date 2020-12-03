@@ -7,10 +7,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lex.simplequest.App
+import com.lex.simplequest.R
 import com.lex.simplequest.databinding.FragmentTracksBinding
 import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractorImpl
 import com.lex.simplequest.presentation.base.BaseMvpFragment
+import com.lex.simplequest.presentation.screen.home.MainActivity
 import com.lex.simplequest.presentation.screen.home.MainRouter
 import com.softeq.android.mvp.PresenterStateHolder
 import com.softeq.android.mvp.VoidPresenterStateHolder
@@ -43,6 +45,18 @@ class TracksFragment :
         }
     }
 
+    private val bottomBarHeightChangeListener = object : MainActivity.BottomBarHeightListener {
+        override fun onBottomBarHeightChanged(height: Int) {
+            if (viewBinding.tracksListView.layoutParams is ViewGroup.MarginLayoutParams) {
+                val lp = viewBinding.tracksListView.layoutParams as ViewGroup.MarginLayoutParams
+                if (lp.bottomMargin != height) {
+                    lp.bottomMargin = height
+                    viewBinding.tracksListView.layoutParams = lp
+                }
+            }
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -64,6 +78,20 @@ class TracksFragment :
         super.onViewCreated(view, savedInstanceState)
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (activity is MainActivity) {
+            (activity as MainActivity).bottomBarHeightListener = bottomBarHeightChangeListener
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (activity is MainActivity) {
+            (activity as MainActivity).bottomBarHeightListener = null
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _viewBinding = null
@@ -75,6 +103,8 @@ class TracksFragment :
             tracksListView.visibility = View.VISIBLE
             notTrackTextView.visibility = View.GONE
         }
+
+        toolbarInfo.setTitle(String.format(resources.getString(R.string.tracks_title), items.size))
     }
 
     override fun showNoContent() {
