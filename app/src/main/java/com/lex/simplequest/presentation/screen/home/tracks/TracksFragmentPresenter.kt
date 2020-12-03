@@ -32,7 +32,9 @@ class TracksFragmentPresenter(
 
     override fun start() {
         super.start()
-        taskReadTracks.start(ReadTracksInteractor.Param(AllTracksQuerySpecification()), Unit)
+        if (tracks.isEmpty()) {
+            taskReadTracks.start(ReadTracksInteractor.Param(AllTracksQuerySpecification()), Unit)
+        }
         updateUi()
     }
 

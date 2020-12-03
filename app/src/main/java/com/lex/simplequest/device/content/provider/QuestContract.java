@@ -19,6 +19,8 @@ public interface QuestContract {
         String COLUMN_NAME = "name";
         String COLUMN_START_TIME = "start_time";
         String COLUMN_END_TIME = "end_time";
+
+        String[] PROJECTION = {COLUMN_ID, COLUMN_NAME, COLUMN_START_TIME, COLUMN_END_TIME};
     }
 
     interface Points extends BaseEntityColumns {
@@ -30,6 +32,8 @@ public interface QuestContract {
         String COLUMN_LONGITUDE = "longitude";
         String COLUMN_ALTITUDE = "altitude";
         String COLUMN_TIMESTAMP = "timestamp";
+
+        String[] PROJECTION = {COLUMN_ID, COLUMN_TRACK_ID, COLUMN_LATITUDE, COLUMN_LONGITUDE, COLUMN_ALTITUDE, COLUMN_TIMESTAMP};
     }
 
     interface CheckPoints extends  BaseEntityColumns {
@@ -40,5 +44,7 @@ public interface QuestContract {
         String COLUMN_TYPE = "type";
         String COLUMN_TIMESTAMP = "timestamp";
         String COLUMN_TAG = "tag";
+
+        String[] PROJECTION = {COLUMN_ID, COLUMN_TRACK_ID, COLUMN_TYPE, COLUMN_TIMESTAMP, COLUMN_TAG};
     }
 }

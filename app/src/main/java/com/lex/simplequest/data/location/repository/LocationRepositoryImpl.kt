@@ -131,7 +131,7 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
         checkNotClosed()
         return context.contentResolver.query(
             QuestContract.Tracks.CONTENT_URI,
-            null,
+            QuestContract.Tracks.PROJECTION,
             (spec as LocationQuerySpecificationImpl).getWhereClause(),
             null,
             QuestContract.Tracks.COLUMN_START_TIME + " DESC"

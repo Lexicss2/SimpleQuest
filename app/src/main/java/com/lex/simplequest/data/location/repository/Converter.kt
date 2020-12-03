@@ -22,14 +22,14 @@ fun Cursor.toFullTracks(context: Context): List<Track> =
         val trackId = this.getTrackId()
         val pointsCursor = context.contentResolver.query(
             QuestContract.Points.CONTENT_URI,
-            null,
+            QuestContract.Points.PROJECTION,
             "${QuestContract.Points.COLUMN_TRACK_ID} = $trackId",
             null,
             null
         )
         val checkPointsCursor = context.contentResolver.query(
             QuestContract.CheckPoints.CONTENT_URI,
-            null,
+            QuestContract.CheckPoints.PROJECTION,
             "${QuestContract.Points.COLUMN_TRACK_ID} = $trackId",
             null,
             null
