@@ -46,13 +46,7 @@ class App : Application() {
         instance = this
         super.onCreate()
 
-        //locationTracker.setup(locationManager, locationRepository)
-
         // TODO: Setup Strict mode
-
-//        val intent = Intent(applicationContext, TrackLocationService::class.java)
-//        val res = applicationContext.startService(intent)
-//        Log.d("qaz", "result: $res")
 
         RxJavaPlugins.setErrorHandler { throwable ->
             android.util.Log.e("app", "RxJava undelivered exception", throwable)

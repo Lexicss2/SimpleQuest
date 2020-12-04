@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.lex.simplequest.App
 import com.lex.simplequest.R
@@ -143,9 +144,16 @@ class TrackDetailsFragment :
         viewBinding.durationTextView.text = text
     }
 
+    override fun setPausesCount(pausesCount: Int?) {
+        val text = if (null != pausesCount) String.format(
+            resources.getString(R.string.track_details_pauses),
+            pausesCount
+        ) else NO_VALUE
+        viewBinding.pausesTextView.text = text
+    }
+
     override fun shareTrack(track: Track) {
         val gpxFile = track.toGpxFile(context!!)
-        Log.d("qaz", "File len: ${gpxFile.length()}")
         if (gpxFile.exists()) {
             val intentShareFile = Intent(Intent.ACTION_SEND)
             intentShareFile.type = "vnd.android.cursor.dir/email"
@@ -211,6 +219,10 @@ class TrackDetailsFragment :
                 }
             }
         }
+    }
+
+    override fun showError(error: Throwable) {
+        Toast.makeText(context, error.localizedMessage, Toast.LENGTH_SHORT).show()
     }
 
     override fun getUi(): TrackDetailsFragmentContract.Ui =

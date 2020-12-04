@@ -1,11 +1,10 @@
 package com.lex.simplequest.domain.track.interactor
 
-import android.util.Log
 import com.lex.simplequest.domain.interactor.RxMultiResultInteractor
 import com.lex.simplequest.domain.repository.LocationRepository
+import com.lex.simplequest.domain.utils.asRxObservable
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
-import com.lex.simplequest.domain.utils.asRxObservable
 
 class AddPointInteractorImpl(
     private val locationRepository: LocationRepository
@@ -16,10 +15,7 @@ class AddPointInteractorImpl(
             .map { point ->
                 if (point.trackId != -1L) {
                     locationRepository.addPoint(point)
-                } else {
-                    Log.w("qaz", "Skip cause it is default")
                 }
-
             }
 
 

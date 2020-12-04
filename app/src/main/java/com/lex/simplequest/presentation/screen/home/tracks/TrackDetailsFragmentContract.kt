@@ -11,9 +11,11 @@ interface TrackDetailsFragmentContract {
         fun setDistance(distance: String?)
         fun setSpeed(speed: String?)
         fun setDuration(duration: String?)
+        fun setPausesCount(pausesCount: Int?)
         fun shareTrack(track: Track)
         fun requestPermissions(permissions: Set<PermissionChecker.Permission>)
         fun showDeletePopup()
+        fun showError(error: Throwable)
     }
 
     interface Presenter : BaseMvpContract.Presenter<Ui, Presenter.State> {

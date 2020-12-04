@@ -64,10 +64,6 @@ data class Track(
     }
 }
 
-//fun Track.fullDuration(): Long =
-//    if (null != endTime) endTime - startTime else checkPoints.lastPause()?.let { checkPoint ->
-//        checkPoint.timestamp - startTime
-//    } ?: if (points.isNotEmpty()) points[points.lastIndex].timestamp - startTime else 0L
 fun Track.fullDuration(isNow: Boolean = false): Long =
     if (null != endTime) endTime - startTime else if (isNow) System.currentTimeMillis() - startTime else checkPoints.lastPause()?.let { checkPoint ->
         checkPoint.timestamp - startTime

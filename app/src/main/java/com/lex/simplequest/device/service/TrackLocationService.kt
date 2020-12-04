@@ -477,7 +477,6 @@ class TrackLocationService() : Service(), LocationTracker {
     private fun handleAddPointTask(error: Throwable?) {
         if (null != error) {
             Log.e(TAG, "Failed to add point: ${error.localizedMessage}")
-            // TODO: Handle somehow, needs to restart task
         } else {
             Log.d(TAG, "Point add succeeded")
         }
@@ -503,8 +502,6 @@ class TrackLocationService() : Service(), LocationTracker {
         error: Throwable?,
         recRequest: Boolean
     ) {
-        // TODO: Check and handle error case
-
         connectionConfig = if (null != result) {
             trackerConfig = LocationTracker.TrackerConfig(result.distance, result.batteryLevel)
             LocationManager.ConnectionConfig(result.timePeriod, result.displacement)
@@ -543,7 +540,6 @@ class TrackLocationService() : Service(), LocationTracker {
         )
 
     private fun handleAddCheckPoint(error: Throwable?) {
-        // Handle?
         if (null == error) {
             _recordingEventsListener?.onPauseResumeSucceeded(true)
         } else {

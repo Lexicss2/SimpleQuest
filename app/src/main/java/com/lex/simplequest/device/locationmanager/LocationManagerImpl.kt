@@ -39,7 +39,6 @@ class LocationManagerImpl(
     private val connectionCallbacks = object : GoogleApiClient.ConnectionCallbacks {
         @SuppressLint("MissingPermission")
         override fun onConnected(bundle: Bundle?) {
-            Log.i("qaz", "M GoogleApiClient connected")
             if (!permissionChecker.checkAnyPermissionGranted(setOf(PermissionChecker.Permission.ACCESS_COARSE_LOCATION, PermissionChecker.Permission.ACCESS_FINE_LOCATION))) {
                 // TODO: call callback fun onPermissionRequired
                 throw PermissionDeniedException("Location permissions was not granted")
@@ -64,32 +63,26 @@ class LocationManagerImpl(
         }
 
         override fun onConnectionSuspended(reason: Int) {
-            Log.w("qaz", "onConnectionSuspended: $reason")
             locationManagerCallback?.onConnectionSuspended(reason)
         }
     }
 
     private val connectionFailedListener =
         GoogleApiClient.OnConnectionFailedListener { result ->
-            Log.e("qaz", "onConnectionFailed: ${result.errorMessage}")
             locationManagerCallback?.onConnectionFailed(LocationConnectionFailedException(result.errorMessage))
         }
 
     private val locationCallback = object : LocationCallback() {
         override fun onLocationAvailability(availability: LocationAvailability) {
             super.onLocationAvailability(availability)
-            Log.i("qaz", "onLocationAvailability: ${availability.isLocationAvailable}")
             locationManagerCallback?.onLocationAvailable(availability.isLocationAvailable)
         }
 
         override fun onLocationResult(result: LocationResult?) {
             super.onLocationResult(result)
-            Log.d("qaz", "location result: $result in thread: ${Thread.currentThread().name}")
-
             val location = result?.lastLocation
 
             if (null != location) {
-                // TODO: Write location in DB
                 val l = Location(location.latitude, location.longitude, location.altitude)
                 locationManagerCallback?.onLocationChanged(l)
             }
@@ -97,7 +90,6 @@ class LocationManagerImpl(
     }
 
     init {
-        Log.i("qaz", "M init")
         googleApiClient = initGoogleApiClient()
         if (!checkPlayServices()) {
             throw IllegalStateException("You need to install Google Play Services to use the App properly")
@@ -108,26 +100,20 @@ class LocationManagerImpl(
         null != locationRequest
 
     override fun connect(connectionConfig: LocationManager.ConnectionConfig?, callback: LocationManager.Callback?) {
-        Log.i("qaz", "connect called")
         if (!googleApiClient.isConnected) {
             this.connectionConfig = connectionConfig
             googleApiClient.connect()
             locationManagerCallback = callback
-        } else {
-            Log.d("qaz", "already connected")
         }
     }
 
     override fun disconnect() {
-        Log.w("qaz", "disconnect called")
         if (googleApiClient.isConnected) {
             val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
             fusedLocationClient.removeLocationUpdates(locationCallback)
             googleApiClient.disconnect()
             locationRequest = null
             locationManagerCallback = null
-        } else {
-            Log.d("qaz", "already disconnected")
         }
     }
 

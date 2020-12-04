@@ -4,10 +4,7 @@ import android.util.Log
 import com.lex.core.log.LogFactory
 import com.lex.simplequest.Config
 import com.lex.simplequest.data.location.repository.queries.TrackByIdQuerySpecification
-import com.lex.simplequest.domain.model.Track
-import com.lex.simplequest.domain.model.averageSpeed
-import com.lex.simplequest.domain.model.fullDistance
-import com.lex.simplequest.domain.model.fullDuration
+import com.lex.simplequest.domain.model.*
 import com.lex.simplequest.domain.permission.repository.PermissionChecker
 import com.lex.simplequest.domain.track.interactor.DeleteTrackInteractor
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractor
@@ -129,6 +126,11 @@ class TrackDetailsFragmentPresenter(
                 val durationStr = t.toSingleStringDurations()
                 ui.setDuration(durationStr)
             } ?: ui.setDuration(null)
+
+            track?.let { t ->
+                val pausesCount = t.checkPoints.filter { it.type == CheckPoint.Type.PAUSE }.size
+                ui.setPausesCount(pausesCount)
+            } ?: ui.setPausesCount(null)
         }
     }
 
@@ -139,7 +141,7 @@ class TrackDetailsFragmentPresenter(
             val param = UpdateTrackInteractor.Param(track)
             taskUpdateTrackWhenChanged.start(param, Unit)
         } else if (null != error) {
-            // handle
+            ui.showError(error)
         }
 
         updateUi()
@@ -165,7 +167,7 @@ class TrackDetailsFragmentPresenter(
         if (null != track) {
             this.track = track
         } else if (null != error) {
-            // show error
+            ui.showError(error)
         }
         updateUi()
     }
@@ -199,8 +201,7 @@ class TrackDetailsFragmentPresenter(
                 router.goBack()
             }
         } else if (null != error) {
-            // show error
-
+            ui.showError(error)
         }
     }
 

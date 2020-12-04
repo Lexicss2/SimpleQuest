@@ -89,6 +89,7 @@
     <string name="track_details_distance">distance %s</string>
     <string name="track_details_speed">speed %s</string>
     <string name="track_details_duration">duration %s</string>
+    <string name="track_details_pauses">pauses %s</string>
 
     <string name="track_details_delete_title">Delete track</string>
     <string name="track_details_delete_description">Do you really want to delete this track?</string>
