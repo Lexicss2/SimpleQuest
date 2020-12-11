@@ -8,7 +8,6 @@
     android:layout_height="match_parent"
     app:ignore="NamespaceTypo">
 
-
     <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -30,23 +29,27 @@
         android:id="@+id/first_row"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageButton
+        <Button
             android:id="@+id/refresh_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
-            android:contentDescription="@string/map_refresh"
-            android:src="@drawable/refresh" />
+            android:background="@drawable/selector_button_refresh"
+            android:text="@string/map_refresh" />
 
         <TextView
             android:id="@+id/track_name_text_view"
             style="@style/AppTheme.Text.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:gravity="center_horizontal"
             tools:text="Recording track: 2020.11.05_13:30:000" />
     </LinearLayout>
 

@@ -9,6 +9,7 @@ import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -49,7 +50,7 @@ class MapFragment :
     }
 
     private var googleMap: GoogleMap? = null
-    private lateinit var refreshButton: ImageButton
+    private lateinit var refreshButton: Button
     private lateinit var trackNameTextView: TextView
     private lateinit var indicatorTextView: TextView
     private var startMarker: Marker? = null
