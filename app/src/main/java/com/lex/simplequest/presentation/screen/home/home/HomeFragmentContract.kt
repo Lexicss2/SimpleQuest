@@ -6,8 +6,8 @@ import com.lex.simplequest.presentation.base.BaseMvpLceContract
 interface HomeFragmentContract {
 
     interface Ui : BaseMvpLceContract.Ui {
-        fun setButtonStyleRecording(recordButtonType: RecordButtonType?)
-        fun showLastTrackName(trackName: String?, isRecording: Boolean)
+        fun setButtonStyleRecording(recordingStatus: RecordingStatus?)
+        fun showLastTrackName(trackName: String?, recordingStatus: RecordingStatus?)
         fun showProgress(show: Boolean)
         fun showLastTrackDuration(minutes: String?, seconds: String?)
         fun showLastTrackDistance(distance: String?, withBoldStyle: Boolean)

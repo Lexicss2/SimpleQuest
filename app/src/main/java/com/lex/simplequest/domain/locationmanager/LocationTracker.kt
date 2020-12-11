@@ -6,6 +6,7 @@ import com.lex.simplequest.domain.track.interactor.AddCheckPointInteractor
 import com.lex.simplequest.domain.track.interactor.AddPointInteractor
 import com.lex.simplequest.domain.track.interactor.StartTrackInteractor
 import com.lex.simplequest.domain.track.interactor.StopTrackInteractor
+import com.lex.simplequest.presentation.screen.home.home.RecordingStatus
 
 interface LocationTracker {
     fun connect(): Boolean
@@ -57,4 +58,17 @@ interface LocationTracker {
     }
 
     data class TrackerConfig(val distanceM: Long, val batteryLevelPc: Int)
+
+    fun getRecordingStatus(): RecordingStatus =
+        when {
+            isRecording() -> {
+                if (isRecordingPaused()) RecordingStatus.PAUSED
+                else RecordingStatus.RECORDING
+            }
+            isConnecting() -> {
+                RecordingStatus.GOING_TO_RECORD
+            }
+            else -> RecordingStatus.STOPPED
+        }
+
 }

@@ -94,10 +94,10 @@ class HomeFragment :
         _viewBinding = null
     }
 
-    override fun setButtonStyleRecording(recordButtonType: RecordButtonType?) {
+    override fun setButtonStyleRecording(recordingStatus: RecordingStatus?) {
         viewBinding.layoutContent.apply {
-            when (recordButtonType) {
-                RecordButtonType.STOPPED -> {
+            when (recordingStatus) {
+                RecordingStatus.STOPPED -> {
                     startStopButton.apply {
                         text = getString(R.string.home_start_tracking)
                         setTextColor(resources.getColor(R.color.colorBgStartButton, null))
@@ -105,9 +105,10 @@ class HomeFragment :
                         isEnabled = true
                     }
                     pauseResumeButton.visibility = View.GONE
+                    delimiterView.visibility = View.GONE
                 }
 
-                RecordButtonType.GOING_TO_RECORD -> {
+                RecordingStatus.GOING_TO_RECORD -> {
                     startStopButton.apply {
                         text = getString(R.string.home_start_tracking)
                         setTextColor(resources.getColor(R.color.colorBgGray, null))
@@ -115,9 +116,10 @@ class HomeFragment :
                         isEnabled = false
                     }
                     pauseResumeButton.visibility = View.GONE
+                    delimiterView.visibility = View.GONE
                 }
 
-                RecordButtonType.RECORDING -> {
+                RecordingStatus.RECORDING -> {
                     startStopButton.apply {
                         text = getString(R.string.home_stop_tracking)
                         setTextColor(resources.getColor(R.color.colorBgStopButton, null))
@@ -130,9 +132,10 @@ class HomeFragment :
                         setTextColor(resources.getColor(R.color.colorBgPauseButton, null))
                         background = ResourcesCompat.getDrawable(resources, R.drawable.shape_button_pause, null)
                     }
+                    delimiterView.visibility = View.VISIBLE
                 }
 
-                RecordButtonType.PAUSED -> {
+                RecordingStatus.PAUSED -> {
                     startStopButton.apply {
                         text = getString(R.string.home_stop_tracking)
                         setTextColor(resources.getColor(R.color.colorBgStopButton, null))
@@ -145,6 +148,7 @@ class HomeFragment :
                         setTextColor(resources.getColor(R.color.colorBgResumeButton, null))
                         background = ResourcesCompat.getDrawable(resources, R.drawable.shape_button_resume, null)
                     }
+                    delimiterView.visibility = View.VISIBLE
                 }
 
                 null -> {
@@ -158,19 +162,32 @@ class HomeFragment :
                         isEnabled = false
                     }
                     pauseResumeButton.visibility = View.GONE
+                    delimiterView.visibility = View.GONE
                 }
             }
         }
     }
 
-    override fun showLastTrackName(trackName: String?, isRecording: Boolean) {
+    override fun showLastTrackName(trackName: String?, recordingStatus: RecordingStatus?) {
         val caption = trackName ?: resources.getString(R.string.home_no_tracks)
         viewBinding.layoutContent.apply {
             lastTrackNameView.text = caption
-            lastTrackCaption.text =
-                if (isRecording) resources.getString(R.string.home_is_recording) else resources.getString(
-                    R.string.home_last_track_name
-                )
+            lastTrackCaption.apply {
+                when(recordingStatus) {
+                    RecordingStatus.RECORDING -> {
+                        text = resources.getString(R.string.home_is_recording)
+                        setTextColor(resources.getColor(R.color.colorSimpleRed, null))
+                    }
+                    RecordingStatus.PAUSED -> {
+                        text = resources.getString(R.string.home_is_recording_paused)
+                        setTextColor(resources.getColor(R.color.colorSimpleYellow, null))
+                    }
+                    else -> {
+                        text = resources.getString(R.string.home_last_track_name)
+                        setTextColor(resources.getColor(R.color.colorPrimary, null))
+                    }
+                }
+            }
         }
         toolbarInfo.setTitle(caption)
     }

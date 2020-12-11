@@ -16,8 +16,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="50dp"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="60dp"
             android:layout_marginEnd="50dp"
+            android:background="@drawable/shape_monitor_panel"
             android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -29,6 +30,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:layout_marginTop="5dp"
                 android:text="@string/home_last_track_name" />
 
             <TextView
@@ -41,7 +43,7 @@
                 tools:text="29.10.2020,13:25:00:000" />
 
             <TextView
-                style="@style/AppTheme.Text.Small.DarkBlue"
+                style="@style/AppTheme.Text.Small.White"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -50,7 +52,7 @@
 
             <TextView
                 android:id="@+id/last_track_distance_view"
-                style="@style/AppTheme.Text.Normal.DarkBlue"
+                style="@style/AppTheme.Text.Normal.White"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -58,7 +60,7 @@
                 tools:text="1.0 km" />
 
             <TextView
-                style="@style/AppTheme.Text.Small.DarkBlue"
+                style="@style/AppTheme.Text.Small.White"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -69,11 +71,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="5dp"
                 android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/minutes_duration_text_view"
-                    style="@style/AppTheme.Text.Normal.DarkBlue"
+                    style="@style/AppTheme.Text.Normal.White"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textStyle="bold"
@@ -81,7 +84,7 @@
 
                 <TextView
                     android:id="@+id/seconds_duration_text_view"
-                    style="@style/AppTheme.Text.Small.DarkBlue"
+                    style="@style/AppTheme.Text.Small.White"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="3dp"
@@ -96,7 +99,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="50dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="15dp"
             android:layout_marginEnd="50dp"
             android:orientation="horizontal"
             app:layout_constraintBottom_toTopOf="@id/location_availability_status_text_view"
@@ -112,12 +115,14 @@
                 android:layout_weight="13"
                 android:text="@string/home_pause_tracking"
                 android:visibility="gone"
-                tools:visibility="visible" />
+                tools:visibility="gone" />
 
             <View
+                android:id="@+id/delimiter_view"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                tools:visibility="gone" />
 
             <Button
                 android:id="@+id/start_stop_button"

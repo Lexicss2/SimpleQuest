@@ -193,7 +193,7 @@ class HomeFragmentPresenter(
         connectedLocationTracker?.recordingEventsListener = startStopRecordResultListener
         Log.d(TAG, "location tracker connected in presenter")
 
-        updateUi(FLAG_SET_BUTTON_STATUS or FLAG_SET_LOCATION_ERROR_DATA)
+        updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS or FLAG_SET_LOCATION_ERROR_DATA)
     }
 
     override fun locationTrackerServiceDisconnected() {
@@ -240,7 +240,8 @@ class HomeFragmentPresenter(
 
 
             if (0 != (flags and FLAG_SET_TRACK_INFO)) {
-                ui.showLastTrackName(track?.name, tracker?.isRecording() ?: false)
+                val recordingStatus = tracker?.getRecordingStatus()
+                ui.showLastTrackName(track?.name, recordingStatus)
                 // show speed when needed
             }
 
@@ -295,17 +296,7 @@ class HomeFragmentPresenter(
 
             if (0 != (flags and FLAG_SET_BUTTON_STATUS)) {
                 if (null != tracker) {
-                    val status: RecordButtonType =
-                        when {
-                            tracker.isRecording() -> {
-                                if (tracker.isRecordingPaused()) RecordButtonType.PAUSED
-                                else RecordButtonType.RECORDING
-                            }
-                            tracker.isConnecting() -> {
-                                RecordButtonType.GOING_TO_RECORD
-                            }
-                            else -> RecordButtonType.STOPPED
-                        }
+                    val status: RecordingStatus = tracker.getRecordingStatus()
                     ui.setButtonStyleRecording(status)
                 } else {
                     ui.setButtonStyleRecording(null)

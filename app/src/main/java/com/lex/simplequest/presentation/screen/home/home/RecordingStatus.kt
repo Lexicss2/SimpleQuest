@@ -1,6 +1,6 @@
 package com.lex.simplequest.presentation.screen.home.home
 
-enum class RecordButtonType {
+enum class RecordingStatus {
     STOPPED,
     GOING_TO_RECORD,
     RECORDING,
