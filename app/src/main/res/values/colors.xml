@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#6200EE</color>
-    <color name="colorPrimaryDark">#3700B3</color>
-    <color name="colorAccent">#03DAC5</color>
+    <color name="colorPrimary">#10971E</color>
+    <color name="colorPrimaryDark">#5740C3</color>
+    <color name="colorAccent">#FFFFFF</color>
 
-    <color name="colorBgDefault">#c0c0c0</color>
-    <color name="colorBgToolbar">#b0b0b0</color>
+<!--    <color name="colorBgDefault">#c0c0c0</color>-->
+    <color name="colorBgDefault">#303030</color>
+    <color name="colorBgToolbar">#505050</color>
     <color name="colorBgGray">#909090</color>
-    <color name="colorButtonText">#111111</color>
+    <color name="colorButtonText">@color/colorPrimary</color>
     <color name="colorBgStartButton">#90f890</color>
     <color name="colorBgStopButton">#f89090</color>
     <color name="colorBgPauseButton">#f8f890</color>
     <color name="colorBgResumeButton">#90f890</color>
+    <color name="colorWhite">#ffffffff</color>
 
     <color name="colorSimpleBlack">#181818</color>
     <color name="colorDarkBlue">#484880</color>

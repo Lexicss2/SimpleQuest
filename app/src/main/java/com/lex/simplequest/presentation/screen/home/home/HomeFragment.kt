@@ -11,6 +11,7 @@ import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.res.ResourcesCompat
 import com.google.android.gms.common.ConnectionResult
 import com.lex.simplequest.App
 import com.lex.simplequest.R
@@ -99,12 +100,8 @@ class HomeFragment :
                 RecordButtonType.STOPPED -> {
                     startStopButton.apply {
                         text = getString(R.string.home_start_tracking)
-                        setBackgroundColor(
-                            resources.getColor(
-                                R.color.colorBgStartButton,
-                                null
-                            )
-                        )
+                        setTextColor(resources.getColor(R.color.colorBgStartButton, null))
+                        background = ResourcesCompat.getDrawable(resources, R.drawable.shape_button_start, null)
                         isEnabled = true
                     }
                     pauseResumeButton.visibility = View.GONE
@@ -113,12 +110,8 @@ class HomeFragment :
                 RecordButtonType.GOING_TO_RECORD -> {
                     startStopButton.apply {
                         text = getString(R.string.home_start_tracking)
-                        setBackgroundColor(
-                            resources.getColor(
-                                R.color.colorBgGray,
-                                null
-                            )
-                        )
+                        setTextColor(resources.getColor(R.color.colorBgGray, null))
+                        background = ResourcesCompat.getDrawable(resources, R.drawable.shape_button_disabled, null)
                         isEnabled = false
                     }
                     pauseResumeButton.visibility = View.GONE
@@ -127,46 +120,30 @@ class HomeFragment :
                 RecordButtonType.RECORDING -> {
                     startStopButton.apply {
                         text = getString(R.string.home_stop_tracking)
-                        setBackgroundColor(
-                            resources.getColor(
-                                R.color.colorBgStopButton,
-                                null
-                            )
-                        )
+                        setTextColor(resources.getColor(R.color.colorBgStopButton, null))
+                        background = ResourcesCompat.getDrawable(resources, R.drawable.shape_button_stop, null)
                         isEnabled = true
                     }
                     pauseResumeButton.visibility = View.VISIBLE
                     pauseResumeButton.apply {
                         text = resources.getString(R.string.home_pause_tracking)
-                        setBackgroundColor(
-                            resources.getColor(
-                                R.color.colorBgPauseButton,
-                                null
-                            )
-                        )
+                        setTextColor(resources.getColor(R.color.colorBgPauseButton, null))
+                        background = ResourcesCompat.getDrawable(resources, R.drawable.shape_button_pause, null)
                     }
                 }
 
                 RecordButtonType.PAUSED -> {
                     startStopButton.apply {
                         text = getString(R.string.home_stop_tracking)
-                        setBackgroundColor(
-                            resources.getColor(
-                                R.color.colorBgStopButton,
-                                null
-                            )
-                        )
+                        setTextColor(resources.getColor(R.color.colorBgStopButton, null))
+                        background = ResourcesCompat.getDrawable(resources, R.drawable.shape_button_stop, null)
                         isEnabled = true
                     }
                     pauseResumeButton.visibility = View.VISIBLE
                     pauseResumeButton.apply {
                         text = resources.getString(R.string.home_resume_tracking)
-                        setBackgroundColor(
-                            resources.getColor(
-                                R.color.colorBgPauseButton,
-                                null
-                            )
-                        )
+                        setTextColor(resources.getColor(R.color.colorBgResumeButton, null))
+                        background = ResourcesCompat.getDrawable(resources, R.drawable.shape_button_resume, null)
                     }
                 }
 

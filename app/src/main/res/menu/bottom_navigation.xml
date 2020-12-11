@@ -6,25 +6,25 @@
         android:enabled="true"
         android:icon="@drawable/ic_settings_input_antenna_24px"
         android:title="@string/navigation_home"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_navigation_map"
         android:enabled="true"
         android:icon="@drawable/ic_gps_fixed_24px"
         android:title="@string/navigation_map"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_navigation_track_list"
         android:enabled="true"
         android:icon="@drawable/ic_format_list_bulleted_24px"
         android:title="@string/navigation_track_list"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_navigation_settings"
         android:enabled="true"
         android:icon="@drawable/ic_settings_24px"
         android:title="@string/navigation_settings"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
 
 
 </menu>

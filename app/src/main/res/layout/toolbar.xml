@@ -6,4 +6,5 @@
     android:layout_height="?attr/actionBarSize"
     android:background="@color/colorBgToolbar"
     android:elevation="0dp"
-    android:paddingTop="0dip" />
+    android:paddingTop="0dip"
+    app:theme="@style/ToolBarStyle" />
