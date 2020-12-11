@@ -53,6 +53,7 @@
     <string name="tracks_finish">Finish</string>
     <string name="tracks_no_tracks">No tracks</string>
     <string name="tracks_title">%d tracks</string>
+    <string name="tracks_i">i</string>
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>

@@ -66,7 +66,7 @@ class AdapterTracks(private val context: Context, private val clickListener: Ite
                     trackNameView.setTextAppearance(R.style.AppTheme_Text_Small)
                     trackTimeDistanceView.setTextAppearance(R.style.AppTheme_Text_ExtraSmall)
                 }
-                infoView.setOnClickListener {
+                infoButton.setOnClickListener {
                     clickListener.onInfoClicked(track)
                 }
             }
