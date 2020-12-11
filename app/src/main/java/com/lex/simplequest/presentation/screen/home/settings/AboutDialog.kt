@@ -22,7 +22,7 @@ class AboutDialog : BaseDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val binding = DialogAboutBinding.inflate(LayoutInflater.from(context))
-        val builder = AlertDialog.Builder(context)
+        val builder = AlertDialog.Builder(context, android.R.style.Theme_DeviceDefault_Dialog_Alert)
         builder.setView(binding.root)
 
         val version = try {

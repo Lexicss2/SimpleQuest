@@ -165,9 +165,6 @@ class TrackDetailsFragment :
             intentShareFile.putExtra(Intent.EXTRA_SUBJECT, "Sharing file...")
             intentShareFile.putExtra(Intent.EXTRA_TEXT, "Sharing file text")
             startActivity(Intent.createChooser(intentShareFile, "Share file"))
-        } else {
-            // error
-            Log.w("qaz", "file not exists")
         }
     }
 

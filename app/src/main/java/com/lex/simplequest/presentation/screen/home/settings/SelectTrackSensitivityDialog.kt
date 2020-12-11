@@ -37,7 +37,7 @@ class SelectTrackSensitivityDialog : BaseDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val binding = DialogSelectTrackSensitivityBinding.inflate(LayoutInflater.from(context))
-        val builder = AlertDialog.Builder(context)
+        val builder = AlertDialog.Builder(context, android.R.style.Theme_DeviceDefault_Dialog_Alert)
         builder.setView(binding.root)
         builder.setPositiveButton(resources.getString(R.string.settings_apply)) { _, _ ->
             val clickListener = getTarget(OnDistanceSelectedListener::class.java)

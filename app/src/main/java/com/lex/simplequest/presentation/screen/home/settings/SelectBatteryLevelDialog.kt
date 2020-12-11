@@ -37,7 +37,7 @@ class SelectBatteryLevelDialog : BaseDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val binding = DialogSelectMinimalBatteryLevelBinding.inflate(LayoutInflater.from(context))
-        val builder = AlertDialog.Builder(context)
+        val builder = AlertDialog.Builder(context, android.R.style.Theme_DeviceDefault_Dialog_Alert)
         builder.setView(binding.root)
         builder.setPositiveButton(resources.getString(R.string.settings_apply)) { _, _ ->
             val clickListener = getTarget(OnBatteryLevelSelectedListener::class.java)
@@ -54,7 +54,6 @@ class SelectBatteryLevelDialog : BaseDialogFragment() {
         val distanceStr = distance.toString()
         var index = array.indexOf(distanceStr)
         if (index == -1) {
-            Log.w("qaz", "Selected level $index is not in a list, selecting in the middle")
             index = array.lastIndex / 2
         }
 
