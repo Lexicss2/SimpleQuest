@@ -60,6 +60,7 @@ class TrackLocationService() : Service(), LocationTracker {
     private var activeTrackId: Long? = null
     private var trackerConfig: LocationTracker.TrackerConfig? = null
     private var connectionConfig: LocationManager.ConnectionConfig? = null
+    private var isLocationAvailable: Boolean = false
 
     private val taskStartTrack = createStartTrackTask()
     private val taskStopTrack = createStopTrackTask()
@@ -135,37 +136,42 @@ class TrackLocationService() : Service(), LocationTracker {
 
         override fun onLocationChanged(location: Location) {
             Log.v(TAG, "Manager onChanged")
-            locationListeners.forEach {
-                it.onLocationUpdated(location)
-            }
-
             if (null != activeTrackId && LocationTracker.Status.RECORDING != status) {
                 changeStatus(LocationTracker.Status.RECORDING)
             }
 
-            activeTrackId?.let { trackId ->
-                Log.v(TAG, "location: ${location.latitude}: ${location.longitude}")
-                val point =
-                    Point(
-                        -1,
-                        trackId,
-                        location.latitude,
-                        location.longitude,
-                        location.altitude,
-                        System.currentTimeMillis()
-                    )
-                pointObservableValue.set(point)
-
-                if (taskAddPoint.isRunning()) {
-                    pointObservableValue.set(point)
-                } else {
-                    taskAddPoint.start(AddPointInteractor.Param(pointObservableValue), Unit)
+            if (isLocationAvailable) {
+                locationListeners.forEach {
+                    it.onLocationUpdated(location)
                 }
+
+                activeTrackId?.let { trackId ->
+                    Log.v(TAG, "location: ${location.latitude}: ${location.longitude}")
+                    val point =
+                        Point(
+                            -1,
+                            trackId,
+                            location.latitude,
+                            location.longitude,
+                            location.altitude,
+                            System.currentTimeMillis()
+                        )
+                    pointObservableValue.set(point)
+
+                    if (taskAddPoint.isRunning()) {
+                        pointObservableValue.set(point)
+                    } else {
+                        taskAddPoint.start(AddPointInteractor.Param(pointObservableValue), Unit)
+                    }
+                }
+            } else {
+                Log.w(TAG, "Location is not available yet. Skip saving point")
             }
         }
 
         override fun onLocationAvailable(available: Boolean) {
             Log.w(TAG, "onLocationAvailable called, available: $available")
+            isLocationAvailable = available
             locationListeners.forEach {
                 it.onLocationAvailable(available)
             }

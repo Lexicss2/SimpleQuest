@@ -6,6 +6,7 @@ import com.lex.simplequest.Config
 import com.lex.simplequest.presentation.utils.toDateString
 import java.io.File
 import java.io.FileWriter
+import java.util.*
 
 data class Track(
     val id: Long,
@@ -65,9 +66,10 @@ data class Track(
 }
 
 fun Track.fullDuration(isNow: Boolean = false): Long =
-    if (null != endTime) endTime - startTime else if (isNow) System.currentTimeMillis() - startTime else checkPoints.lastPause()?.let { checkPoint ->
-        checkPoint.timestamp - startTime
-    } ?: if (points.isNotEmpty()) points[points.lastIndex].timestamp - startTime else 0L
+    if (null != endTime) endTime - startTime else if (isNow) System.currentTimeMillis() - startTime else checkPoints.lastPause()
+        ?.let { checkPoint ->
+            checkPoint.timestamp - startTime
+        } ?: if (points.isNotEmpty()) points[points.lastIndex].timestamp - startTime else 0L
 
 fun Track.pausedDuration(): Long = if (checkPoints.isNotEmpty()) {
     var duration = 0L
@@ -162,19 +164,17 @@ fun Track.toGpxFile(context: Context): File {
             write("<trkseg>\n")
 
             t.points.forEach { pt ->
-                val openTrkpt = "<trkpt lat=\"${String.format("%.7f", pt.latitude)}\" lon=\"${
-                    String.format(
-                        "%.7f",
-                        pt.longitude
-                    )
-                }\">\n"
+                val openTrkpt =
+                    "<trkpt lat=\"${String.format(Locale.US, "%.7f", pt.latitude)}\" lon=\"${
+                        String.format(Locale.US, "%.7f", pt.longitude)
+                    }\">\n"
                 val time = "<time>${pt.timestamp.toDateString()}</time>\n"
                 val closeTrkpt = "</trkpt>\n"
                 writer.write("$openTrkpt$time$closeTrkpt")
             }
 
-            write("</trkseg>")
-            write("</trk>")
+            write("</trkseg>\n")
+            write("</trk>\n")
             write("</gpx>")
         }
     }

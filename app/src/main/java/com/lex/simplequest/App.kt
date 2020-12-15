@@ -1,6 +1,7 @@
 package com.lex.simplequest
 
 import android.app.Application
+import android.os.StrictMode
 import android.provider.Settings
 import com.lex.core.log.LogFactory
 import com.lex.core.log.LogFactoryImpl
@@ -47,6 +48,8 @@ class App : Application() {
         super.onCreate()
 
         // TODO: Setup Strict mode
+        val builder = StrictMode.VmPolicy.Builder()
+        StrictMode.setVmPolicy(builder.build())
 
         RxJavaPlugins.setErrorHandler { throwable ->
             android.util.Log.e("app", "RxJava undelivered exception", throwable)

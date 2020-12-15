@@ -95,5 +95,8 @@
 
     <string name="track_details_delete_title">Delete track</string>
     <string name="track_details_delete_description">Do you really want to delete this track?</string>
+    <string name="track_details_share_file">Share file</string>
+    <string name="track_details_share_file_subject">Track from Simple Quest app</string>
+    <string name="track_details_share_file_text">Hi! In the attachment to this e-mail there is a track %s assembled by Simple Quest app</string>
 
 </resources>

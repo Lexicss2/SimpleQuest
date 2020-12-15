@@ -106,9 +106,9 @@ class HomeFragmentPresenter(
             )
         }
 
-        override fun onRecordStartFailed(throwable: Throwable) {
-            Log.e(TAG, "II record start failed: ${throwable.localizedMessage}")
-            this@HomeFragmentPresenter.error = throwable
+        override fun onRecordStartFailed(error: Throwable) {
+            Log.e(TAG, "II record start failed: ${error.localizedMessage}")
+            this@HomeFragmentPresenter.error = error
             updateUi(FLAG_SET_LOCATION_ERROR_DATA)
         }
 
@@ -120,8 +120,8 @@ class HomeFragmentPresenter(
             taskReadTracks.start(ReadTracksInteractor.Param(LatestTrackQuerySpecification()), Unit)
         }
 
-        override fun onRecordStopFailed(throwable: Throwable) {
-            Log.e(TAG, "IV Failed to stop record: ${throwable.localizedMessage}")
+        override fun onRecordStopFailed(error: Throwable) {
+            Log.e(TAG, "IV Failed to stop record: ${error.localizedMessage}")
         }
 
         override fun onPauseResumeSucceeded(succeeded: Boolean) {

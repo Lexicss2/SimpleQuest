@@ -110,7 +110,7 @@ class TrackDetailsFragmentPresenter(
         if (isUiBinded) {
             ui.showProgress(taskReadTrack.isRunning() || taskDeleteTrack.isRunning())
             ui.setName(track?.name)
-            track?.fullDistance()?.let { d ->
+            track?.movingDistance()?.let { d ->
                 if (d >= Config.METERS_IN_KILOMETER) {
                     ui.setDistance(String.format("%.2f km", d / Config.METERS_IN_KILOMETER))
                 } else {

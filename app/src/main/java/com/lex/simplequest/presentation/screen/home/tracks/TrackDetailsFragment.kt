@@ -162,9 +162,9 @@ class TrackDetailsFragment :
                 Intent.EXTRA_STREAM,
                 path
             )
-            intentShareFile.putExtra(Intent.EXTRA_SUBJECT, "Sharing file...")
-            intentShareFile.putExtra(Intent.EXTRA_TEXT, "Sharing file text")
-            startActivity(Intent.createChooser(intentShareFile, "Share file"))
+            intentShareFile.putExtra(Intent.EXTRA_SUBJECT, resources.getString(R.string.track_details_share_file_subject)) // Subject
+            intentShareFile.putExtra(Intent.EXTRA_TEXT, String.format(resources.getString(R.string.track_details_share_file_text, track.name))) // Text
+            startActivity(Intent.createChooser(intentShareFile, resources.getString(R.string.track_details_share_file))) // via
         }
     }
 

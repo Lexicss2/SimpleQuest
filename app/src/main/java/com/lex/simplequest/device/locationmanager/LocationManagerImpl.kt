@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.os.Looper
-import android.util.Log
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.api.GoogleApiClient
@@ -109,6 +108,7 @@ class LocationManagerImpl(
 
     override fun disconnect() {
         if (googleApiClient.isConnected) {
+            locationManagerCallback?.onLocationAvailable(false)
             val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
             fusedLocationClient.removeLocationUpdates(locationCallback)
             googleApiClient.disconnect()
@@ -116,7 +116,6 @@ class LocationManagerImpl(
             locationManagerCallback = null
         }
     }
-
 
     private fun initGoogleApiClient(): GoogleApiClient =
         GoogleApiClient.Builder(context).apply {
