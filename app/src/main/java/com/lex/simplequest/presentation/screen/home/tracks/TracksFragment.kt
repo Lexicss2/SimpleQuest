@@ -11,6 +11,7 @@ import com.lex.simplequest.App
 import com.lex.simplequest.R
 import com.lex.simplequest.databinding.FragmentTracksBinding
 import com.lex.simplequest.domain.model.Track
+import com.lex.simplequest.domain.track.interactor.ReadTracksCountInteractorImpl
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractorImpl
 import com.lex.simplequest.presentation.base.BaseMvpFragment
 import com.lex.simplequest.presentation.screen.home.MainActivity
@@ -131,6 +132,7 @@ class TracksFragment :
     override fun createPresenter(): TracksFragmentContract.Presenter =
         TracksFragmentPresenter(
             ReadTracksInteractorImpl(App.instance.locationRepository),
+            ReadTracksCountInteractorImpl(App.instance.locationRepository),
             App.instance.internetConnectivityTracker,
             App.instance.logFactory,
             getTarget(MainRouter::class.java)!!

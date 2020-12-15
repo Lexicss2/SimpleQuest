@@ -11,6 +11,7 @@ interface LocationRepository : Closeable {
     fun startTrack(name: String, startTime: Long): Long
     fun stopTrack(id: Long, endTime: Long, minimalDistance: Long?): Boolean
     fun getTracks(spec: LocationQuerySpecification): List<Track>
+    fun getTracksCount(): Int
     fun updateTrack(track: Track): Boolean
     fun deleteTrack(id: Long): Boolean
     fun addPoint(point: Point)

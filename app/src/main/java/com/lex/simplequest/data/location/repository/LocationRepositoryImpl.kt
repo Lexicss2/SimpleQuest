@@ -140,6 +140,19 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
         } ?: emptyList()
     }
 
+    override fun getTracksCount(): Int {
+        checkNotClosed()
+        return context.contentResolver.query(
+            QuestContract.Tracks.CONTENT_URI,
+            QuestContract.Tracks.PROJECTION,
+            AllTracksQuerySpecification().getWhereClause(),
+            null,
+            null
+        )?.use { cursor ->
+            cursor.count
+        } ?: 0
+    }
+
     override fun updateTrack(track: Track): Boolean {
         checkNotClosed()
         val cv = ContentValues().apply {
