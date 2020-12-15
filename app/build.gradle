@@ -2,6 +2,10 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
+def versionMajor = 0
+def versionMinor = 2
+def versionPatch = 0
+
 repositories {
     flatDir { dirs 'libs' }
 }
@@ -14,7 +18,7 @@ android {
         minSdkVersion toolVersions.android.minSdk
         targetSdkVersion toolVersions.android.targetSdk
         versionCode 1
-        versionName "0.2.0"
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}(${versionCode})"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -24,8 +28,12 @@ android {
     }
 
     buildTypes {
-        release {
+        debug {
             minifyEnabled false
+        }
+
+        release {
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -34,7 +42,24 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+}
 
+android.applicationVariants.all { variant ->
+    variant.outputs.all { output ->
+        def apkFileName = output.outputFileName
+        if (apkFileName.endsWith("apk") && !apkFileName.contains("unaligned")) {
+            def project = "simplequest"
+            def separator = "-"
+            def buildType = variant.buildType.name
+            def versionCode = ((versionMajor + 1) * 1_000_000) + (versionMinor * 1_000) + (versionPatch)
+            def versionName = "${versionMajor}.${versionMinor}.${versionPatch}(${versionCode})"
+            def apkName = project + separator + versionName + separator + buildType + ".apk"
+
+            output.outputFileName = apkName
+            output.versionNameOverride = versionName
+            output.versionCodeOverride = versionCode
+        }
+    }
 }
 
 dependencies {

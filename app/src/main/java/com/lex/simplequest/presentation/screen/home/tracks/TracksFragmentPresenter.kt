@@ -44,7 +44,6 @@ class TracksFragmentPresenter(
         } else {
             taskReadTracksCount.start(ReadTracksCountInteractor.Param(), Unit)
         }
-        //updateUi(0)
         updateUi(FLAG_SET_TRACKS)
     }
 
