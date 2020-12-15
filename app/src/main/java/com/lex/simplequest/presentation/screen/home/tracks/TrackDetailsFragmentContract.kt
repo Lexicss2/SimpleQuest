@@ -8,7 +8,7 @@ interface TrackDetailsFragmentContract {
     interface Ui : BaseMvpContract.Ui {
         fun showProgress(show: Boolean)
         fun setName(trackName: String?)
-        fun setDistance(distance: String?)
+        fun setDistance(distance: String?, inKilo: Boolean)
         fun setSpeed(speed: String?)
         fun setDuration(duration: String?)
         fun setPausesCount(pausesCount: Int?)

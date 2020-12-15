@@ -209,7 +209,8 @@ class HomeFragment :
     override fun showLastTrackDistance(distance: String?, withBoldStyle: Boolean) {
         viewBinding.layoutContent.lastTrackDistanceView.apply {
             setTypeface(typeface, if (withBoldStyle) Typeface.BOLD else Typeface.NORMAL)
-            text = distance ?: NO_DATA
+            val measure = if (withBoldStyle) resources.getString(R.string.others_km) else resources.getString(R.string.others_m)
+            text = if (null != distance) "$distance $measure" else NO_DATA
         }
     }
 

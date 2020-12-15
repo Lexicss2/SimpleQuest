@@ -262,11 +262,11 @@ class HomeFragmentPresenter(
                     var summaryDistance = originDistance + additionalDistance
                     val withBoldStyle: Boolean
                     if (summaryDistance >= Config.METERS_IN_KILOMETER) {
-                        format = "%.2f km"
+                        format = "%.2f"
                         summaryDistance /= Config.METERS_IN_KILOMETER
                         withBoldStyle = true
                     } else {
-                        format = "%.2f m"
+                        format = "%.2f"
                         withBoldStyle = false
                     }
                     ui.showLastTrackDistance(String.format(format, summaryDistance), withBoldStyle)

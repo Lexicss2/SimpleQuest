@@ -3,9 +3,9 @@
 
     <!-- initialization -->
     <string name="init_location_permission_rationale_title">Location Permission</string>
-    <string name="init_location_permission_rationale_message">The app wants to determine the user\'s location. This allows a user to find the nearest IPIC location.</string>
+    <string name="init_location_permission_rationale_message">The app wants to determine the user\'s location. This allows a user to find the nearest location.</string>
     <string name="init_location_services_disabled_title">Location Services disabled</string>
-    <string name="init_location_services_disabled_message">IPIC needs to access your location to find the nearest theater. Please turn on Location Services in your device settings.</string>
+    <string name="init_location_services_disabled_message">App needs to access your location to find the nearest theater. Please turn on Location Services in your device settings.</string>
 
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
@@ -98,5 +98,10 @@
     <string name="track_details_share_file">Share file</string>
     <string name="track_details_share_file_subject">Track from Simple Quest app</string>
     <string name="track_details_share_file_text">Hi! In the attachment to this e-mail there is a track %s assembled by Simple Quest app</string>
+
+    <!-- Others -->
+    <string name="others_km">km</string>
+    <string name="others_kmh">km/h</string>
+    <string name="others_m">m</string>
 
 </resources>

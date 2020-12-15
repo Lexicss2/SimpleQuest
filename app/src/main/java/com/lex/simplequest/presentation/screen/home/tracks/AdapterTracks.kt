@@ -50,11 +50,10 @@ class AdapterTracks(private val context: Context, private val clickListener: Ite
                 val format: String
                 var distance = track.movingDistance()
                 if (distance >= Config.METERS_IN_KILOMETER) {
-                    // TODO: Restore 2nd dist
-                    format = "%s, %.2f km" + if (BuildConfig.DEBUG) ", ${track.checkPoints.size} / ${track.points.size}" else ""
+                    format = "%s, %.2f " + context.resources.getString(R.string.others_km) + if (BuildConfig.DEBUG) ", ${track.checkPoints.size} / ${track.points.size}" else ""
                     distance /= Config.METERS_IN_KILOMETER
                 } else {
-                    format = "%s, %.2f m" + if (BuildConfig.DEBUG) ", ${track.checkPoints.size} / ${track.points.size}" else ""
+                    format = "%s, %.2f " + context.resources.getString(R.string.others_m) + if (BuildConfig.DEBUG) ", ${track.checkPoints.size} / ${track.points.size}" else ""
                 }
 
                 trackTimeDistanceView.text =

@@ -120,18 +120,20 @@ class TrackDetailsFragment :
         toolbarInfo.setTitle(value)
     }
 
-    override fun setDistance(distance: String?) {
+    override fun setDistance(distance: String?, inKilo: Boolean) {
+        val measure = if (inKilo) resources.getString(R.string.others_km) else resources.getString(R.string.others_m)
         val text = if (null != distance) String.format(
             resources.getString(R.string.track_details_distance),
-            distance
+            "$distance $measure"//distance
         ) else NO_VALUE
         viewBinding.distanceTextView.text = text
     }
 
     override fun setSpeed(speed: String?) {
+        val measure = resources.getString(R.string.others_kmh)
         val text = if (null != speed) String.format(
             resources.getString(R.string.track_details_speed),
-            speed
+            "$speed $measure"//speed
         ) else NO_VALUE
         viewBinding.speedTextView.text = text
     }

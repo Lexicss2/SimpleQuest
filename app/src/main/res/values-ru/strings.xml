@@ -1,0 +1,107 @@
+<resources>
+    <string name="app_name">Simple Quest</string>
+
+    <!-- initialization -->
+    <string name="init_location_permission_rationale_title">Разрешение на локацию</string>
+    <string name="init_location_permission_rationale_message">Приложение хочет распознать местоположение пользователя. Это позаолит пользователю найти ближайшее местоположение</string>
+    <string name="init_location_services_disabled_title">Служба локации отключена</string>
+    <string name="init_location_services_disabled_message">Приложение хочет распознать местоположение пользователя. Это позаолит пользователю найти ближайшее местоположение.</string>
+
+    <string name="ok">Ок</string>
+    <string name="cancel">Отмена</string>
+    <string name="go_to_settings">Перейти в настройки</string>
+    <string name="no_thanks">Нет, спасибо</string>
+
+
+    <!-- Navigation -->
+    <string name="navigation_home">Дом</string>
+    <string name="navigation_map">Карта</string>
+    <string name="navigation_track_list">Трэки</string>
+    <string name="navigation_settings">Настройки</string>
+    <string name="title_activity_maps">Карта</string>
+
+    <!-- Service -->
+    <string name="service_notification_channel_name">Запись трэка</string>
+    <string name="service_track_was_not_saved">Трэк не был сохранен</string>
+
+    <!-- Home -->
+    <string name="home_start_tracking">Старт</string>
+    <string name="home_stop_tracking">Стоп</string>
+    <string name="home_starting_tracking">Запуск…</string>
+    <string name="info">инфо</string>
+    <string name="home_last_track_name">Последний трэк</string>
+    <string name="home_last_track_distance">Расстояние</string>
+    <string name="home_no_tracks">(нет трэков)</string>
+    <string name="home_is_recording">Запись трэка…</string>
+    <string name="home_is_recording_paused">Запись на паузе…</string>
+    <string name="home_last_track_duration">Длительность</string>
+    <string name="home_location_is_available">Локация доступна</string>
+    <string name="home_location_is_not_available">Локация не доступна</string>
+    <string name="home_location_suspended_status">Локация приостановлена, статус: %d</string>
+    <string name="home_pause_tracking">Пауза</string>
+    <string name="home_resume_tracking">Возобн.</string>
+
+    <!-- Map -->
+    <string name="map_iam_here">Я здесь</string>
+    <string name="map_start">старт</string>
+    <string name="map_finish">финиш</string>
+    <string name="map_refresh">Обновить</string>
+    <string name="map_recording_track">Пишется трэк: %s</string>
+
+    <!-- Tracks -->
+    <string name="tracks_start">Старт</string>
+    <string name="tracks_finish">Финиш</string>
+    <string name="tracks_no_tracks">Нет трэков</string>
+    <string name="tracks_title">%d трэков</string>
+    <string name="tracks_i">i</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_gps_accuracy_title">GPS точность</string>
+    <string name="settings_gps_accuracy_value">Временной интервал: %d s</string>
+    <string name="settings_gps_accuracy_description">Пожалуйста, выберете вроеменной интервал (в секундах) как часто локаци ябудет обновляться</string>
+    <string name="settings_gps_accuracy_hint">Более высокое значение уменьшает разряд аккумулятора, но и уменьшает точность трэка</string>
+
+    <string name="settings_track_record_sensitivity_title">Чувствительность записи</string>
+    <string name="settings_track_record_sensitivity_value">Сохранить трэк если его расстояние как минимум %d</string>
+    <string name="settings_track_record_sensitivity_description">Пожалуйста, выбирите минимальное расстояние, при котором трэк будет сохранен</string>
+    <string name="settings_track_record_sensitivity_hint">Трэк не будет сохранен если конечная его длина меньше этого занчения</string>
+
+    <string name="settings_minimal_displacement_title">Минимальное смещение</string>
+    <string name="settings_minimal_displacement_value">Минимальное смещение %d м</string>
+    <string name="settings_minimal_displacement_description">Пожалуйста, выберете минимальное смещение в метрах</string>
+    <string name="settings_minimal_displacement_hint">Локация не будет обновляться пока вы не переместитесь на расстояние не менее указанное тут</string>
+
+    <string name="settings_minimal_battery_level_title">Минимальный заряд аккумулятора</string>
+    <string name="settings_minimal_battery_level_value">Минимальный заряд аккумулятора для записи трэка %d %%</string>
+    <string name="settings_minimal_battery_level_description">Пожалуйста, выберете минимальный заряд аккумулятора</string>
+    <string name="settings_minimal_battery_level_hint">Когда заряд аккумулятора станет ниже этого значения, то запись трэка остановиться</string>
+
+    <string name="settings_about_title">О приложении</string>
+    <string name="settings_about_value">Верия приложения</string>
+    <string name="settings_about_description">Версия приложения %s</string>
+
+    <string name="settings_apply">Применить</string>
+
+    <!-- Track details -->
+    <string name="track_details_name">Имя трэка</string>
+    <string name="track_details_statistics">Статистика</string>
+    <string name="track_details_share">Поделиться</string>
+    <string name="track_details_delete">Удалить трэк</string>
+    <string name="track_details_distance">расстояние %s</string>
+    <string name="track_details_speed">скорость %s</string>
+    <string name="track_details_duration">длительность %s</string>
+    <string name="track_details_pauses">паузы %s</string>
+
+    <string name="track_details_delete_title">Удаление трэка</string>
+    <string name="track_details_delete_description">Вы действительно хотите улаить этот трэк?</string>
+    <string name="track_details_share_file">Поделиться файлом</string>
+    <string name="track_details_share_file_subject">Трэк из приложения Simple Quest</string>
+    <string name="track_details_share_file_text">Привет! В приложение к этому письму содержиться трэк %s собранный из приложения Simple Quest</string>
+
+    <!-- Others -->
+    <string name="others_km">км</string>
+    <string name="others_kmh">км/ч</string>
+    <string name="others_m">м</string>
+
+</resources>

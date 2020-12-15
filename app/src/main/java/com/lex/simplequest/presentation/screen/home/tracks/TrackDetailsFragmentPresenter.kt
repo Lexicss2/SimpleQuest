@@ -112,14 +112,14 @@ class TrackDetailsFragmentPresenter(
             ui.setName(track?.name)
             track?.movingDistance()?.let { d ->
                 if (d >= Config.METERS_IN_KILOMETER) {
-                    ui.setDistance(String.format("%.2f km", d / Config.METERS_IN_KILOMETER))
+                    ui.setDistance(String.format("%.2f" , d / Config.METERS_IN_KILOMETER), true)
                 } else {
-                    ui.setDistance(String.format("%.2f m", d))
+                    ui.setDistance(String.format("%.2f", d), false)
                 }
-            } ?: ui.setDistance(null)
+            } ?: ui.setDistance(null, false)
 
             track?.averageSpeed()?.let { v ->
-                ui.setSpeed(String.format("%.2f km/h", v))
+                ui.setSpeed(String.format("%.2f", v))
             } ?: ui.setSpeed(null)
 
             track?.fullDuration()?.let { t ->
