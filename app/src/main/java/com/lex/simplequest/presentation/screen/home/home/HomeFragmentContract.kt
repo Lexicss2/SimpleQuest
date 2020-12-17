@@ -11,6 +11,7 @@ interface HomeFragmentContract {
         fun showProgress(show: Boolean)
         fun showLastTrackDuration(minutes: String?, seconds: String?)
         fun showLastTrackDistance(distance: String?, withBoldStyle: Boolean)
+        fun showSpeed(speed: String?, isCurrent: Boolean)
         fun setLocationAvailableStatus(isAvailable: Boolean?)
         fun setLocationSuspendedStatus(reason: Int?)
         fun setError(error: Throwable?)

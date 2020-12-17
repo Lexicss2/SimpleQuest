@@ -132,7 +132,7 @@ class TrackDetailsFragment :
     override fun setSpeed(speed: String?) {
         val measure = resources.getString(R.string.others_kmh)
         val text = if (null != speed) String.format(
-            resources.getString(R.string.track_details_speed),
+            resources.getString(R.string.track_details_average_speed),
             "$speed $measure"//speed
         ) else NO_VALUE
         viewBinding.speedTextView.text = text

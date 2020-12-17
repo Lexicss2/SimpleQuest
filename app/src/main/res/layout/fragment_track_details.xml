@@ -103,7 +103,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="3dp"
-                    android:text="@string/track_details_speed" />
+                    android:text="@string/track_details_average_speed" />
 
                 <TextView
                     android:id="@+id/duration_text_view"

@@ -101,7 +101,11 @@ class HomeFragment :
                     startStopButton.apply {
                         text = getString(R.string.home_start_tracking)
                         setTextColor(resources.getColor(R.color.colorBgStartButton, null))
-                        background = ResourcesCompat.getDrawable(resources, R.drawable.shape_button_start, null)
+                        background = ResourcesCompat.getDrawable(
+                            resources,
+                            R.drawable.shape_button_start,
+                            null
+                        )
                         isEnabled = true
                     }
                     pauseResumeButton.visibility = View.GONE
@@ -112,7 +116,11 @@ class HomeFragment :
                     startStopButton.apply {
                         text = getString(R.string.home_start_tracking)
                         setTextColor(resources.getColor(R.color.colorBgGray, null))
-                        background = ResourcesCompat.getDrawable(resources, R.drawable.shape_button_disabled, null)
+                        background = ResourcesCompat.getDrawable(
+                            resources,
+                            R.drawable.shape_button_disabled,
+                            null
+                        )
                         isEnabled = false
                     }
                     pauseResumeButton.visibility = View.GONE
@@ -123,14 +131,22 @@ class HomeFragment :
                     startStopButton.apply {
                         text = getString(R.string.home_stop_tracking)
                         setTextColor(resources.getColor(R.color.colorBgStopButton, null))
-                        background = ResourcesCompat.getDrawable(resources, R.drawable.shape_button_stop, null)
+                        background = ResourcesCompat.getDrawable(
+                            resources,
+                            R.drawable.shape_button_stop,
+                            null
+                        )
                         isEnabled = true
                     }
                     pauseResumeButton.visibility = View.VISIBLE
                     pauseResumeButton.apply {
                         text = resources.getString(R.string.home_pause_tracking)
                         setTextColor(resources.getColor(R.color.colorBgPauseButton, null))
-                        background = ResourcesCompat.getDrawable(resources, R.drawable.shape_button_pause, null)
+                        background = ResourcesCompat.getDrawable(
+                            resources,
+                            R.drawable.shape_button_pause,
+                            null
+                        )
                     }
                     delimiterView.visibility = View.VISIBLE
                 }
@@ -139,14 +155,22 @@ class HomeFragment :
                     startStopButton.apply {
                         text = getString(R.string.home_stop_tracking)
                         setTextColor(resources.getColor(R.color.colorBgStopButton, null))
-                        background = ResourcesCompat.getDrawable(resources, R.drawable.shape_button_stop, null)
+                        background = ResourcesCompat.getDrawable(
+                            resources,
+                            R.drawable.shape_button_stop,
+                            null
+                        )
                         isEnabled = true
                     }
                     pauseResumeButton.visibility = View.VISIBLE
                     pauseResumeButton.apply {
                         text = resources.getString(R.string.home_resume_tracking)
                         setTextColor(resources.getColor(R.color.colorBgResumeButton, null))
-                        background = ResourcesCompat.getDrawable(resources, R.drawable.shape_button_resume, null)
+                        background = ResourcesCompat.getDrawable(
+                            resources,
+                            R.drawable.shape_button_resume,
+                            null
+                        )
                     }
                     delimiterView.visibility = View.VISIBLE
                 }
@@ -173,7 +197,7 @@ class HomeFragment :
         viewBinding.layoutContent.apply {
             lastTrackNameView.text = caption
             lastTrackCaption.apply {
-                when(recordingStatus) {
+                when (recordingStatus) {
                     RecordingStatus.RECORDING -> {
                         text = resources.getString(R.string.home_is_recording)
                         setTextColor(resources.getColor(R.color.colorSimpleRed, null))
@@ -190,6 +214,21 @@ class HomeFragment :
             }
         }
         toolbarInfo.setTitle(caption)
+    }
+
+    override fun showSpeed(speed: String?, isCurrent: Boolean) {
+        viewBinding.layoutContent.apply {
+            speedCaptionView.text =
+                if (isCurrent) resources.getString(R.string.home_current_speed) else resources.getString(
+                    R.string.home_average_speed
+                )
+            if (null != speed) {
+                val measure = resources.getString(R.string.others_kmh)
+                speedValueView.text = String.format("%s %s", speed, measure)
+            } else {
+                speedValueView.text = "---"
+            }
+        }
     }
 
     override fun showProgress(show: Boolean) {
@@ -209,7 +248,10 @@ class HomeFragment :
     override fun showLastTrackDistance(distance: String?, withBoldStyle: Boolean) {
         viewBinding.layoutContent.lastTrackDistanceView.apply {
             setTypeface(typeface, if (withBoldStyle) Typeface.BOLD else Typeface.NORMAL)
-            val measure = if (withBoldStyle) resources.getString(R.string.others_km) else resources.getString(R.string.others_m)
+            val measure =
+                if (withBoldStyle) resources.getString(R.string.others_km) else resources.getString(
+                    R.string.others_m
+                )
             text = if (null != distance) "$distance $measure" else NO_DATA
         }
     }

@@ -270,8 +270,13 @@ class HomeFragmentPresenter(
                         withBoldStyle = false
                     }
                     ui.showLastTrackDistance(String.format(format, summaryDistance), withBoldStyle)
+
+                    val showCurrent = tracker?.getRecordingStatus() == RecordingStatus.RECORDING
+                    val speed = if (showCurrent) track.currentSpeed() else track.averageSpeed()
+                    ui.showSpeed(String.format("%.2f", speed), isCurrent = showCurrent)
                 } else {
                     ui.showLastTrackDistance(null, false)
+                    ui.showSpeed(null, false)
                 }
             }
 

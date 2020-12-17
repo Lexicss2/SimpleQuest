@@ -40,6 +40,8 @@
     <string name="home_location_suspended_status">Локация приостановлена, статус: %d</string>
     <string name="home_pause_tracking">Пауза</string>
     <string name="home_resume_tracking">Возобн.</string>
+    <string name="home_average_speed">Средняя скорость</string>
+    <string name="home_current_speed">Текущая скорость</string>
 
     <!-- Map -->
     <string name="map_iam_here">Я здесь</string>
@@ -90,7 +92,7 @@
     <string name="track_details_share">Поделиться</string>
     <string name="track_details_delete">Удалить трэк</string>
     <string name="track_details_distance">расстояние %s</string>
-    <string name="track_details_speed">скорость %s</string>
+    <string name="track_details_average_speed">средняя скорость %s</string>
     <string name="track_details_duration">длительность %s</string>
     <string name="track_details_pauses">паузы %s</string>
     <string name="track_details_map">Карта</string>

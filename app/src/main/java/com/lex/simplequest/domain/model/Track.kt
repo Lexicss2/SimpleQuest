@@ -150,6 +150,27 @@ fun Track.averageSpeed(): Float =
         }
     }
 
+fun Track.currentSpeed(): Float =
+    when(points.size) {
+        0 -> .0f
+        1 -> .0f
+        else -> {
+            val results = FloatArray(3)
+            val start = points[points.lastIndex - 1]
+            val end = points.last()
+            Location.distanceBetween(
+                start.latitude,
+                start.longitude,
+                end.latitude,
+                end.longitude,
+                results
+            )
+            val d = results[0]
+            val t = (end.timestamp - start.timestamp).toFloat()
+            (d / Config.METERS_IN_KILOMETER) / (t / (1000.0f * 60.0f * 60.0f))
+        }
+    }
+
 fun Track.toGpxFile(context: Context): File {
     val outputDir = context.externalCacheDir
     val outputFile = File.createTempFile(this.name, ".gpx", outputDir)
