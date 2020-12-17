@@ -80,19 +80,13 @@ dependencies {
     implementation deps.picasso
     implementation deps.playservices.location
     implementation deps.playservices.gcm
-
-    //implementation 'com.aldoapps:autoformatedittext:0.9.3'
-//    implementation 'me.abhinay.input:currency-edittext:1.1'
-//    implementation 'com.cottacush:CurrencyEditText:0.0.3'
+    implementation deps.playservices.maps
 
     implementation project(':core')
 
-    // TODO: Wrap with project-properties
-    implementation 'com.google.android.gms:play-services-maps:17.0.0'
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
+    debugImplementation deps.debugDb
 
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }
