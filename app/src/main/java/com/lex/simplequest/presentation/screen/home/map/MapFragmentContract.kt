@@ -8,8 +8,18 @@ import com.lex.simplequest.presentation.base.BaseMvpContract
 interface MapFragmentContract {
     interface Ui : BaseMvpContract.Ui {
         fun showStartMarker(location: Location?)
-        fun showFinishMarker(location: Location?, isRecording: Boolean = false, shouldMoveCamera: Boolean = false)
-        fun showTrack(track: Track?, isRecording: Boolean = false, shouldMoveCamera: Boolean = false)
+        fun showFinishMarker(
+            location: Location?,
+            isRecording: Boolean = false,
+            shouldMoveCamera: Boolean = false
+        )
+
+        fun showTrack(
+            track: Track?,
+            isRecording: Boolean = false,
+            shouldMoveCamera: Boolean = false
+        )
+
         fun showIndicatorProgress(text: String)
         fun showError(error: Throwable)
     }

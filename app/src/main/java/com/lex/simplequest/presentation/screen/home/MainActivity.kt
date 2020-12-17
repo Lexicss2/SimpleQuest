@@ -18,7 +18,7 @@ import com.lex.simplequest.presentation.base.ToolbarBackButtonOverride
 import com.lex.simplequest.presentation.screen.home.home.HomeFragment
 import com.lex.simplequest.presentation.screen.home.map.MapFragment
 import com.lex.simplequest.presentation.screen.home.settings.SettingsFragment
-import com.lex.simplequest.presentation.screen.home.tracks.TracksFragment
+import com.lex.simplequest.presentation.screen.home.tracks.list.TracksFragment
 import com.lex.simplequest.presentation.utils.bind
 import com.softeq.android.mvp.PresenterStateHolder
 import com.softeq.android.mvp.VoidPresenterStateHolder

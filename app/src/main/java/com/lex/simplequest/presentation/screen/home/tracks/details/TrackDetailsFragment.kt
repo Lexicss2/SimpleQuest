@@ -1,4 +1,4 @@
-package com.lex.simplequest.presentation.screen.home.tracks
+package com.lex.simplequest.presentation.screen.home.tracks.details
 
 import android.Manifest
 import android.content.DialogInterface
@@ -8,7 +8,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

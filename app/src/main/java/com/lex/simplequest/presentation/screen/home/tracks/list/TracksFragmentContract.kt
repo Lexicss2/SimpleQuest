@@ -1,4 +1,4 @@
-package com.lex.simplequest.presentation.screen.home.tracks
+package com.lex.simplequest.presentation.screen.home.tracks.list
 
 import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.presentation.base.BaseMvpContract

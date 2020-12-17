@@ -1,7 +1,6 @@
-package com.lex.simplequest.presentation.screen.home.tracks
+package com.lex.simplequest.presentation.screen.home.tracks.list
 
 import android.content.Context
-import android.os.Build
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView

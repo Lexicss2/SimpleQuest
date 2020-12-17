@@ -1,15 +1,14 @@
 package com.lex.simplequest.presentation.screen.home
 
-import android.content.Intent
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.lex.simplequest.R
 import com.lex.simplequest.presentation.screen.home.home.HomeFragment
 import com.lex.simplequest.presentation.screen.home.map.MapFragment
 import com.lex.simplequest.presentation.screen.home.settings.SettingsFragment
-import com.lex.simplequest.presentation.screen.home.tracks.TrackDetailsFragment
-import com.lex.simplequest.presentation.screen.home.tracks.TrackViewFragment
-import com.lex.simplequest.presentation.screen.home.tracks.TracksFragment
+import com.lex.simplequest.presentation.screen.home.tracks.details.TrackDetailsFragment
+import com.lex.simplequest.presentation.screen.home.tracks.map.TrackViewFragment
+import com.lex.simplequest.presentation.screen.home.tracks.list.TracksFragment
 import com.lex.simplequest.presentation.utils.clearBackStack
 import com.lex.simplequest.presentation.utils.inTransaction
 

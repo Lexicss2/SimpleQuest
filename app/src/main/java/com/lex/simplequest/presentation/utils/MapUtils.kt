@@ -1,6 +1,12 @@
 package com.lex.simplequest.presentation.utils
 
+import android.app.Activity
+import android.content.Context
 import android.graphics.Color
+import android.util.DisplayMetrics
+import android.util.Size
+import android.util.TypedValue
+import android.view.WindowManager
 import com.google.android.gms.maps.model.*
 import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.domain.model.toLatLng
@@ -69,4 +75,26 @@ fun List<Polyline>.canBeDrawn(): Boolean {
     }
 
     return false
+}
+
+fun screenSize(activity: Activity): Size {
+    val tv = TypedValue()
+    val actionBarHeight =
+        if (activity.theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            TypedValue.complexToDimensionPixelSize(tv.data, activity.resources.displayMetrics)
+        } else 0
+
+    val resourceId: Int = activity.resources.getIdentifier("status_bar_height", "dimen", "android")
+    val statusBarHeight = if (resourceId > 0) activity.resources.getDimensionPixelSize(resourceId) else 0
+
+    val displayMetrics = DisplayMetrics()
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+        activity.display?.getRealMetrics(displayMetrics)
+    } else {
+        val wm = activity.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        @Suppress("DEPRECATION")
+        wm.defaultDisplay.getRealMetrics(displayMetrics)
+    }
+
+    return Size(displayMetrics.widthPixels, displayMetrics.heightPixels - actionBarHeight - statusBarHeight)
 }

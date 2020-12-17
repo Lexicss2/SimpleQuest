@@ -1,5 +1,6 @@
-package com.lex.simplequest.presentation.screen.home.tracks
+package com.lex.simplequest.presentation.screen.home.tracks.map
 
+import com.lex.simplequest.domain.locationmanager.model.Location
 import com.lex.core.log.LogFactory
 import com.lex.simplequest.data.location.repository.queries.TrackByIdQuerySpecification
 import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracker
@@ -30,6 +31,7 @@ class TrackViewFragmentPresenter(
     private val log = logFactory.get(TAG)
     private val taskReadTracks = createReadTracksTask()
     private var tracks: List<Track>? = null
+    private var wasCameraMoved: Boolean = false
 
     override fun start() {
         super.start()
@@ -41,15 +43,47 @@ class TrackViewFragmentPresenter(
         taskReadTracks.stop()
     }
 
+    override fun mapReady() {
+        updateUi()
+    }
+
     private fun updateUi() {
-        if (!tracks.isNullOrEmpty()) {
-            ui.setTrack(tracks!![0])
+        val track = tracks?.let {
+            if (it.isNotEmpty()) it.first() else null
+        }
+
+        if (null != track) {
+            if (track.points.isNotEmpty()) {
+                val firstPoint = track.points.first()
+                val startLocation = Location(firstPoint.latitude, firstPoint.longitude, firstPoint.altitude)
+                if (1 == track.points.size) {
+                    ui.showStartMarker(null)
+                    ui.showFinishMarker(startLocation,shouldMoveCamera = !wasCameraMoved)
+                } else {
+                    val lastPoint = track.points.last()
+                    val lastLocation = Location(lastPoint.latitude, lastPoint.longitude, lastPoint.altitude)
+                    ui.showStartMarker(startLocation)
+                    ui.showFinishMarker(lastLocation, shouldMoveCamera = false)
+                    ui.showTrack(track, shouldMoveCamera = !wasCameraMoved)
+                }
+
+                if (!wasCameraMoved) {
+                    wasCameraMoved = true
+                }
+            } else {
+                ui.showStartMarker(null)
+                ui.showFinishMarker(null)
+                ui.showTrack(null)
+            }
         }
     }
 
     private fun handleReadTracks(tracks: List<Track>?, error: Throwable?) {
         if (null != tracks) {
+            wasCameraMoved = false
             this.tracks = tracks
+        } else if (null != error) {
+            ui.showError(error)
         }
 
         updateUi()

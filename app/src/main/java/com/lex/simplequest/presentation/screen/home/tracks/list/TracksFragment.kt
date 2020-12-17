@@ -1,4 +1,4 @@
-package com.lex.simplequest.presentation.screen.home.tracks
+package com.lex.simplequest.presentation.screen.home.tracks.list
 
 import android.os.Bundle
 import android.view.LayoutInflater

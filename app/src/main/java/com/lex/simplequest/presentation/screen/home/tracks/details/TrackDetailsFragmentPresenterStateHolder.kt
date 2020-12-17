@@ -1,4 +1,4 @@
-package com.lex.simplequest.presentation.screen.home.tracks
+package com.lex.simplequest.presentation.screen.home.tracks.details
 
 import android.os.Bundle
 import com.softeq.android.mvp.PresenterStateHolder

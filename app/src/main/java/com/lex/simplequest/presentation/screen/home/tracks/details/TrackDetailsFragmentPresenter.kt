@@ -1,4 +1,4 @@
-package com.lex.simplequest.presentation.screen.home.tracks
+package com.lex.simplequest.presentation.screen.home.tracks.details
 
 import android.util.Log
 import com.lex.core.log.LogFactory

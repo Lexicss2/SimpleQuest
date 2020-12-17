@@ -1,6 +1,5 @@
 package com.lex.simplequest.presentation.screen.home.map
 
-import android.util.Log
 import com.lex.core.log.LogFactory
 import com.lex.simplequest.data.location.repository.queries.LatestTrackQuerySpecification
 import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracker
