@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -43,6 +44,7 @@ class TrackViewFragment :
     }
 
     private var googleMap: GoogleMap? = null
+    private lateinit var detailsButton: Button
     private var startMarker: Marker? = null
     private var finishMarker: Marker? = null
     private val currentPolyLines: MutableList<Polyline> = mutableListOf()
@@ -55,6 +57,8 @@ class TrackViewFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initGoogleMap()
+        detailsButton = view.findViewById(R.id.details_button)
+        detailsButton.setOnClickListener { presenter.detailsClicked() }
         super.onViewCreated(view, savedInstanceState)
     }
 

@@ -72,7 +72,7 @@ class InitializationFragment :
     }
 
     override fun showErrorPopup(error: Throwable) {
-        Log.e("qaz", "showErrorPopup: ${error.localizedMessage}")
+        // do nothing
     }
 
     override fun requestLocationPermissions() {

@@ -56,7 +56,6 @@ class SelectMinimalDisplacementDialog : BaseDialogFragment() {
         var index = array.indexOf(displacementStr)
 
         if (index == -1) {
-            Log.w("qaz", "Selected period $displacementStr is not in a list, selecting in the middle")
             index = array.lastIndex / 2
         }
 

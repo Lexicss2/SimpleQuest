@@ -47,6 +47,10 @@ class TrackViewFragmentPresenter(
         updateUi()
     }
 
+    override fun detailsClicked() {
+        router.showTrackDetails(trackId, switchFromTrackView = true)
+    }
+
     private fun updateUi() {
         val track = tracks?.let {
             if (it.isNotEmpty()) it.first() else null
@@ -55,13 +59,15 @@ class TrackViewFragmentPresenter(
         if (null != track) {
             if (track.points.isNotEmpty()) {
                 val firstPoint = track.points.first()
-                val startLocation = Location(firstPoint.latitude, firstPoint.longitude, firstPoint.altitude)
+                val startLocation =
+                    Location(firstPoint.latitude, firstPoint.longitude, firstPoint.altitude)
                 if (1 == track.points.size) {
                     ui.showStartMarker(null)
-                    ui.showFinishMarker(startLocation,shouldMoveCamera = !wasCameraMoved)
+                    ui.showFinishMarker(startLocation, shouldMoveCamera = !wasCameraMoved)
                 } else {
                     val lastPoint = track.points.last()
-                    val lastLocation = Location(lastPoint.latitude, lastPoint.longitude, lastPoint.altitude)
+                    val lastLocation =
+                        Location(lastPoint.latitude, lastPoint.longitude, lastPoint.altitude)
                     ui.showStartMarker(startLocation)
                     ui.showFinishMarker(lastLocation, shouldMoveCamera = false)
                     ui.showTrack(track, shouldMoveCamera = !wasCameraMoved)

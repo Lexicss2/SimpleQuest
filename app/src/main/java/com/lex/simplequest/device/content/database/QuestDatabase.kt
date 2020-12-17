@@ -49,7 +49,6 @@ class QuestDatabase(
     constructor(ctx: Context) : this(ctx, DATABASE_NAME, null, DATABASE_VERSION)
 
     override fun onCreate(db: SQLiteDatabase) {
-        Log.i("qaz", "DB onCreate")
         db.execSQL(SQL_CREATE_TRACKS_TABLE)
         db.execSQL(SQL_CREATE_POINTS_TABLE)
         db.execSQL(SQL_CREATE_CHECK_POINTS_TABLE)
@@ -66,6 +65,5 @@ class QuestDatabase(
     override fun onOpen(db: SQLiteDatabase) {
         super.onOpen(db)
         db.execSQL(SWITCH_ON_FOREIGN_KEY)
-        Log.d("qaz", "DB onOpen, but createdPoints TABLE = $SQL_CREATE_POINTS_TABLE")
     }
 }

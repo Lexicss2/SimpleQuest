@@ -31,12 +31,26 @@ class MainRouterImpl : MainRouter {
         addFragment(SettingsFragment.newInstance(), true)
     }
 
-    override fun showTrackView(trackId: Long) {
-        addFragment(TrackViewFragment.newInstance(trackId), false)
+    override fun showTrackView(trackId: Long, switchFromTrackDetails: Boolean) {
+        if (switchFromTrackDetails) {
+            addFragments(
+                TracksFragment.newInstance(),
+                TrackViewFragment.newInstance(trackId), clearBackStack = true
+            )
+        } else {
+            addFragment(TrackViewFragment.newInstance(trackId), clearBackStack = false)
+        }
     }
 
-    override fun showTrackDetails(trackId: Long) {
-        addFragment(TrackDetailsFragment.newInstance(trackId), false)
+    override fun showTrackDetails(trackId: Long, switchFromTrackView: Boolean) {
+        if (switchFromTrackView) {
+            addFragments(
+                TracksFragment.newInstance(),
+                TrackDetailsFragment.newInstance(trackId), clearBackStack = true
+            )
+        } else {
+            addFragment(TrackDetailsFragment.newInstance(trackId), clearBackStack = false)
+        }
     }
 
     override fun goBack() {

@@ -54,6 +54,7 @@
     <string name="tracks_no_tracks">Нет трэков</string>
     <string name="tracks_title">%d трэков</string>
     <string name="tracks_i">i</string>
+    <string name="tracks_details">Детали</string>
 
     <!-- Settings -->
     <string name="settings_title">Настройки</string>
@@ -92,6 +93,7 @@
     <string name="track_details_speed">скорость %s</string>
     <string name="track_details_duration">длительность %s</string>
     <string name="track_details_pauses">паузы %s</string>
+    <string name="track_details_map">Карта</string>
 
     <string name="track_details_delete_title">Удаление трэка</string>
     <string name="track_details_delete_description">Вы действительно хотите улаить этот трэк?</string>

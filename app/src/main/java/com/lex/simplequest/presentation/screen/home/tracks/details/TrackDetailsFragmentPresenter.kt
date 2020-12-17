@@ -73,7 +73,11 @@ class TrackDetailsFragmentPresenter(
         }
     }
 
-    override fun shareClicked() {
+    override fun mapButtonClicked() {
+        router.showTrackView(trackId, switchFromTrackDetails = true)
+    }
+
+    override fun shareButtonClicked() {
         track?.let {
             val permissionsSet = setOf(
                 PermissionChecker.Permission.READ_EXTERNAL_STORAGE,
@@ -94,7 +98,7 @@ class TrackDetailsFragmentPresenter(
         }
     }
 
-    override fun deleteClicked() {
+    override fun deleteButtonClicked() {
         ui.showDeletePopup()
     }
 

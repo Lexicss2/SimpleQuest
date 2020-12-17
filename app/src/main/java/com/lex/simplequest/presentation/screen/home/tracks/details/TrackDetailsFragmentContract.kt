@@ -20,8 +20,9 @@ interface TrackDetailsFragmentContract {
 
     interface Presenter : BaseMvpContract.Presenter<Ui, Presenter.State> {
         fun nameChanged(name: String)
-        fun shareClicked()
-        fun deleteClicked()
+        fun mapButtonClicked()
+        fun shareButtonClicked()
+        fun deleteButtonClicked()
         fun deleteConfirmed()
         fun permissionsGranted()
 

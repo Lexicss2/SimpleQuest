@@ -7,6 +7,6 @@ interface MainRouter : Router {
     fun showMap()
     fun showTracks()
     fun showSettings()
-    fun showTrackView(trackId: Long)
-    fun showTrackDetails(trackId: Long)
+    fun showTrackView(trackId: Long, switchFromTrackDetails: Boolean)
+    fun showTrackDetails(trackId: Long, switchFromTrackView: Boolean)
 }

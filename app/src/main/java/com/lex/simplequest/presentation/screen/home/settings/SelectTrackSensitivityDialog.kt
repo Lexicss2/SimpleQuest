@@ -52,7 +52,6 @@ class SelectTrackSensitivityDialog : BaseDialogFragment() {
         val distanceStr = distance.toString()
         var index = array.indexOf(distanceStr)
         if (index == -1) {
-            Log.w("qaz", "Selected period $index is not in a list, selecting in the middle")
             index = array.lastIndex / 2
         }
 

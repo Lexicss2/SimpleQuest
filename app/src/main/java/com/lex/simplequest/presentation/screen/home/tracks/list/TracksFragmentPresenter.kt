@@ -54,15 +54,14 @@ class TracksFragmentPresenter(
     }
 
     override fun trackClicked(track: Track) {
-        router.showTrackView(track.id)
+        router.showTrackView(track.id, switchFromTrackDetails = false)
     }
 
     override fun trackInfoClicked(track: Track) {
-        router.showTrackDetails(track.id)
+        router.showTrackDetails(track.id, switchFromTrackView = false)
     }
 
     private fun updateUi(flags: Int) {
-        Log.v("qaz", "updateUi : $flags")
         val inProgress = taskReadTracks.isRunning()
         ui.showProgress(inProgress)
 

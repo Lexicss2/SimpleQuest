@@ -18,6 +18,7 @@ interface TrackViewFragmentContract {
 
     interface Presenter : BaseMvpContract.Presenter<Ui, Presenter.State> {
         fun mapReady()
+        fun detailsClicked()
         interface State : BaseMvpContract.Presenter.State
     }
 }

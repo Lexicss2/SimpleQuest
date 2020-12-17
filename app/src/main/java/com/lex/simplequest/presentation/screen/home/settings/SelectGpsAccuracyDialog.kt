@@ -54,7 +54,6 @@ class SelectGpsAccuracyDialog : BaseDialogFragment() {
         val timePeriodStr = timePeriod.toString()
         var index = array.indexOf(timePeriodStr)
         if (index == -1) {
-            Log.w("qaz", "Selected period $timePeriodStr is not in a list, selecting in the middle")
             index = array.lastIndex / 2
         }
 

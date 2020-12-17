@@ -80,8 +80,9 @@ class TrackDetailsFragment :
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewBinding.apply {
             trackNameEditText.addTextChangedListener(nameChangeListener)
-            shareButton.setOnClickListener { presenter.shareClicked() }
-            deleteButton.setOnClickListener { presenter.deleteClicked() }
+            mapButton.setOnClickListener { presenter.mapButtonClicked() }
+            shareButton.setOnClickListener { presenter.shareButtonClicked() }
+            deleteButton.setOnClickListener { presenter.deleteButtonClicked() }
         }
         super.onViewCreated(view, savedInstanceState)
     }
