@@ -17,7 +17,15 @@ fun Point.toLatLng() =
 
 fun List<Point>.toLatLngs() =
     this.map {
-        LatLng(it.latitude, it.longitude)
+        it.toLatLng()
+    }
+
+fun Point.toTimedLocation(): Pair<Long, com.lex.simplequest.domain.locationmanager.model.Location> =
+    Pair(this.timestamp, com.lex.simplequest.domain.locationmanager.model.Location(this.latitude, this.longitude, this.altitude))
+
+fun List<Point>.toTimedLocations() =
+    this.map {
+        it.toTimedLocation()
     }
 
 fun Point.distanceTo(otherPoint: Point): Float {

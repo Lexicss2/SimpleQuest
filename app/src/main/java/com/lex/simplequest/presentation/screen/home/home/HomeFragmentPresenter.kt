@@ -40,8 +40,10 @@ class HomeFragmentPresenter(
         private const val FLAG_SET_DURATION = 0x0004
         private const val FLAG_SET_BUTTON_STATUS = 0x0008
         private const val FLAG_SET_LOCATION_ERROR_DATA = 0x0010
+        private const val FLAG_SET_SPEED = 0x0020
         private const val FLAG_SETUP_UI =
-            FLAG_SET_TRACK_INFO or FLAG_SET_DISTANCE or FLAG_SET_DURATION or FLAG_SET_BUTTON_STATUS or FLAG_SET_LOCATION_ERROR_DATA
+            FLAG_SET_TRACK_INFO or FLAG_SET_DISTANCE or FLAG_SET_DURATION or FLAG_SET_BUTTON_STATUS or
+                    FLAG_SET_LOCATION_ERROR_DATA or FLAG_SET_SPEED
     }
 
     private val log = logFactory.get(TAG)
@@ -52,7 +54,7 @@ class HomeFragmentPresenter(
     private var lastTrack: Track? = null
     private var isLocationAvailable: Boolean? = null
     private var locationSuspendedReason: Int? = null
-    private val newRecordedLocations = mutableListOf<Location>()
+    private val newRecordedLocations = mutableListOf<Pair<Long, Location>>()
     private var timerValue: Long? = null
 
     private val trackingListener = object : LocationTracker.Listener {
@@ -77,9 +79,9 @@ class HomeFragmentPresenter(
         override fun onLocationUpdated(location: Location) {
             Log.d(TAG, "4.onLocationManger Updated")
             if (true == connectedLocationTracker?.isRecording()) {
-                newRecordedLocations.add(location)
+                newRecordedLocations.add(Pair(System.currentTimeMillis(), location))
             }
-            updateUi(FLAG_SET_DISTANCE)
+            updateUi(FLAG_SET_DISTANCE or FLAG_SET_SPEED)
         }
 
         override fun onStatusUpdated(status: LocationTracker.Status) {
@@ -270,12 +272,17 @@ class HomeFragmentPresenter(
                         withBoldStyle = false
                     }
                     ui.showLastTrackDistance(String.format(format, summaryDistance), withBoldStyle)
-
-                    val showCurrent = tracker?.getRecordingStatus() == RecordingStatus.RECORDING
-                    val speed = if (showCurrent) track.currentSpeed() else track.averageSpeed()
-                    ui.showSpeed(String.format("%.2f", speed), isCurrent = showCurrent)
                 } else {
                     ui.showLastTrackDistance(null, false)
+                }
+            }
+
+            if (0 != (flags and FLAG_SET_SPEED)) {
+                if (null != track) {
+                    val showCurrent = tracker?.getRecordingStatus() == RecordingStatus.RECORDING
+                    val speed = if (showCurrent) newRecordedLocations.currentSpeed(track) else track.averageSpeed()
+                    ui.showSpeed(String.format("%.2f", speed), isCurrent = showCurrent)
+                } else {
                     ui.showSpeed(null, false)
                 }
             }
@@ -286,12 +293,13 @@ class HomeFragmentPresenter(
                         null != tracker && tracker.isRecording() && !tracker.isRecordingPaused()
 
                     val isPaused = tracker?.isRecordingPaused() ?: false
-                    val dur_tm = if (null != timerValue) timerValue!!.toStringDurations() else null
-                    val dur_tr = track.movingDuration(!isPaused).toStringDurations()
+                    val timeDuration = if (null != timerValue) timerValue!!.toStringDurations() else null
+                    val movingDuration = track.movingDuration(!isPaused).toStringDurations()
 
-                    Log.v(TAG, "timerValue = ${dur_tm}, trackValue = ${dur_tr}")
+                    Log.v(TAG, "timerValue = $timeDuration, trackValue = $movingDuration")
 
-                    val duration = if (isNowRecording) timerValue!! else track.movingDuration(!isPaused)
+                    val duration =
+                        if (isNowRecording) timerValue!! else track.movingDuration(!isPaused)
                     val (minutes, seconds) = duration.toStringDurations()
                     ui.showLastTrackDuration(minutes, seconds)
                 } else {
@@ -348,7 +356,7 @@ class HomeFragmentPresenter(
             }
         }
 
-        updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_DISTANCE or FLAG_SET_DURATION)
+        updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_DISTANCE or FLAG_SET_DURATION or FLAG_SET_SPEED)
     }
 
     private fun createReadTracksTask() =
@@ -394,7 +402,7 @@ class HomeFragmentPresenter(
 }
 
 // Optimize
-fun List<Location>.additionalDistance(origin: Location?): Float {
+fun List<Pair<Long, Location>>.additionalDistance(origin: Location?): Float {
     if (this.isEmpty()) {
         return .0f
     }
@@ -407,27 +415,51 @@ fun List<Location>.additionalDistance(origin: Location?): Float {
     var distanceInMeters = .0f
 
     if (null != origin) {
+        val (_, l) = this.first()
         android.location.Location.distanceBetween(
             origin.latitude,
             origin.longitude,
-            this[0].latitude,
-            this[0].longitude,
+            l.latitude,
+            l.longitude,
             results
         )
         distanceInMeters = results[0]
     }
     for (i in 1 until this.size) {
-        val start = this[i - 1]
-        val end = this[i]
+        val (_, startLocation) = this[i - 1]
+        val (_, endLocation) = this[i]
         android.location.Location.distanceBetween(
-            start.latitude,
-            start.longitude,
-            end.latitude,
-            end.longitude,
+            startLocation.latitude,
+            startLocation.longitude,
+            endLocation.latitude,
+            endLocation.longitude,
             results
         )
         distanceInMeters += results[0]
     }
 
     return distanceInMeters
+}
+
+fun List<Pair<Long, Location>>.currentSpeed(track: Track?): Float {
+    val allLocations = (track?.points?.toTimedLocations() ?: emptyList()) + this
+    return when(allLocations.size) {
+        0 -> .0f
+        1 -> .0f
+        else -> {
+            val results = FloatArray(3)
+            val (startTime, startLocation) = allLocations[allLocations.lastIndex - 1]
+            val (endTime, endLocation) = allLocations.last()
+            android.location.Location.distanceBetween(
+                startLocation.latitude,
+                startLocation.longitude,
+                endLocation.latitude,
+                endLocation.longitude,
+                results
+            )
+            val d = results[0]
+            val t = (endTime - startTime).toFloat()
+            (d / Config.METERS_IN_KILOMETER) / (t / (1000.0f * 60.0f * 60.0f))
+        }
+    }
 }
