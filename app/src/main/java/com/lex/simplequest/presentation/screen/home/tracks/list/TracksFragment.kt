@@ -122,6 +122,10 @@ class TracksFragment :
         }
     }
 
+    override fun showCantViewTrackMessage() {
+        Toast.makeText(context, resources.getString(R.string.tracks_track_cant_be_viewed), Toast.LENGTH_SHORT).show()
+    }
+
     override fun showError(error: Throwable) {
         Toast.makeText(context, error.localizedMessage, Toast.LENGTH_SHORT).show()
     }

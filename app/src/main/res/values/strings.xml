@@ -57,6 +57,7 @@
     <string name="tracks_title">%d tracks</string>
     <string name="tracks_i">i</string>
     <string name="tracks_details">Details</string>
+    <string name="tracks_track_cant_be_viewed">This track can\'t be viewed</string>
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>

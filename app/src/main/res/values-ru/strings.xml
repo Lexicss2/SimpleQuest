@@ -57,6 +57,7 @@
     <string name="tracks_title">%d трэков</string>
     <string name="tracks_i">i</string>
     <string name="tracks_details">Детали</string>
+    <string name="tracks_track_cant_be_viewed">Этот трэк сейчас нельзя просмотреть</string>
 
     <!-- Settings -->
     <string name="settings_title">Настройки</string>

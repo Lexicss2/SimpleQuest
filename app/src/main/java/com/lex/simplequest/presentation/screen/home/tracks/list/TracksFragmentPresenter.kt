@@ -54,7 +54,13 @@ class TracksFragmentPresenter(
     }
 
     override fun trackClicked(track: Track) {
-        router.showTrackView(track.id, switchFromTrackDetails = false)
+        val maxIdTrack = tracks.maxByOrNull { it.id }
+        if (null != maxIdTrack && track.id == maxIdTrack.id && null == maxIdTrack.endTime) {
+            ui.showCantViewTrackMessage()
+        } else {
+            router.showTrackView(track.id, switchFromTrackDetails = false)
+        }
+
     }
 
     override fun trackInfoClicked(track: Track) {
@@ -107,7 +113,10 @@ class TracksFragmentPresenter(
             Log.d("qaz", "count = $count")
             if (tracks.size != count) {
                 taskReadTracks.stop()
-                taskReadTracks.start(ReadTracksInteractor.Param(AllTracksQuerySpecification()), Unit)
+                taskReadTracks.start(
+                    ReadTracksInteractor.Param(AllTracksQuerySpecification()),
+                    Unit
+                )
                 updateUi(0)
             } else {
                 updateUi(FLAG_SET_TRACKS)
@@ -126,7 +135,7 @@ class TracksFragmentPresenter(
                 readTracksCountInteractor.asRxSingle(param)
                     .observeOn(AndroidSchedulers.mainThread())
             },
-            {result, _ ->
+            { result, _ ->
                 handleReadTracksCount(result.count, null)
             },
             { error, _ ->
