@@ -292,14 +292,14 @@ class HomeFragmentPresenter(
                     val isNowRecording =
                         null != tracker && tracker.isRecording() && !tracker.isRecordingPaused()
 
-                    val isPaused = tracker?.isRecordingPaused() ?: false
+                    //val isPaused = tracker?.isRecordingPaused() ?: false
                     val timeDuration = if (null != timerValue) timerValue!!.toStringDurations() else null
-                    val movingDuration = track.movingDuration(!isPaused).toStringDurations()
+                    val movingDuration = track.movingDuration(isNowRecording).toStringDurations()
 
                     Log.v(TAG, "timerValue = $timeDuration, trackValue = $movingDuration")
 
                     val duration =
-                        if (isNowRecording) timerValue!! else track.movingDuration(!isPaused)
+                        if (isNowRecording) timerValue!! else track.movingDuration(isNowRecording)
                     val (minutes, seconds) = duration.toStringDurations()
                     ui.showLastTrackDuration(minutes, seconds)
                 } else {
@@ -315,7 +315,7 @@ class HomeFragmentPresenter(
                     ui.setButtonStyleRecording(null)
                 }
 
-                if (BuildConfig.DEBUG) {
+                if (BuildConfig.DEBUG && Config.SHOW_DEBUG_INFO) {
                     ui.setTrackerStatus(
                         tracker?.getStatus(),
                         "point, newRecorded = ${newRecordedLocations.size}"

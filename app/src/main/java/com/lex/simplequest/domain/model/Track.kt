@@ -18,7 +18,7 @@ data class Track(
 ) {
     // Get points between pauses in track
     val pathes: List<List<Point>> by lazy {
-        if (checkPoints.isNotEmpty()) {
+        if (checkPoints.isNotEmpty() && points.isNotEmpty()) {
             val pathesList = mutableListOf<List<Point>>()
             var pointsIndex = 0
             var startTime = this.startTime

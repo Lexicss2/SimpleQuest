@@ -18,7 +18,7 @@ ext {
             ],
             rxJava                  : 'io.reactivex.rxjava2:rxjava:2.2.2',
             rxAndroid               : 'io.reactivex.rxjava2:rxandroid:2.1.0',
-            viewPump                : 'io.github.inflationx:viewpump:1.0.0',
+            viewPump                : 'io.github.inflationx:viewpump:2.0.3',
             okHttp                  : [
                     okHttp            : 'com.squareup.okhttp3:okhttp:3.13.1',
                     loggingInterceptor: 'com.squareup.okhttp3:logging-interceptor:3.13.1'
