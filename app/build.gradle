@@ -27,20 +27,38 @@ android {
         enabled = true
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    signingConfigs {
+        debug {
+            Properties properties = new Properties()
+            properties.load(project.rootProject.file("signing.properties").newDataInputStream())
+            storeFile file(properties.getProperty('debugStoreFile'))
+        }
+        release {
+            Properties properties = new Properties()
+            properties.load(project.rootProject.file("signing.properties").newDataInputStream())
+            storeFile file(properties.getProperty('releaseStoreFile'))
+            keyAlias properties.getProperty('releaseKeyAlias')
+            storePassword properties.getProperty('releaseStorePassword')
+            keyPassword properties.getProperty('releaseKeyPassword')
+        }
+    }
+
     buildTypes {
         debug {
             minifyEnabled false
+            signingConfig signingConfigs.debug
         }
 
         release {
             minifyEnabled true
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 

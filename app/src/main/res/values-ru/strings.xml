@@ -102,7 +102,7 @@
     <string name="track_details_delete_description">Вы действительно хотите улаить этот трэк?</string>
     <string name="track_details_share_file">Поделиться файлом</string>
     <string name="track_details_share_file_subject">Трэк из приложения Simple Quest</string>
-    <string name="track_details_share_file_text">Привет! В приложение к этому письму содержиться трэк %s собранный из приложения Simple Quest</string>
+    <string name="track_details_share_file_text">Привет! В приложение к этому письму содержится трэк %s собранный из приложения Simple Quest</string>
 
     <!-- Others -->
     <string name="others_km">км</string>
