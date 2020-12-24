@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
+import com.lex.simplequest.BuildConfig
 import com.lex.simplequest.R
 import com.lex.simplequest.databinding.DialogAboutBinding
 import com.lex.simplequest.presentation.base.BaseDialogFragment
@@ -32,7 +33,8 @@ class AboutDialog : BaseDialogFragment() {
             "?"
         }
 
-        binding.descriptionTextView.text = String.format(resources.getString(R.string.settings_about_description), version)
+        val buildType = if (BuildConfig.DEBUG) "(debug)" else "(release)"
+        binding.descriptionTextView.text = String.format(resources.getString(R.string.settings_about_description), version, buildType)
 
         _viewBinding = binding
 

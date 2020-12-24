@@ -83,7 +83,7 @@
 
     <string name="settings_about_title">About</string>
     <string name="settings_about_value">Application description</string>
-    <string name="settings_about_description">Application version %s</string>
+    <string name="settings_about_description">Application version %s %s</string>
 
     <string name="settings_apply">Apply</string>
 

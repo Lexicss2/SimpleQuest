@@ -83,7 +83,7 @@
 
     <string name="settings_about_title">О приложении</string>
     <string name="settings_about_value">Верия приложения</string>
-    <string name="settings_about_description">Версия приложения %s</string>
+    <string name="settings_about_description">Версия приложения %s %s</string>
 
     <string name="settings_apply">Применить</string>
 
