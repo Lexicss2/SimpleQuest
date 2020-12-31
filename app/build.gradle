@@ -5,6 +5,7 @@ apply plugin: 'kotlin-android-extensions'
 def versionMajor = 0
 def versionMinor = 3
 def versionPatch = 0
+def beta = "-beta"
 
 repositories {
     flatDir { dirs 'libs' }
@@ -60,24 +61,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-}
 
-android.applicationVariants.all { variant ->
-    variant.outputs.all { output ->
-        def apkFileName = output.outputFileName
-        if (apkFileName.endsWith("apk") && !apkFileName.contains("unaligned")) {
-            def project = "simplequest"
-            def separator = "-"
-            def buildType = variant.buildType.name
-            def versionCode = ((versionMajor + 1) * 1_000_000) + (versionMinor * 1_000) + (versionPatch)
-            def versionName = "${versionMajor}.${versionMinor}.${versionPatch}(${versionCode})"
-            def apkName = project + separator + versionName + separator + buildType + ".apk"
-
-            output.outputFileName = apkName
-            output.versionNameOverride = versionName
-            output.versionCodeOverride = versionCode
-        }
-    }
+    def versionCode = ((versionMajor + 1) * 1_000_000) + (versionMinor * 1_000) + (versionPatch)
+    def versionName = "${versionMajor}.${versionMinor}.${versionPatch}(${versionCode})${beta}"
+    setProperty("archivesBaseName", "simplequest-${versionName}")
 }
 
 dependencies {
