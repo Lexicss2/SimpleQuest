@@ -2,7 +2,6 @@ package com.lex.simplequest
 
 import android.app.Application
 import android.os.StrictMode
-import android.provider.Settings
 import com.lex.core.log.LogFactory
 import com.lex.core.log.LogFactoryImpl
 import com.lex.simplequest.data.location.repository.LocationRepositoryImpl
@@ -10,15 +9,12 @@ import com.lex.simplequest.data.settings.repository.SettingsRepositoryImpl
 import com.lex.simplequest.device.connectivity.InternetConnectivityTrackerImpl
 import com.lex.simplequest.device.locationmanager.LocationManagerImpl
 import com.lex.simplequest.device.permission.repository.PermissionCheckerImpl
-import com.lex.simplequest.device.service.TrackLocationService
 import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracker
 import com.lex.simplequest.domain.locationmanager.LocationManager
-import com.lex.simplequest.domain.locationmanager.LocationTracker
 import com.lex.simplequest.domain.permission.repository.PermissionChecker
 import com.lex.simplequest.domain.repository.LocationRepository
 import com.lex.simplequest.domain.repository.SettingsRepository
 import com.lex.simplequest.presentation.utils.tasks.RxCache
-
 import io.reactivex.plugins.RxJavaPlugins
 
 class App : Application() {

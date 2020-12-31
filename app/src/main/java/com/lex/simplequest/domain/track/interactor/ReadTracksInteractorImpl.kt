@@ -19,7 +19,6 @@ class ReadTracksInteractorImpl(
                 val startTime = System.currentTimeMillis()
                 val list = locationRepository.getTracks(param.spec)
                 val delta = System.currentTimeMillis() - startTime
-                Log.i("qaz", "calculated delta = $delta")
                 ReadTracksInteractor.Result(list)
             }
             .subscribeOn(Schedulers.io())

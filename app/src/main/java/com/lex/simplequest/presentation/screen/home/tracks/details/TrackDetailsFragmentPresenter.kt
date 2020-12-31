@@ -64,10 +64,8 @@ class TrackDetailsFragmentPresenter(
     }
 
     override fun nameChanged(name: String) {
-        Log.d("qaz", "taskUpdater is running: ${taskUpdateTrackWhenChanged.isRunning()}")
         track?.let {
             if (name.isNotBlank() && it.name != name) {
-                Log.d("qaz", "Update to $name")
                 nameToUpdate.onNext(name)
             }
         }
@@ -190,11 +188,10 @@ class TrackDetailsFragmentPresenter(
                     }
             },
             { result, _ ->
-                Log.i("qaz", "result: $result")
                 handleChange(result.track, null)
             },
             { error, _ ->
-                Log.e("qaz", "error: $error")
+                log.e("error: $error")
                 handleChange(null, error)
             }
         )

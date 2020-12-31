@@ -113,7 +113,6 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
                 (spec as LocationQuerySpecificationImpl).getWhereClause(),
                 null
             )
-            Log.d("qaz", "updatedRows = $updatedRows")
             return updatedRows > 0
         } else {
             // remove track
@@ -122,7 +121,6 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
                 (spec as LocationQuerySpecificationImpl).getWhereClause(),
                 null
             )
-            Log.w("qaz", "track was no saved as it distance is $trackDistance rather low")
             return false
         }
     }
@@ -209,7 +207,7 @@ class LocationRepositoryImpl(ctx: Context) : LocationRepository {
 
     private fun checkNotClosed() {
         if (isClosed.get()) {
-            Log.e("qaz", "This instance is closed")
+            // do nothing
         }
     }
 }

@@ -110,7 +110,6 @@ class TracksFragmentPresenter(
 
     private fun handleReadTracksCount(count: Int?, error: Throwable?) {
         if (null != count) {
-            Log.d("qaz", "count = $count")
             if (tracks.size != count) {
                 taskReadTracks.stop()
                 taskReadTracks.start(

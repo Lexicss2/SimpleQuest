@@ -16,7 +16,6 @@ class ReadTracksCountInteractorImpl(
                 val startTime = System.currentTimeMillis()
                 val count = locationRepository.getTracksCount()
                 val delta = System.currentTimeMillis() - startTime
-                Log.i("qaz", "calculated COUNT delta = $delta")
                 ReadTracksCountInteractor.Result(count)
             }
 }
