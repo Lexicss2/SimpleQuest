@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
 import android.view.LayoutInflater
@@ -19,17 +20,18 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.lex.simplequest.App
 import com.lex.simplequest.R
+import com.lex.simplequest.device.permission.repository.PermissionCheckerImpl
+import com.lex.simplequest.device.permission.repository.asAndroidPermissions
 import com.lex.simplequest.device.service.TrackLocationService
 import com.lex.simplequest.domain.locationmanager.LocationTracker
 import com.lex.simplequest.domain.locationmanager.model.Location
 import com.lex.simplequest.domain.model.Track
+import com.lex.simplequest.domain.permission.repository.PermissionChecker
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractorImpl
 import com.lex.simplequest.presentation.base.BaseMvpFragment
+import com.lex.simplequest.presentation.dialog.SimpleDialogFragment
 import com.lex.simplequest.presentation.screen.home.MainRouter
-import com.lex.simplequest.presentation.utils.canBeDrawn
-import com.lex.simplequest.presentation.utils.screenSize
-import com.lex.simplequest.presentation.utils.toLatLngBounds
-import com.lex.simplequest.presentation.utils.toPolylineOptions
+import com.lex.simplequest.presentation.utils.*
 import com.softeq.android.mvp.PresenterStateHolder
 
 class MapFragment :
@@ -38,6 +40,8 @@ class MapFragment :
     companion object {
         private const val BOUND_PADDING = 5
         private const val TRACK_WIDTH = 6.0f
+        private const val REQUEST_CODE_LOCATION_PERMISSIONS = 1004
+        private const val DLG_LOCATION_PERMISSION_RATIONALE = "location_permission_rationale"
 
         fun newInstance(): MapFragment =
             MapFragment().apply {
@@ -205,6 +209,38 @@ class MapFragment :
         Toast.makeText(activity, error.localizedMessage, Toast.LENGTH_SHORT).show()
     }
 
+    override fun requestPermissions(permissions: Set<PermissionChecker.Permission>) {
+        val array = permissions.asAndroidPermissions().toTypedArray()
+        requestPermissions(array, REQUEST_CODE_LOCATION_PERMISSIONS)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (REQUEST_CODE_LOCATION_PERMISSIONS == requestCode) {
+            if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                presenter.permissionsGranted()
+            } else {
+                presenter.permissionsDenied()
+            }
+        }
+    }
+
+    override fun showLocationPermissionRationale() {
+        if (!childFragmentManager.isDialogShown(DLG_LOCATION_PERMISSION_RATIONALE)) {
+            val ctx = requireContext()
+            val dlg = SimpleDialogFragment.newInstance(
+                ctx.getString(R.string.location_permission_title),
+                ctx.getString(R.string.map_location_permission_message),
+                ctx.getString(R.string.ok),
+            )
+            childFragmentManager.showDialog(dlg, DLG_LOCATION_PERMISSION_RATIONALE)
+        }
+    }
+
     private fun initGoogleMap() {
         if (null == googleMap) {
             val googleMap = childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
@@ -218,6 +254,7 @@ class MapFragment :
     override fun createPresenter(): MapFragmentContract.Presenter =
         MapFragmentPresenter(
             ReadTracksInteractorImpl(App.instance.locationRepository),
+            PermissionCheckerImpl(requireContext()),
             App.instance.internetConnectivityTracker,
             App.instance.logFactory,
             getTarget(MainRouter::class.java)!!

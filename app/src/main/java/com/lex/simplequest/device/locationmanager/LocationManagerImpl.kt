@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Looper
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.common.api.GoogleApi
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.*
 import com.lex.simplequest.Config
@@ -39,7 +40,7 @@ class LocationManagerImpl(
         @SuppressLint("MissingPermission")
         override fun onConnected(bundle: Bundle?) {
             if (!permissionChecker.checkAnyPermissionGranted(setOf(PermissionChecker.Permission.ACCESS_COARSE_LOCATION, PermissionChecker.Permission.ACCESS_FINE_LOCATION))) {
-                // TODO: call callback fun onPermissionRequired
+                // Impossible case
                 throw PermissionDeniedException("Location permissions was not granted")
             }
             val config = connectionConfig

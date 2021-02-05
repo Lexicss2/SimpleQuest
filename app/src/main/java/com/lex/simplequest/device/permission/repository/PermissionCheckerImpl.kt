@@ -29,13 +29,17 @@ class PermissionCheckerImpl(ctx: Context) : PermissionChecker {
                 )
             }
         } else true
-
-    private fun PermissionChecker.Permission.asAndroidPermission(): String =
-        when (this) {
-            PermissionChecker.Permission.ACCESS_COARSE_LOCATION -> Manifest.permission.ACCESS_COARSE_LOCATION
-            PermissionChecker.Permission.ACCESS_FINE_LOCATION -> Manifest.permission.ACCESS_FINE_LOCATION
-            PermissionChecker.Permission.CALL_PHONE -> Manifest.permission.CALL_PHONE
-            PermissionChecker.Permission.READ_EXTERNAL_STORAGE -> Manifest.permission.READ_EXTERNAL_STORAGE
-            PermissionChecker.Permission.WRITE_EXTERNAL_STORAGE -> Manifest.permission.WRITE_EXTERNAL_STORAGE
-        }
 }
+
+private fun PermissionChecker.Permission.asAndroidPermission(): String =
+    when (this) {
+        PermissionChecker.Permission.ACCESS_COARSE_LOCATION -> Manifest.permission.ACCESS_COARSE_LOCATION
+        PermissionChecker.Permission.ACCESS_FINE_LOCATION -> Manifest.permission.ACCESS_FINE_LOCATION
+        PermissionChecker.Permission.CALL_PHONE -> Manifest.permission.CALL_PHONE
+        PermissionChecker.Permission.READ_EXTERNAL_STORAGE -> Manifest.permission.READ_EXTERNAL_STORAGE
+        PermissionChecker.Permission.WRITE_EXTERNAL_STORAGE -> Manifest.permission.WRITE_EXTERNAL_STORAGE
+    }
+
+fun Set<PermissionChecker.Permission>.asAndroidPermissions(): List<String> =
+    this.map { it.asAndroidPermission() }
+

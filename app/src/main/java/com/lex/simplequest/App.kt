@@ -8,6 +8,7 @@ import com.lex.simplequest.data.location.repository.LocationRepositoryImpl
 import com.lex.simplequest.data.settings.repository.SettingsRepositoryImpl
 import com.lex.simplequest.device.connectivity.InternetConnectivityTrackerImpl
 import com.lex.simplequest.device.locationmanager.LocationManagerImpl
+import com.lex.simplequest.device.log.AndroidLogWatcher
 import com.lex.simplequest.device.permission.repository.PermissionCheckerImpl
 import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracker
 import com.lex.simplequest.domain.locationmanager.LocationManager
@@ -49,6 +50,10 @@ class App : Application() {
 
         RxJavaPlugins.setErrorHandler { throwable ->
             android.util.Log.e("app", "RxJava undelivered exception", throwable)
+        }
+
+        if (Config.LOG_ENABLED) {
+            logFactory.addLogWatcher(AndroidLogWatcher())
         }
     }
 }

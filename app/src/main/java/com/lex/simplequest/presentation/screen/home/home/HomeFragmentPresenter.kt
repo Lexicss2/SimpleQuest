@@ -1,6 +1,5 @@
 package com.lex.simplequest.presentation.screen.home.home
 
-import android.util.Log
 import com.lex.core.log.LogFactory
 import com.lex.simplequest.BuildConfig
 import com.lex.simplequest.Config
@@ -10,6 +9,7 @@ import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracke
 import com.lex.simplequest.domain.locationmanager.LocationTracker
 import com.lex.simplequest.domain.locationmanager.model.Location
 import com.lex.simplequest.domain.model.*
+import com.lex.simplequest.domain.permission.repository.PermissionChecker
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractor
 import com.lex.simplequest.presentation.base.BaseMvpLcePresenter
 import com.lex.simplequest.presentation.screen.home.MainRouter
@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit
 
 class HomeFragmentPresenter(
     private val readTracksInteractor: ReadTracksInteractor,
+    private val permissionChecker: PermissionChecker,
     internetConnectivityTracker: InternetConnectivityTracker,
     logFactory: LogFactory,
     router: MainRouter
@@ -44,6 +45,9 @@ class HomeFragmentPresenter(
         private const val FLAG_SETUP_UI =
             FLAG_SET_TRACK_INFO or FLAG_SET_DISTANCE or FLAG_SET_DURATION or FLAG_SET_BUTTON_STATUS or
                     FLAG_SET_LOCATION_ERROR_DATA or FLAG_SET_SPEED
+
+        private val LOCATION_PERMISSIONS_SET = setOf(PermissionChecker.Permission.ACCESS_COARSE_LOCATION,
+        PermissionChecker.Permission.ACCESS_FINE_LOCATION)
     }
 
     private val log = logFactory.get(TAG)
@@ -56,28 +60,29 @@ class HomeFragmentPresenter(
     private var locationSuspendedReason: Int? = null
     private val newRecordedLocations = mutableListOf<Pair<Long, Location>>()
     private var timerValue: Long? = null
+    private var isRecordingRequested: Boolean = false
 
     private val trackingListener = object : LocationTracker.Listener {
 
         override fun onLocationManagerConnected() {
-            Log.d(TAG, "1.onLocationManger Connected")
+            log.d("1.onLocationManger Connected")
             updateUi(FLAG_SET_LOCATION_ERROR_DATA)
         }
 
         override fun onLocationMangerConnectionSuspended(reason: Int) {
-            Log.d(TAG, "2.onLocationManger Suspended")
+            log.d("2.onLocationManger Suspended")
             locationSuspendedReason = reason
             updateUi(FLAG_SET_LOCATION_ERROR_DATA)
         }
 
         override fun onLocationMangerConnectionFailed(error: Throwable) {
-            Log.d(TAG, "3.onLocationManger Failed")
+            log.d("3.onLocationManger Failed")
             this@HomeFragmentPresenter.error = error
             updateUi(FLAG_SET_LOCATION_ERROR_DATA)
         }
 
         override fun onLocationUpdated(location: Location) {
-            Log.d(TAG, "4.onLocationManger Updated")
+            log.d("4.onLocationManger Updated")
             if (true == connectedLocationTracker?.isRecording()) {
                 newRecordedLocations.add(Pair(System.currentTimeMillis(), location))
             }
@@ -85,12 +90,12 @@ class HomeFragmentPresenter(
         }
 
         override fun onStatusUpdated(status: LocationTracker.Status) {
-            Log.d(TAG, "5.onStatus Updated: $status")
+            log.d("5.onStatus Updated: $status")
             updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS)
         }
 
         override fun onLocationAvailable(isAvailable: Boolean) {
-            Log.d(TAG, "6. onLocationAvailable")
+            log.d("6. onLocationAvailable")
             isLocationAvailable = isAvailable
             updateUi(FLAG_SET_LOCATION_ERROR_DATA)
         }
@@ -98,7 +103,7 @@ class HomeFragmentPresenter(
 
     private val startStopRecordResultListener = object : LocationTracker.RecordingEventsListener {
         override fun onRecordStartSucceeded(trackId: Long) {
-            Log.i(TAG, "I record started, trackId: $trackId")
+            log.i("I record started, trackId: $trackId")
             if (taskReadTracks.isRunning()) {
                 taskReadTracks.stop()
             }
@@ -109,13 +114,13 @@ class HomeFragmentPresenter(
         }
 
         override fun onRecordStartFailed(error: Throwable) {
-            Log.e(TAG, "II record start failed: ${error.localizedMessage}")
+            log.e("II record start failed: ${error.localizedMessage}")
             this@HomeFragmentPresenter.error = error
             updateUi(FLAG_SET_LOCATION_ERROR_DATA)
         }
 
         override fun onRecordStopSucceeded(success: Boolean) {
-            Log.d(TAG, "III record stopped Succedded: $success")
+            log.d("III record stopped Succedded: $success")
             if (taskReadTracks.isRunning()) {
                 taskReadTracks.stop()
             }
@@ -123,11 +128,11 @@ class HomeFragmentPresenter(
         }
 
         override fun onRecordStopFailed(error: Throwable) {
-            Log.e(TAG, "IV Failed to stop record: ${error.localizedMessage}")
+            log.e("IV Failed to stop record: ${error.localizedMessage}")
         }
 
         override fun onPauseResumeSucceeded(succeeded: Boolean) {
-            Log.d(TAG, "V record Paused or Resumed")
+            log.d("V record Paused or Resumed")
             if (!taskReadTracks.isRunning()) {
                 taskReadTracks.start(
                     ReadTracksInteractor.Param(LatestTrackQuerySpecification()),
@@ -137,7 +142,7 @@ class HomeFragmentPresenter(
         }
 
         override fun onPauseResumeFailed(error: Throwable) {
-            Log.e(TAG, "VI record Paused or Resumed failed: $error")
+            log.e( "VI record Paused or Resumed failed: $error")
         }
     }
 
@@ -146,6 +151,7 @@ class HomeFragmentPresenter(
         state.error = error
         state.isLocationAvailable = isLocationAvailable
         state.locationSuspendedReason = locationSuspendedReason
+        state.isRecordingRequested = isRecordingRequested
     }
 
     override fun restoreState(savedState: HomeFragmentContract.Presenter.State?) {
@@ -155,6 +161,7 @@ class HomeFragmentPresenter(
             error = state.error
             isLocationAvailable = state.isLocationAvailable
             locationSuspendedReason = state.locationSuspendedReason
+            state.isRecordingRequested = isRecordingRequested
         }
     }
 
@@ -173,12 +180,14 @@ class HomeFragmentPresenter(
     override fun startStopClicked() {
         connectedLocationTracker?.let { tracker ->
             if (tracker.isRecording()) {
-                Log.d(TAG, "STOP recording")
+                log.d("STOP recording")
                 tracker.stopRecording()
             } else {
-                Log.e(TAG, "START recording")
-                tracker.startRecording()
-                lastTrack = null
+                if (permissionChecker.checkAllPermissionGranted(LOCATION_PERMISSIONS_SET)) {
+                    startRecording()
+                } else {
+                    ui.requestPermissions(LOCATION_PERMISSIONS_SET)
+                }
             }
         }
         updateUi(FLAG_SET_BUTTON_STATUS)
@@ -193,7 +202,11 @@ class HomeFragmentPresenter(
         connectedLocationTracker = locationTracker
         connectedLocationTracker?.addListener(trackingListener)
         connectedLocationTracker?.recordingEventsListener = startStopRecordResultListener
-        Log.d(TAG, "location tracker connected in presenter")
+        log.d("location tracker connected in presenter")
+        if (isRecordingRequested) {
+            isRecordingRequested = false
+            startRecording()
+        }
 
         updateUi(FLAG_SET_TRACK_INFO or FLAG_SET_BUTTON_STATUS or FLAG_SET_LOCATION_ERROR_DATA)
     }
@@ -202,8 +215,16 @@ class HomeFragmentPresenter(
         connectedLocationTracker?.removeListener(trackingListener)
         connectedLocationTracker?.recordingEventsListener = null
         connectedLocationTracker = null
-        Log.d(TAG, "location tracker disconnected in presenter")
+        log.d("location tracker disconnected in presenter")
         updateUi(FLAG_SET_LOCATION_ERROR_DATA)
+    }
+
+    override fun permissionsGranted() {
+        isRecordingRequested = true
+    }
+
+    override fun permissionsDenied() {
+        ui.showLocationPermissionRationale()
     }
 
     override fun isLoading(): Boolean =
@@ -213,20 +234,28 @@ class HomeFragmentPresenter(
 
     }
 
+    private fun startRecording() {
+        connectedLocationTracker?.let { tracker ->
+            log.d("START recording")
+            tracker.startRecording()
+            lastTrack = null
+        }
+    }
+
+
     private fun handleTimerAction(tracker: LocationTracker?, track: Track?) {
         if (null != tracker) {
             val isRecordingNow = tracker.isRecording() && !tracker.isRecordingPaused()
-            Log.v(
-                TAG,
+            log.v(
                 "isRecNow = $isRecordingNow, track assigned = ${null != track}, timer running = ${taskTimer.isRunning()}"
             )
             if (isRecordingNow && null != track && !taskTimer.isRunning()) {
                 val started =
                     taskTimer.start(track.startTime + track.pausedDuration(), Unit) // TODO: Fix it
-                Log.w(TAG, "Timer started $started, isRunning = ${taskTimer.isRunning()}")
+                log.w( "Timer started $started, isRunning = ${taskTimer.isRunning()}")
             } else if (!isRecordingNow && taskTimer.isRunning()) {
                 val stopped = taskTimer.stop()
-                Log.i(TAG, "Timer stopped: $stopped")
+                log.i( "Timer stopped: $stopped")
             }
         }
     }
@@ -296,7 +325,7 @@ class HomeFragmentPresenter(
                     val timeDuration = if (null != timerValue) timerValue!!.toStringDurations() else null
                     val movingDuration = track.movingDuration(isNowRecording).toStringDurations()
 
-                    Log.v(TAG, "timerValue = $timeDuration, trackValue = $movingDuration")
+                    log.v( "timerValue = $timeDuration, trackValue = $movingDuration")
 
                     val duration =
                         if (isNowRecording) timerValue!! else track.movingDuration(isNowRecording)
@@ -337,8 +366,7 @@ class HomeFragmentPresenter(
             this.lastTrack = lastTrack
             newRecordedLocations.clear()
             val isPaused = connectedLocationTracker?.isRecordingPaused() ?: false
-            Log.w(
-                TAG, "Update by handleReadTracks = and track Moving duration is =" +
+            log.w("Update by handleReadTracks = and track Moving duration is =" +
                         " ${
                             lastTrack?.movingDuration(!isPaused)?.toStringDurations()
                         }, full = ${lastTrack?.fullDuration(!isPaused)?.toStringDurations()}"
@@ -384,7 +412,7 @@ class HomeFragmentPresenter(
         MultiResultTask<Long, Long, Unit>(
             TASK_TIMER,
             { origin, _ ->
-                Log.d(TAG, "run timer observable")
+                log.d( "run timer observable")
                 Observable.interval(500, TimeUnit.MILLISECONDS)
                     .map {
                         System.currentTimeMillis() - origin
@@ -395,7 +423,6 @@ class HomeFragmentPresenter(
                 updateTimer(timer)
             },
             { error, _ ->
-                Log.e(TAG, "timer failed - ${error.localizedMessage}")
                 log.e(error, "Timer failed")
             }
         )

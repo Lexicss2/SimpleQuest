@@ -6,6 +6,7 @@ import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracke
 import com.lex.simplequest.domain.locationmanager.LocationTracker
 import com.lex.simplequest.domain.locationmanager.model.Location
 import com.lex.simplequest.domain.model.Track
+import com.lex.simplequest.domain.permission.repository.PermissionChecker
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractor
 import com.lex.simplequest.presentation.base.BaseMvpPresenter
 import com.lex.simplequest.presentation.screen.home.MainRouter
@@ -15,6 +16,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 
 class MapFragmentPresenter(
     private val readTracksInteractor: ReadTracksInteractor,
+    private val permissionChecker: PermissionChecker,
     internetConnectivityTracker: InternetConnectivityTracker,
     logFactory: LogFactory,
     router: MainRouter
@@ -27,6 +29,8 @@ class MapFragmentPresenter(
         private const val FLAG_LOCATION = 0x0001
         private const val FLAG_TRACK = 0x0002
         private const val FLAG_SETUP_ALL = FLAG_LOCATION or FLAG_TRACK
+        private val LOCATION_PERMISSIONS_SET = setOf(PermissionChecker.Permission.ACCESS_COARSE_LOCATION,
+            PermissionChecker.Permission.ACCESS_FINE_LOCATION)
     }
 
     private val log = logFactory.get(TAG)
@@ -106,7 +110,12 @@ class MapFragmentPresenter(
     override fun locationTrackerServiceConnected(locationTracker: LocationTracker) {
         connectedLocationTracker = locationTracker
         connectedLocationTracker?.addListener(trackingListener)
-        connectedLocationTracker?.connect()
+        if (permissionChecker.checkAllPermissionGranted(LOCATION_PERMISSIONS_SET)) {
+            connectedLocationTracker?.connect()
+        } else {
+            ui.requestPermissions(LOCATION_PERMISSIONS_SET)
+        }
+
         updateUi(0)
     }
 
@@ -124,6 +133,14 @@ class MapFragmentPresenter(
     override fun refreshClicked() {
         wasCameraMoved = false
         updateUi(0)
+    }
+
+    override fun permissionsGranted() {
+        //
+    }
+
+    override fun permissionsDenied() {
+        ui.showLocationPermissionRationale()
     }
 
     private fun updateUi(flag: Int) {

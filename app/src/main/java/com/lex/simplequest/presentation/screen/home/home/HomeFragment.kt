@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.IBinder
@@ -16,11 +17,17 @@ import com.google.android.gms.common.ConnectionResult
 import com.lex.simplequest.App
 import com.lex.simplequest.R
 import com.lex.simplequest.databinding.FragmentHomeBinding
+import com.lex.simplequest.device.permission.repository.PermissionCheckerImpl
+import com.lex.simplequest.device.permission.repository.asAndroidPermissions
 import com.lex.simplequest.device.service.TrackLocationService
 import com.lex.simplequest.domain.locationmanager.LocationTracker
+import com.lex.simplequest.domain.permission.repository.PermissionChecker
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractorImpl
 import com.lex.simplequest.presentation.base.BaseMvpLceFragment
+import com.lex.simplequest.presentation.dialog.SimpleDialogFragment
 import com.lex.simplequest.presentation.screen.home.MainRouter
+import com.lex.simplequest.presentation.utils.isDialogShown
+import com.lex.simplequest.presentation.utils.showDialog
 import com.softeq.android.mvp.PresenterStateHolder
 
 class HomeFragment :
@@ -29,6 +36,8 @@ class HomeFragment :
 
     companion object {
         private const val NO_DATA = "--"
+        private const val REQUEST_CODE_LOCATION_PERMISSIONS = 1003
+        private const val DLG_LOCATION_PERMISSION_RATIONALE = "location_permission_rationale"
 
         fun newInstance(): HomeFragment =
             HomeFragment().apply {
@@ -304,6 +313,38 @@ class HomeFragment :
         }
     }
 
+    override fun requestPermissions(permissions: Set<PermissionChecker.Permission>) {
+        val array = permissions.asAndroidPermissions().toTypedArray()
+        requestPermissions(array, REQUEST_CODE_LOCATION_PERMISSIONS)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (REQUEST_CODE_LOCATION_PERMISSIONS == requestCode) {
+            if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                presenter.permissionsGranted()
+            } else {
+                presenter.permissionsDenied()
+            }
+        }
+    }
+
+    override fun showLocationPermissionRationale() {
+        if (!childFragmentManager.isDialogShown(DLG_LOCATION_PERMISSION_RATIONALE)) {
+            val ctx = requireContext()
+            val dlg = SimpleDialogFragment.newInstance(
+                ctx.getString(R.string.location_permission_title),
+                ctx.getString(R.string.home_location_permission_message),
+                ctx.getString(R.string.ok),
+            )
+            childFragmentManager.showDialog(dlg, DLG_LOCATION_PERMISSION_RATIONALE)
+        }
+    }
+
     override fun setError(error: Throwable?) {
         viewBinding.layoutContent.apply {
             if (null != error) {
@@ -326,6 +367,7 @@ class HomeFragment :
     override fun createPresenter(): HomeFragmentContract.Presenter =
         HomeFragmentPresenter(
             ReadTracksInteractorImpl(App.instance.locationRepository),
+            PermissionCheckerImpl(requireContext()),
             App.instance.internetConnectivityTracker,
             App.instance.logFactory,
             getTarget(MainRouter::class.java)!!

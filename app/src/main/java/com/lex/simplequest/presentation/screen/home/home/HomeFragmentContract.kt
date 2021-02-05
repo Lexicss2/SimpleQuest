@@ -1,6 +1,7 @@
 package com.lex.simplequest.presentation.screen.home.home
 
 import com.lex.simplequest.domain.locationmanager.LocationTracker
+import com.lex.simplequest.domain.permission.repository.PermissionChecker
 import com.lex.simplequest.presentation.base.BaseMvpLceContract
 
 interface HomeFragmentContract {
@@ -16,6 +17,8 @@ interface HomeFragmentContract {
         fun setLocationSuspendedStatus(reason: Int?)
         fun setError(error: Throwable?)
         fun setTrackerStatus(status: LocationTracker.Status?, tag: String?)
+        fun requestPermissions(permissions: Set<PermissionChecker.Permission>)
+        fun showLocationPermissionRationale()
     }
 
     interface Presenter : BaseMvpLceContract.Presenter<Ui, Presenter.State> {
@@ -23,10 +26,13 @@ interface HomeFragmentContract {
         fun pauseResumeClicked()
         fun locationTrackerServiceConnected(locationTracker: LocationTracker)
         fun locationTrackerServiceDisconnected()
+        fun permissionsGranted()
+        fun permissionsDenied()
 
         interface State : BaseMvpLceContract.Presenter.State {
             var isLocationAvailable: Boolean?
             var locationSuspendedReason: Int?
+            var isRecordingRequested: Boolean?
         }
     }
 }

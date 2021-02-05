@@ -12,6 +12,8 @@
     <string name="go_to_settings">Перейти в настройки</string>
     <string name="no_thanks">Нет, спасибо</string>
 
+    <!-- permissions -->
+    <string name="location_permission_title">Необходим доступ к вашей локации</string>
 
     <!-- Navigation -->
     <string name="navigation_home">Дом</string>
@@ -42,6 +44,7 @@
     <string name="home_resume_tracking">Возобн.</string>
     <string name="home_average_speed">Средняя скорость</string>
     <string name="home_current_speed">Текущая скорость</string>
+    <string name="home_location_permission_message">Пожалуйста, разрешите приложению получить доступ к вашей локации чтобы можно было записывать трэк</string>
 
     <!-- Map -->
     <string name="map_iam_here">Я здесь</string>
@@ -49,6 +52,7 @@
     <string name="map_finish">финиш</string>
     <string name="map_refresh">Обновить</string>
     <string name="map_recording_track">Пишется трэк: %s</string>
+    <string name="map_location_permission_message">Пожалуйста, разрешите приложению получить доступ к вашей локации чтобы можно было определить ваше местоположение на карте</string>
 
     <!-- Tracks -->
     <string name="tracks_start">Старт</string>

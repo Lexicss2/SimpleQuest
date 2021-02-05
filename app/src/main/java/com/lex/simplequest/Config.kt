@@ -2,6 +2,9 @@ package com.lex.simplequest
 
 object Config {
 
+    val DEBUG: Boolean = BuildConfig.DEBUG
+    val LOG_ENABLED = DEBUG
+
     @JvmField
     val AVAILABLE_GPS_ACCURACY_TIME_PERIODS_S = arrayOf("1", "2", "5", "10", "30", "60", "120") // in seconds
 

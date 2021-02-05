@@ -10,6 +10,7 @@ class HomeFragmentPresenterStateHolder :
         private const val ERROR = "error"
         private const val IS_LOCATION_AVAILABLE = "isLocationAvailable"
         private const val LOCATION_SUSPENDED_REASON = "locationSuspendedReason"
+        private const val IS_RECORDING_REQUESTED = "isRecordingRequested"
     }
 
     override fun create(): HomeFragmentContract.Presenter.State? =
@@ -23,6 +24,9 @@ class HomeFragmentPresenterStateHolder :
         state.locationSuspendedReason?.let {
             bundle.putInt(LOCATION_SUSPENDED_REASON, it)
         } ?: bundle.remove(LOCATION_SUSPENDED_REASON)
+        state.isRecordingRequested?.let {
+            bundle.putBoolean(IS_RECORDING_REQUESTED, it)
+        } ?: bundle.remove(IS_RECORDING_REQUESTED)
     }
 
     override fun restore(bundle: Bundle?): HomeFragmentContract.Presenter.State? =
@@ -35,6 +39,9 @@ class HomeFragmentPresenterStateHolder :
                 locationSuspendedReason = if (it.containsKey(LOCATION_SUSPENDED_REASON)) {
                     it.getInt(LOCATION_SUSPENDED_REASON)
                 } else null
+                isRecordingRequested = if (it.containsKey(IS_RECORDING_REQUESTED)) {
+                        it.getBoolean(IS_RECORDING_REQUESTED)
+                    } else null
             }
         }
 
@@ -42,5 +49,6 @@ class HomeFragmentPresenterStateHolder :
         override var error: Throwable? = null
         override var isLocationAvailable: Boolean? = null
         override var locationSuspendedReason: Int? = null
+        override var isRecordingRequested: Boolean? = null
     }
 }

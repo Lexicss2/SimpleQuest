@@ -12,6 +12,8 @@
     <string name="go_to_settings">Go to Settings</string>
     <string name="no_thanks">No thanks</string>
 
+    <!-- permissions -->
+    <string name="location_permission_title">Location Permission Required</string>
 
     <!-- Navigation -->
     <string name="navigation_home">Home</string>
@@ -42,6 +44,7 @@
     <string name="home_resume_tracking">Resume</string>
     <string name="home_average_speed">Average speed</string>
     <string name="home_current_speed">Current speed</string>
+    <string name="home_location_permission_message">Please grant the Permission Location on your device to record tracking</string>
 
     <!-- Map -->
     <string name="map_iam_here">I\'am here</string>
@@ -49,6 +52,7 @@
     <string name="map_finish">finish</string>
     <string name="map_refresh">Refresh</string>
     <string name="map_recording_track">Recording track: %s</string>
+    <string name="map_location_permission_message">Please grant the Permission Location on your device to view your location</string>
 
     <!-- Tracks -->
     <string name="tracks_start">Start</string>
