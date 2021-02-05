@@ -344,7 +344,7 @@ class HomeFragmentPresenter(
                     ui.setButtonStyleRecording(null)
                 }
 
-                if (BuildConfig.DEBUG && Config.SHOW_DEBUG_INFO) {
+                if (Config.DEBUG) {
                     ui.setTrackerStatus(
                         tracker?.getStatus(),
                         "point, newRecorded = ${newRecordedLocations.size}"

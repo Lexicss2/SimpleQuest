@@ -28,6 +28,4 @@ object Config {
     const val DEFAULT_BATTERY_LEVEL_PC = 5
 
     const val METERS_IN_KILOMETER = 1000.0f
-
-    const val SHOW_DEBUG_INFO = false
 }

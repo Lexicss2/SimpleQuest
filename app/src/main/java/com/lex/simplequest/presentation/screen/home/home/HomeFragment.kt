@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.gms.common.ConnectionResult
 import com.lex.simplequest.App
+import com.lex.simplequest.Config
 import com.lex.simplequest.R
 import com.lex.simplequest.databinding.FragmentHomeBinding
 import com.lex.simplequest.device.permission.repository.PermissionCheckerImpl
@@ -79,6 +80,8 @@ class HomeFragment :
             pauseResumeButton.setOnClickListener {
                 presenter.pauseResumeClicked()
             }
+
+            trackerStatusTextView.visibility = if (Config.DEBUG) View.VISIBLE else View.GONE
         }
 
         super.onViewCreated(view, savedInstanceState)
