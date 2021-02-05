@@ -28,16 +28,22 @@ fun List<Point>.toTimedLocations() =
         it.toTimedLocation()
     }
 
-fun Point.distanceTo(otherPoint: Point): Float {
-    val results = FloatArray(3)
-    var distanceInMeters = .0f
-    Location.distanceBetween(
-        this.latitude,
-        this.longitude,
-        otherPoint.latitude,
-        otherPoint.longitude,
-        results
-    )
+fun List<Point>.distance(): Float =
+    if (this.size > 1) {
+        val results = FloatArray(3)
+        var distanceInMeters = .0f
+        for (i in 1 until  this.size) {
+            val a = this[i - 1]
+            val b = this[i]
+            Location.distanceBetween(
+                a.latitude,
+                a.longitude,
+                b.latitude,
+                b.longitude,
+                results
+            )
+            distanceInMeters += results[0]
+        }
 
-    return results[0]
-}
+        distanceInMeters
+    } else .0f

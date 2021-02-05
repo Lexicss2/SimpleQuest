@@ -369,7 +369,7 @@ class HomeFragmentPresenter(
             log.w("Update by handleReadTracks = and track Moving duration is =" +
                         " ${
                             lastTrack?.movingDuration(!isPaused)?.toStringDurations()
-                        }, full = ${lastTrack?.fullDuration(!isPaused)?.toStringDurations()}"
+                        }, full = ${lastTrack?.fullDuration(!isPaused)?.toStringDurations()}, moving dist = ${lastTrack?.movingDistance()}, full dist = ${lastTrack?.fullDistance()}"
             )
         } else if (null != error) {
             this.error = error

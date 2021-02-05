@@ -91,34 +91,12 @@ fun Track.movingDuration(isNow: Boolean = false): Long =
     fullDuration(isNow) - pausedDuration()
 
 fun Track.fullDistance(): Float =
-    if (points.size > 1) {
-        val results = FloatArray(3)
-        var distanceInMeters = .0f
-        for (i in 1 until points.size) {
-            val start = points[i - 1]
-            val end = points[i]
-            Location.distanceBetween(
-                start.latitude,
-                start.longitude,
-                end.latitude,
-                end.longitude,
-                results
-            )
-            distanceInMeters += results[0]
-        }
-
-        distanceInMeters
-    } else .0f
+    this.points.distance()
 
 fun Track.movingDistance(): Float = if (checkPoints.isNotEmpty()) {
     var distance = .0f
     pathes.forEach { path ->
-        if (path.size > 1) {
-            val firstPoint = path.first()
-            val lastPoint = path.last()
-
-            distance += firstPoint.distanceTo(lastPoint)
-        }
+        distance += path.distance()
     }
     distance
 } else fullDistance()
