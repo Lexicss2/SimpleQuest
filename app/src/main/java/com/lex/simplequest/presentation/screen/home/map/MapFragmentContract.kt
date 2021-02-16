@@ -25,6 +25,8 @@ interface MapFragmentContract {
         fun showError(error: Throwable)
         fun requestPermissions(permissions: Set<PermissionChecker.Permission>)
         fun showLocationPermissionRationale()
+        fun zoomIn()
+        fun zoomOut()
     }
 
     interface Presenter : BaseMvpContract.Presenter<Ui, Presenter.State> {
@@ -34,6 +36,8 @@ interface MapFragmentContract {
         fun refreshClicked()
         fun permissionsGranted()
         fun permissionsDenied()
+        fun plusClicked()
+        fun minusClicked()
 
         interface State : BaseMvpContract.Presenter.State {
             var location: Location?

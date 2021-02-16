@@ -143,6 +143,14 @@ class MapFragmentPresenter(
         ui.showLocationPermissionRationale()
     }
 
+    override fun plusClicked() {
+        ui.zoomIn()
+    }
+
+    override fun minusClicked() {
+        ui.zoomOut()
+    }
+
     private fun updateUi(flag: Int) {
         val track = latestTrack
         val isRecording = connectedLocationTracker?.isRecording() ?: false

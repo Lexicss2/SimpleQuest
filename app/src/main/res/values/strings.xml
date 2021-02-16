@@ -53,6 +53,8 @@
     <string name="map_refresh">Refresh</string>
     <string name="map_recording_track">Recording track: %s</string>
     <string name="map_location_permission_message">Please grant the Permission Location on your device to view your location</string>
+    <string name="map_plus" translatable="false">+</string>
+    <string name="map_minus" translatable="false">-</string>
 
     <!-- Tracks -->
     <string name="tracks_start">Start</string>

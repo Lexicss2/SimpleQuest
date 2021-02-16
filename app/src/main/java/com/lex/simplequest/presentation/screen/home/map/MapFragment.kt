@@ -55,6 +55,8 @@ class MapFragment :
     private lateinit var refreshButton: Button
     private lateinit var trackNameTextView: TextView
     private lateinit var indicatorTextView: TextView
+    private lateinit var plusButton: Button
+    private lateinit var minusButton: Button
     private var startMarker: Marker? = null
     private var finishMarker: Marker? = null
     private val currentPolyLines: MutableList<Polyline> = mutableListOf()
@@ -87,6 +89,10 @@ class MapFragment :
         }
         trackNameTextView = view.findViewById(R.id.track_name_text_view)
         indicatorTextView = view.findViewById(R.id.indicator_text_view)
+        plusButton = view.findViewById(R.id.plus_button)
+        plusButton.setOnClickListener { presenter.plusClicked() }
+        minusButton = view.findViewById(R.id.minus_button)
+        minusButton.setOnClickListener { presenter.minusClicked() }
         super.onViewCreated(view, savedInstanceState)
     }
 
@@ -170,7 +176,6 @@ class MapFragment :
 
                 if (shouldMoveCamera && polyLines.canBeDrawn()) {
                     val bounds = polyLines.toLatLngBounds()
-
                     val size = screenSize(requireActivity())
                     val width = size.width
                     val height = size.height
@@ -239,6 +244,14 @@ class MapFragment :
             )
             childFragmentManager.showDialog(dlg, DLG_LOCATION_PERMISSION_RATIONALE)
         }
+    }
+
+    override fun zoomIn() {
+        googleMap?.moveCamera(CameraUpdateFactory.zoomIn())
+    }
+
+    override fun zoomOut() {
+        googleMap?.moveCamera(CameraUpdateFactory.zoomOut())
     }
 
     private fun initGoogleMap() {
