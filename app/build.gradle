@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 def versionMajor = 0
-def versionMinor = 3
+def versionMinor = 4
 def versionPatch = 0
 def beta = "-beta"
 
@@ -18,7 +18,7 @@ android {
         applicationId "com.lex.simplequest"
         minSdkVersion toolVersions.android.minSdk
         targetSdkVersion toolVersions.android.targetSdk
-        versionCode 2
+        versionCode 3
         versionName "${versionMajor}.${versionMinor}.${versionPatch}(${versionCode})"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
