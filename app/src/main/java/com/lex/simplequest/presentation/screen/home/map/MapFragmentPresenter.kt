@@ -5,6 +5,7 @@ import com.lex.simplequest.data.location.repository.queries.LatestTrackQuerySpec
 import com.lex.simplequest.domain.common.connectivity.InternetConnectivityTracker
 import com.lex.simplequest.domain.locationmanager.LocationTracker
 import com.lex.simplequest.domain.locationmanager.model.Location
+import com.lex.simplequest.domain.locationmanager.model.distance2d
 import com.lex.simplequest.domain.model.Track
 import com.lex.simplequest.domain.permission.repository.PermissionChecker
 import com.lex.simplequest.domain.track.interactor.ReadTracksInteractor
@@ -41,6 +42,7 @@ class MapFragmentPresenter(
     private var locationsReceivedCount = 0
     private var latestTrack: Track? = null
     private var wasCameraMoved: Boolean = false
+    private var lastSpaceTime: Pair<Location, Long>? = null
 
     private val trackingListener = object : LocationTracker.Listener {
         override fun onLocationManagerConnected() {
@@ -70,6 +72,17 @@ class MapFragmentPresenter(
                 }
             }
             ui.showIndicatorProgress(count.toIndicatorText())
+
+            lastSpaceTime?.let { st ->
+                val (lastSpace, lastTime) = st
+                val distanceM = lastSpace.distance2d(location)
+                val distanceKm = distanceM / 1000
+                val timeS = (System.currentTimeMillis() - lastTime).toFloat() / 1000
+                val timeH = timeS / (60.0f * 60.0f)
+                val speed = distanceKm / timeH
+                ui.showSpeed(String.format("%.2f", speed))
+            }
+            lastSpaceTime = Pair(location, System.currentTimeMillis())
         }
 
         override fun onStatusUpdated(status: LocationTracker.Status) {

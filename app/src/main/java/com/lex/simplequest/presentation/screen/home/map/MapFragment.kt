@@ -57,6 +57,7 @@ class MapFragment :
     private lateinit var indicatorTextView: TextView
     private lateinit var plusButton: Button
     private lateinit var minusButton: Button
+    private lateinit var speedTextView: TextView
     private var startMarker: Marker? = null
     private var finishMarker: Marker? = null
     private val currentPolyLines: MutableList<Polyline> = mutableListOf()
@@ -93,6 +94,7 @@ class MapFragment :
         plusButton.setOnClickListener { presenter.plusClicked() }
         minusButton = view.findViewById(R.id.minus_button)
         minusButton.setOnClickListener { presenter.minusClicked() }
+        speedTextView = view.findViewById(R.id.speed_text_view)
         super.onViewCreated(view, savedInstanceState)
     }
 
@@ -252,6 +254,11 @@ class MapFragment :
 
     override fun zoomOut() {
         googleMap?.moveCamera(CameraUpdateFactory.zoomOut())
+    }
+
+    override fun showSpeed(speed: String?) {
+        val measure = resources.getString(R.string.others_kmh)
+        speedTextView.text = String.format("%s %s", speed, measure)
     }
 
     private fun initGoogleMap() {

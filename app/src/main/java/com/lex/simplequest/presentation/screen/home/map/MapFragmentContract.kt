@@ -27,6 +27,7 @@ interface MapFragmentContract {
         fun showLocationPermissionRationale()
         fun zoomIn()
         fun zoomOut()
+        fun showSpeed(speed: String?)
     }
 
     interface Presenter : BaseMvpContract.Presenter<Ui, Presenter.State> {
