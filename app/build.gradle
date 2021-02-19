@@ -18,7 +18,7 @@ android {
         applicationId "com.lex.simplequest"
         minSdkVersion toolVersions.android.minSdk
         targetSdkVersion toolVersions.android.targetSdk
-        versionCode 3
+        versionCode (versionMajor * 1_000_000 + versionMinor * 1_000 + versionPatch)
         versionName "${versionMajor}.${versionMinor}.${versionPatch}(${versionCode})"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
